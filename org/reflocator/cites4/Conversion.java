@@ -16,7 +16,7 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-package org.mmaroti.cites2;
+package org.reflocator.cites4;
 
 import java.util.regex.Pattern;
 
@@ -68,14 +68,14 @@ public class Conversion
 	
 	public static String removeAccents(String input)
 	{
-		input = input.replace("á", "a");
-		input = input.replace("é", "e");
-		input = input.replace("ó", "o");
-		input = input.replace("ö", "a");
-		input = input.replace("ú", "u");
-		input = input.replace("ü", "u");
-		input = input.replace("ý", "y");
-		input = input.replace("ž", "z");
+		input = input.replace("ï¿½", "a");
+		input = input.replace("ï¿½", "e");
+		input = input.replace("ï¿½", "o");
+		input = input.replace("ï¿½", "a");
+		input = input.replace("ï¿½", "u");
+		input = input.replace("ï¿½", "u");
+		input = input.replace("ï¿½", "y");
+		input = input.replace("ï¿½", "z");
 		
 		return input;
 	}
