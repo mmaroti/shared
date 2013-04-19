@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry excluding="jars/|libs/" kind="src" path="">
+		<attributes>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="shared/libs"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="jars/choco-1_2_06.jar"/>
+	<classpathentry kind="lib" path="jars/collections.jar"/>
+	<classpathentry kind="lib" path="jars/Jama-1.0.1-src.zip"/>
+	<classpathentry kind="lib" path="jars/Jama-1.0.1.jar"/>
+	<classpathentry kind="lib" path="jars/javailp-1.2a.jar"/>
+	<classpathentry kind="lib" path="jars/jmathplot.jar"/>
+	<classpathentry kind="lib" path="jars/jsoup-1.5.1.jar"/>
+	<classpathentry kind="lib" path="jars/jtransforms-2.4.jar"/>
+	<classpathentry kind="lib" path="jars/jxl.jar"/>
+	<classpathentry kind="lib" path="jars/lpsolve55j.jar"/>
+	<classpathentry kind="output" path=""/>
+</classpath>
