@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<jardesc>
+    <jar path="/home/mmaroti/shared/www/applets/CollapsingMonoid.jar"/>
+    <options buildIfNeeded="true" compress="true" descriptionLocation="/Shared Java/org/mmaroti/applets/CollapsingMonoid.jardesc" exportErrors="false" exportWarnings="false" includeDirectoryEntries="false" overwrite="true" saveDescription="true" storeRefactorings="false" useSourceFolders="false"/>
+    <storedRefactorings deprecationInfo="true" structuralOnly="false"/>
+    <selectedProjects/>
+    <manifest generateManifest="true" mainClassHandleIdentifier="=Shared Java/&lt;org.mmaroti.ua.research{CollapsingMonoid.java[CollapsingMonoid" manifestLocation="" manifestVersion="1.0" reuseManifest="false" saveManifest="false" usesManifest="true">
+        <sealing sealJar="true">
+            <packagesToSeal/>
+            <packagesToUnSeal/>
+        </sealing>
+    </manifest>
+    <selectedElements exportClassFiles="true" exportJavaFiles="false" exportOutputFolder="false">
+        <javaElement handleIdentifier="=Shared Java/&lt;org.mmaroti.ua.util{PermArgument.java"/>
+        <javaElement handleIdentifier="=Shared Java/&lt;org.mmaroti.ua.csp{Relation.java"/>
+        <javaElement handleIdentifier="=Shared Java/&lt;org.mmaroti.ua.util{Argument.java"/>
+        <javaElement handleIdentifier="=Shared Java/&lt;org.mmaroti.ua.csp{Problem.java"/>
+        <javaElement handleIdentifier="=Shared Java/&lt;org.mmaroti.ua.research{CollapsingMonoid.java"/>
+        <javaElement handleIdentifier="=Shared Java/&lt;org.mmaroti.ua.csp{Constraint.java"/>
+        <javaElement handleIdentifier="=Shared Java/&lt;org.mmaroti.ua.math{TransSemigroup.java"/>
+        <javaElement handleIdentifier="=Shared Java/&lt;org.mmaroti.ua.csp{Variable.java"/>
+        <javaElement handleIdentifier="=Shared Java/&lt;org.mmaroti.ua.csp{NotAllEquals.java"/>
+        <javaElement handleIdentifier="=Shared Java/&lt;org.mmaroti.ua.csp{RelationTuples.java"/>
+    </selectedElements>
+</jardesc>
