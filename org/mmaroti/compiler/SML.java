@@ -20,16 +20,16 @@ package org.mmaroti.compiler;
 
 public class SML {
 
-	// --- Constants
+	// --- Values
 
-	public interface Constant {
-		public String toString();
+	public static abstract class Value {
+		public abstract String toString();
 	}
 
-	public static class BoolConst implements Constant {
+	public static class BoolValue extends Value {
 		public boolean value;
 
-		public BoolConst(boolean value) {
+		public BoolValue(boolean value) {
 			this.value = value;
 		}
 
@@ -42,10 +42,10 @@ public class SML {
 		}
 	}
 
-	public static class IntConst implements Constant {
+	public static class IntValue extends Value {
 		public int value;
 
-		public IntConst(int value) {
+		public IntValue(int value) {
 			this.value = value;
 		}
 
@@ -54,10 +54,10 @@ public class SML {
 		}
 	}
 
-	public static class RealConst implements Constant {
+	public static class RealValue extends Value {
 		public double value;
 
-		public RealConst(double value) {
+		public RealValue(double value) {
 			this.value = value;
 		}
 
@@ -66,10 +66,10 @@ public class SML {
 		}
 	}
 
-	public static class StringConst implements Constant {
+	public static class StringValue extends Value {
 		public String value;
 
-		public StringConst(String value) {
+		public StringValue(String value) {
 			this.value = value;
 		}
 
@@ -78,6 +78,28 @@ public class SML {
 		}
 	}
 
+	public static class TupleValue extends Value {
+		public Value[] members;
+		
+		public TupleValue(Value[] members) {
+			this.members = members;
+		}
+		
+		public String toString() {
+			String s = "(";
+
+			for (int i = 0; i < members.length; ++i) {
+				if (i != 0)
+					s += ",";
+
+				s += members[i].toString();
+			}
+
+			s += ")";
+			return s;
+		}
+	}
+	
 	// --- Operators
 
 	public interface BinaryOp {
@@ -146,9 +168,9 @@ public class SML {
 	}
 
 	public static class ConstExpr extends Expression {
-		public Constant value;
+		public Value value;
 
-		public ConstExpr(Constant value) {
+		public ConstExpr(Value value) {
 			this.value = value;
 		}
 
@@ -323,7 +345,7 @@ public class SML {
 
 	public static void main(String[] args) {
 		Expression expr = new BinaryOpExpr(new PlusOp(), new ConstExpr(
-				new IntConst(300)), new ConstExpr(new IntConst(12)));
+				new IntValue(300)), new ConstExpr(new IntValue(12)));
 
 		System.out.println(expr.toString());
 	}
