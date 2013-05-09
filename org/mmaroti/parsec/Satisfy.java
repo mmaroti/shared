@@ -19,9 +19,16 @@
 package org.mmaroti.parsec;
 
 import java.io.IOException;
+import java.util.List;
 
 public abstract class Satisfy extends Parser<Character> {
+	public final String name;
+
 	public abstract boolean test(char c);
+
+	public Satisfy(String name) {
+		this.name = name;
+	}
 
 	public Consumed<Character> parse(final State state) {
 		try {
@@ -32,6 +39,10 @@ public abstract class Satisfy extends Parser<Character> {
 					public Reply<Character> getReply() {
 						return new Reply<Character>(c, state.next());
 					}
+
+					@Override
+					public void addExpected(List<String> expected) {
+					}
 				};
 			} else {
 				return new Consumed<Character>(false) {
@@ -40,6 +51,11 @@ public abstract class Satisfy extends Parser<Character> {
 						throw new ParserException(state,
 								"unexpected character: " + c);
 					}
+
+					@Override
+					public void addExpected(List<String> expected) {
+						expected.add(name);
+					}
 				};
 			}
 		} catch (final IOException exception) {
@@ -47,6 +63,11 @@ public abstract class Satisfy extends Parser<Character> {
 				@Override
 				public Reply<Character> getReply() throws ParserException {
 					throw new ParserException(state, exception.getMessage());
+				}
+
+				@Override
+				public void addExpected(List<String> expected) {
+					expected.add(name);
 				}
 			};
 		}

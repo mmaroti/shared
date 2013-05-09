@@ -18,6 +18,8 @@
 
 package org.mmaroti.parsec;
 
+import java.util.*;
+
 public abstract class Consumed<T> {
 	public final boolean consumed;
 
@@ -26,4 +28,6 @@ public abstract class Consumed<T> {
 	}
 
 	public abstract Reply<T> getReply() throws ParserException;
+
+	public abstract void addExpected(List<String> expected);
 }

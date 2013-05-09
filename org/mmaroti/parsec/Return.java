@@ -18,6 +18,8 @@
 
 package org.mmaroti.parsec;
 
+import java.util.*;
+
 public class Return<T> extends Parser<T> {
 	public final T result;
 
@@ -27,8 +29,13 @@ public class Return<T> extends Parser<T> {
 
 	public Consumed<T> parse(final State state) {
 		return new Consumed<T>(false) {
+			@Override
 			public Reply<T> getReply() {
 				return new Reply<T>(result, state);
+			}
+
+			@Override
+			public void addExpected(List<String> expected) {
 			}
 		};
 	}
