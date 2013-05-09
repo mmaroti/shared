@@ -20,13 +20,13 @@ package org.mmaroti.parsec;
 
 import java.util.List;
 
-public abstract class Sequence2<RESULT1, RESULT2, TOKEN> extends
-		Parser2<RESULT2, TOKEN> {
-	public final Parser2<RESULT1, TOKEN> first;
+public abstract class Sequence<RESULT1, RESULT2, TOKEN> extends
+		Parser<RESULT2, TOKEN> {
+	public final Parser<RESULT1, TOKEN> first;
 
-	public abstract Parser2<RESULT2, TOKEN> getSecond(RESULT1 result);
+	public abstract Parser<RESULT2, TOKEN> getSecond(RESULT1 result);
 
-	public Sequence2(Parser2<RESULT1, TOKEN> first) {
+	public Sequence(Parser<RESULT1, TOKEN> first) {
 		this.first = first;
 	}
 
@@ -37,7 +37,7 @@ public abstract class Sequence2<RESULT1, RESULT2, TOKEN> extends
 				@Override
 				public Result<RESULT2, TOKEN> getResult() throws Error {
 					Result<RESULT1, TOKEN> fr = fc.getResult();
-					Parser2<RESULT2, TOKEN> second = getSecond(fr.result);
+					Parser<RESULT2, TOKEN> second = getSecond(fr.result);
 					Consumption<RESULT2, TOKEN> sc = second.parse(fr.leftover);
 					return sc.getResult();
 				}
@@ -50,7 +50,7 @@ public abstract class Sequence2<RESULT1, RESULT2, TOKEN> extends
 
 		try {
 			Result<RESULT1, TOKEN> fr = fc.getResult();
-			Parser2<RESULT2, TOKEN> second = getSecond(fr.result);
+			Parser<RESULT2, TOKEN> second = getSecond(fr.result);
 			final Consumption<RESULT2, TOKEN> sc = second.parse(fr.leftover);
 			if (sc.consumed)
 				return sc;

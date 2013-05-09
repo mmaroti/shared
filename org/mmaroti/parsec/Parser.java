@@ -20,7 +20,7 @@ package org.mmaroti.parsec;
 
 import java.util.List;
 
-public abstract class Parser2<RESULT, TOKEN> {
+public abstract class Parser<RESULT, TOKEN> {
 	public abstract Consumption<RESULT, TOKEN> parse(Input<TOKEN> input);
 
 	public static abstract class Input<TOKEN> {

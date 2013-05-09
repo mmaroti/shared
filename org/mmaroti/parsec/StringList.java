@@ -18,7 +18,7 @@
 
 package org.mmaroti.parsec;
 
-public class StringList extends Parser2.Input<Character> {
+public class StringList extends Parser.Input<Character> {
 	public static StringList create(String string) {
 		if (string == null || string.length() == 0)
 			return null;

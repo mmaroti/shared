@@ -20,11 +20,11 @@ package org.mmaroti.parsec;
 
 import java.util.List;
 
-public class Choice2<RESULT, TOKEN> extends Parser2<RESULT, TOKEN> {
-	public final Parser2<RESULT, TOKEN> first;
-	public final Parser2<RESULT, TOKEN> second;
+public class Choice<RESULT, TOKEN> extends Parser<RESULT, TOKEN> {
+	public final Parser<RESULT, TOKEN> first;
+	public final Parser<RESULT, TOKEN> second;
 
-	public Choice2(Parser2<RESULT, TOKEN> first, Parser2<RESULT, TOKEN> second) {
+	public Choice(Parser<RESULT, TOKEN> first, Parser<RESULT, TOKEN> second) {
 		this.first = first;
 		this.second = second;
 	}

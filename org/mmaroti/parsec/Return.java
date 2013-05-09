@@ -18,11 +18,11 @@
 
 package org.mmaroti.parsec;
 
-public class Return2<RESULT, TOKEN> extends
-		Parser2<RESULT, TOKEN> {
+public class Return<RESULT, TOKEN> extends
+		Parser<RESULT, TOKEN> {
 	public final RESULT result;
 
-	public Return2(RESULT result) {
+	public Return(RESULT result) {
 		this.result = result;
 	}
 

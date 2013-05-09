@@ -20,12 +20,12 @@ package org.mmaroti.parsec;
 
 import java.util.List;
 
-public abstract class Satisfy2<TOKEN> extends Parser2<TOKEN, TOKEN> {
+public abstract class Satisfy<TOKEN> extends Parser<TOKEN, TOKEN> {
 	public final String name;
 
 	public abstract boolean test(TOKEN token);
 
-	public Satisfy2(String name) {
+	public Satisfy(String name) {
 		this.name = name;
 	}
 
