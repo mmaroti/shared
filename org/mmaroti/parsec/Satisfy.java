@@ -30,6 +30,20 @@ public abstract class Satisfy<TOKEN> extends Parser<TOKEN, TOKEN> {
 	}
 
 	public Consumption<TOKEN, TOKEN> parse(final Input<TOKEN> input) {
+		if (input == null) {
+			return new Consumption<TOKEN, TOKEN>(false) {
+				@Override
+				public Result<TOKEN, TOKEN> getResult() throws Error {
+					throw new Error("unexpected and of input");
+				}
+
+				@Override
+				public void addExpected(List<String> expected) {
+					expected.add(name);
+				}
+			};
+		}
+
 		final TOKEN token = input.head;
 		if (test(token)) {
 			return new Consumption<TOKEN, TOKEN>(true) {
