@@ -26,7 +26,7 @@ public class Return<RESULT, TOKEN> extends
 		this.result = result;
 	}
 
-	public Consumption<RESULT, TOKEN> parse(final Input<TOKEN> input) {
+	public Consumption<RESULT, TOKEN> getConsumption(final Input<TOKEN> input) {
 		return new Consumption<RESULT, TOKEN>(false) {
 			@Override
 			public Result<RESULT, TOKEN> getResult() {

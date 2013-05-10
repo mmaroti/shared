@@ -29,12 +29,12 @@ public class Choice<RESULT, TOKEN> extends Parser<RESULT, TOKEN> {
 		this.second = second;
 	}
 
-	public Consumption<RESULT, TOKEN> parse(Input<TOKEN> input) {
-		final Consumption<RESULT, TOKEN> fc = first.parse(input);
+	public Consumption<RESULT, TOKEN> getConsumption(Input<TOKEN> input) {
+		final Consumption<RESULT, TOKEN> fc = first.getConsumption(input);
 		if (fc.consumed)
 			return fc;
 
-		final Consumption<RESULT, TOKEN> sc = second.parse(input);
+		final Consumption<RESULT, TOKEN> sc = second.getConsumption(input);
 		if (sc.consumed)
 			return sc;
 

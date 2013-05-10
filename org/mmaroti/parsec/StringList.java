@@ -29,7 +29,7 @@ public class StringList extends Parser.Input<Character> {
 	private final String string;
 	private final int index;
 
-	public StringList(String string, int index) {
+	private StringList(String string, int index) {
 		super(string.charAt(index));
 
 		this.string = string;
@@ -48,6 +48,6 @@ public class StringList extends Parser.Input<Character> {
 
 	@Override
 	public String getPosition() {
-		return Integer.toString(index);
+		return "column " + index;
 	}
 }

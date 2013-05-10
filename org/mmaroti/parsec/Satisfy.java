@@ -29,12 +29,12 @@ public abstract class Satisfy<TOKEN> extends Parser<TOKEN, TOKEN> {
 		this.name = name;
 	}
 
-	public Consumption<TOKEN, TOKEN> parse(final Input<TOKEN> input) {
+	public Consumption<TOKEN, TOKEN> getConsumption(final Input<TOKEN> input) {
 		if (input == null) {
 			return new Consumption<TOKEN, TOKEN>(false) {
 				@Override
 				public Result<TOKEN, TOKEN> getResult() throws Error {
-					throw new Error("unexpected and of input");
+					throw new Error("unexpected end of input");
 				}
 
 				@Override
@@ -60,7 +60,7 @@ public abstract class Satisfy<TOKEN> extends Parser<TOKEN, TOKEN> {
 			return new Consumption<TOKEN, TOKEN>(false) {
 				@Override
 				public Result<TOKEN, TOKEN> getResult() throws Error {
-					throw new Error("unexpected token " + token + " at "
+					throw new Error("unexpected token \"" + token + "\" at "
 							+ input.getPosition());
 				}
 
@@ -71,4 +71,20 @@ public abstract class Satisfy<TOKEN> extends Parser<TOKEN, TOKEN> {
 			};
 		}
 	}
+
+	public static final Satisfy<Character> DIGIT = new Satisfy<Character>(
+			"digit") {
+		@Override
+		public boolean test(Character token) {
+			return Character.isDigit(token);
+		}
+	};
+
+	public static final Satisfy<Character> LETTER = new Satisfy<Character>(
+			"digit") {
+		@Override
+		public boolean test(Character token) {
+			return Character.isLetter(token);
+		}
+	};
 }
