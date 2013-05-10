@@ -18,36 +18,15 @@
 
 package org.mmaroti.parsec;
 
-public class StringList extends Parser.Input<Character> {
-	public static StringList create(String string) {
-		if (string == null || string.length() == 0)
-			return null;
-		else
-			return new StringList(string, 0);
+public class Test {
+	public static void test1(String input) throws Exception {
+		Parser.Input<Character> list = StringList.create(input);
+		Parser<Character, Character> parser = Satisfy.DIGIT;
+		Character result = parser.parse(list).result;
+		System.out.println(result);
 	}
-
-	private final String string;
-	private final int index;
-
-	private StringList(String string, int index) {
-		super(string.charAt(index));
-
-		this.string = string;
-		this.index = index;
-	}
-
-	@Override
-	public StringList tail() throws Error {
-		int i = index + 1;
-
-		if (i >= string.length())
-			return null;
-		else
-			return new StringList(string, i);
-	}
-
-	@Override
-	public String getPosition() {
-		return "column " + index;
+	
+	public static void main(String[] args) throws Exception {
+		test1("a");
 	}
 }

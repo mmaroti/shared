@@ -21,7 +21,11 @@ package org.mmaroti.parsec;
 import java.util.List;
 
 public abstract class Parser<RESULT, TOKEN> {
-	public abstract Consumption<RESULT, TOKEN> parse(Input<TOKEN> input);
+	public abstract Consumption<RESULT, TOKEN> getConsumption(Input<TOKEN> input);
+
+	public Result<RESULT, TOKEN> parse(Input<TOKEN> input) throws Error {
+		return getConsumption(input).getResult();
+	}
 
 	public static abstract class Input<TOKEN> {
 		public final TOKEN head;
@@ -38,10 +42,8 @@ public abstract class Parser<RESULT, TOKEN> {
 	public static class Error extends Exception {
 		private static final long serialVersionUID = -151114319314581777L;
 
-		public final String message;
-
 		public Error(String message) {
-			this.message = message;
+			super(message);
 		}
 	}
 

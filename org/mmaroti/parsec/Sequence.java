@@ -30,15 +30,15 @@ public abstract class Sequence<RESULT1, RESULT2, TOKEN> extends
 		this.first = first;
 	}
 
-	public Consumption<RESULT2, TOKEN> parse(Input<TOKEN> input) {
-		final Consumption<RESULT1, TOKEN> fc = first.parse(input);
+	public Consumption<RESULT2, TOKEN> getConsumption(Input<TOKEN> input) {
+		final Consumption<RESULT1, TOKEN> fc = first.getConsumption(input);
 		if (fc.consumed) {
 			return new Consumption<RESULT2, TOKEN>(true) {
 				@Override
 				public Result<RESULT2, TOKEN> getResult() throws Error {
 					Result<RESULT1, TOKEN> fr = fc.getResult();
 					Parser<RESULT2, TOKEN> second = getSecond(fr.result);
-					Consumption<RESULT2, TOKEN> sc = second.parse(fr.leftover);
+					Consumption<RESULT2, TOKEN> sc = second.getConsumption(fr.leftover);
 					return sc.getResult();
 				}
 
@@ -51,7 +51,7 @@ public abstract class Sequence<RESULT1, RESULT2, TOKEN> extends
 		try {
 			Result<RESULT1, TOKEN> fr = fc.getResult();
 			Parser<RESULT2, TOKEN> second = getSecond(fr.result);
-			final Consumption<RESULT2, TOKEN> sc = second.parse(fr.leftover);
+			final Consumption<RESULT2, TOKEN> sc = second.getConsumption(fr.leftover);
 			if (sc.consumed)
 				return sc;
 			else
