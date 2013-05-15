@@ -18,15 +18,30 @@
 
 package org.mmaroti.parsec;
 
-public class Test {
-	public static void test1(String input) throws Exception {
-		Parser.Input<Character> list = StringList.create(input);
-		Parser<Character, Character> parser = Satisfy.DIGIT;
-		Character result = parser.parse(list).result;
-		System.out.println(result);
-	}
-	
+public class CodeTokenizer {
+	public static final Parser<Character> DIGIT = new Char("digit") {
+		@Override
+		public boolean test(char head) {
+			return Character.isDigit(head);
+		}
+	};
+
+	public static final Parser<Character> LETTER = new Char("letter") {
+		@Override
+		public boolean test(char head) {
+			return Character.isLetter(head);
+		}
+	};
+
+	public static final Parser<Character> WHITE_SPACE = new Char("white space") {
+		@Override
+		public boolean test(char head) {
+			return Character.isWhitespace(head);
+		}
+	};
+
 	public static void main(String[] args) throws Exception {
-		test1("a");
+		Parser.Input input = StringList.create("a");
+		System.out.println(LETTER.parse(input));
 	}
 }

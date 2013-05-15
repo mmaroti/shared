@@ -20,49 +20,49 @@ package org.mmaroti.parsec;
 
 import java.util.List;
 
-public class Choice<RESULT> extends Parser<RESULT> {
-	public final Parser<RESULT> first;
-	public final Parser<RESULT> second;
+public abstract class Char extends Parser<Character> {
+	public final String name;
 
-	public Choice(Parser<RESULT> first, Parser<RESULT> second) {
-		this.first = first;
-		this.second = second;
+	public abstract boolean test(char head);
+
+	public Char(String name) {
+		this.name = name;
 	}
 
-	public Consumption<RESULT> getConsumption(Input input) {
-		final Consumption<RESULT> fc = first.getConsumption(input);
-		if (fc.consumed)
-			return fc;
-
-		final Consumption<RESULT> sc = second.getConsumption(input);
-		if (sc.consumed)
-			return sc;
-
-		try {
-			final Result<RESULT> fr = fc.getResult();
-			return new Consumption<RESULT>(false) {
+	public Consumption<Character> getConsumption(final Input input) {
+		if (input == null) {
+			return new Consumption<Character>(false) {
 				@Override
-				public Result<RESULT> getResult() throws Error {
-					return fr;
+				public Result<Character> getResult() throws Error {
+					throw new Error("unexpected end of input", name);
 				}
 
 				@Override
 				public void addExpected(List<String> expected) {
-					fc.addExpected(expected);
-					sc.addExpected(expected);
+					expected.add(name);
 				}
 			};
-		} catch (final Error error) {
-			return new Consumption<RESULT>(false) {
+		}
+
+		final char head = input.head;
+		if (test(head)) {
+			return new Consumption<Character>(true) {
 				@Override
-				public Result<RESULT> getResult() throws Error {
-					throw error;
+				public Result<Character> getResult() throws Error {
+					return new Result<Character>(head, input.tail());
+				}
+			};
+		} else {
+			return new Consumption<Character>(false) {
+				@Override
+				public Result<Character> getResult() throws Error {
+					throw new Error("unexpected token \"" + head + "\" at "
+							+ input.getPosition(), name);
 				}
 
 				@Override
 				public void addExpected(List<String> expected) {
-					fc.addExpected(expected);
-					sc.addExpected(expected);
+					expected.add(name);
 				}
 			};
 		}

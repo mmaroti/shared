@@ -20,44 +20,42 @@ package org.mmaroti.parsec;
 
 import java.util.List;
 
-public abstract class Sequence<RESULT1, RESULT2, TOKEN> extends
-		Parser<RESULT2, TOKEN> {
-	public final Parser<RESULT1, TOKEN> first;
+public abstract class Sequence<RESULT1, RESULT2> extends
+		Parser<RESULT2> {
+	public final Parser<RESULT1> first;
 
-	public abstract Parser<RESULT2, TOKEN> getSecond(RESULT1 result);
+	public abstract Parser<RESULT2> getSecond(RESULT1 result);
 
-	public Sequence(Parser<RESULT1, TOKEN> first) {
+	public Sequence(Parser<RESULT1> first) {
 		this.first = first;
 	}
 
-	public Consumption<RESULT2, TOKEN> getConsumption(Input<TOKEN> input) {
-		final Consumption<RESULT1, TOKEN> fc = first.getConsumption(input);
+	public Consumption<RESULT2> getConsumption(Input input) {
+		final Consumption<RESULT1> fc = first.getConsumption(input);
 		if (fc.consumed) {
-			return new Consumption<RESULT2, TOKEN>(true) {
+			return new Consumption<RESULT2>(true) {
 				@Override
-				public Result<RESULT2, TOKEN> getResult() throws Error {
-					Result<RESULT1, TOKEN> fr = fc.getResult();
-					Parser<RESULT2, TOKEN> second = getSecond(fr.result);
-					Consumption<RESULT2, TOKEN> sc = second.getConsumption(fr.leftover);
+				public Result<RESULT2> getResult() throws Error {
+					Result<RESULT1> fr = fc.getResult();
+					Parser<RESULT2> second = getSecond(fr.result);
+					Consumption<RESULT2> sc = second
+							.getConsumption(fr.leftover);
 					return sc.getResult();
-				}
-
-				@Override
-				public void addExpected(List<String> expected) {
 				}
 			};
 		}
 
 		try {
-			Result<RESULT1, TOKEN> fr = fc.getResult();
-			Parser<RESULT2, TOKEN> second = getSecond(fr.result);
-			final Consumption<RESULT2, TOKEN> sc = second.getConsumption(fr.leftover);
+			Result<RESULT1> fr = fc.getResult();
+			Parser<RESULT2> second = getSecond(fr.result);
+			final Consumption<RESULT2> sc = second
+					.getConsumption(fr.leftover);
 			if (sc.consumed)
 				return sc;
 			else
-				return new Consumption<RESULT2, TOKEN>(false) {
+				return new Consumption<RESULT2>(false) {
 					@Override
-					public Result<RESULT2, TOKEN> getResult() throws Error {
+					public Result<RESULT2> getResult() throws Error {
 						return sc.getResult();
 					}
 
@@ -68,9 +66,9 @@ public abstract class Sequence<RESULT1, RESULT2, TOKEN> extends
 					}
 				};
 		} catch (final Error error) {
-			return new Consumption<RESULT2, TOKEN>(false) {
+			return new Consumption<RESULT2>(false) {
 				@Override
-				public Result<RESULT2, TOKEN> getResult() throws Error {
+				public Result<RESULT2> getResult() throws Error {
 					throw error;
 				}
 

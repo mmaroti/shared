@@ -18,53 +18,38 @@
 
 package org.mmaroti.parsec;
 
-import java.util.List;
+public abstract class Combine2<RESULT1, RESULT2, RESULT> extends Parser<RESULT> {
 
-public class Choice<RESULT> extends Parser<RESULT> {
-	public final Parser<RESULT> first;
-	public final Parser<RESULT> second;
+	public final Parser<RESULT1> first;
+	public final Parser<RESULT2> second;
 
-	public Choice(Parser<RESULT> first, Parser<RESULT> second) {
+	public abstract RESULT compute(RESULT1 first);
+
+	public abstract RESULT combine(RESULT1 first, RESULT2 second);
+
+	public Combine2(Parser<RESULT1> first, Parser<RESULT2> second) {
 		this.first = first;
 		this.second = second;
 	}
 
 	public Consumption<RESULT> getConsumption(Input input) {
-		final Consumption<RESULT> fc = first.getConsumption(input);
-		if (fc.consumed)
-			return fc;
+		final Consumption<RESULT1> fc = first.getConsumption(input);
 
-		final Consumption<RESULT> sc = second.getConsumption(input);
-		if (sc.consumed)
-			return sc;
-
-		try {
-			final Result<RESULT> fr = fc.getResult();
-			return new Consumption<RESULT>(false) {
+		if (fc.consumed) {
+			return new Consumption<RESULT>(true) {
 				@Override
 				public Result<RESULT> getResult() throws Error {
-					return fr;
-				}
+					Result<RESULT1> fr = fc.getResult();
+					Consumption<RESULT2> sc = second
+							.getConsumption(fr.leftover);
+					Result<RESULT2> sr = sc.getResult();
 
-				@Override
-				public void addExpected(List<String> expected) {
-					fc.addExpected(expected);
-					sc.addExpected(expected);
-				}
-			};
-		} catch (final Error error) {
-			return new Consumption<RESULT>(false) {
-				@Override
-				public Result<RESULT> getResult() throws Error {
-					throw error;
-				}
-
-				@Override
-				public void addExpected(List<String> expected) {
-					fc.addExpected(expected);
-					sc.addExpected(expected);
+					return new Result<RESULT>(combine(fr.result, sr.result),
+							sr.leftover);
 				}
 			};
 		}
+
+		return null;
 	}
 }

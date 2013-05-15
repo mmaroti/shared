@@ -18,19 +18,18 @@
 
 package org.mmaroti.parsec;
 
-public class Return<RESULT, TOKEN> extends
-		Parser<RESULT, TOKEN> {
+public class Return<RESULT> extends Parser<RESULT> {
 	public final RESULT result;
 
 	public Return(RESULT result) {
 		this.result = result;
 	}
 
-	public Consumption<RESULT, TOKEN> getConsumption(final Input<TOKEN> input) {
-		return new Consumption<RESULT, TOKEN>(false) {
+	public Consumption<RESULT> getConsumption(final Input input) {
+		return new Consumption<RESULT>(false) {
 			@Override
-			public Result<RESULT, TOKEN> getResult() {
-				return new Result<RESULT, TOKEN>(result, input);
+			public Result<RESULT> getResult() {
+				return new Result<RESULT>(result, input);
 			}
 		};
 	}

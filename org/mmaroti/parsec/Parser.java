@@ -18,53 +18,72 @@
 
 package org.mmaroti.parsec;
 
-import java.util.List;
+import java.util.*;
 
-public abstract class Parser<RESULT, TOKEN> {
-	public abstract Consumption<RESULT, TOKEN> getConsumption(Input<TOKEN> input);
+public abstract class Parser<RESULT> {
+	public abstract Consumption<RESULT> getConsumption(Input input);
 
-	public Result<RESULT, TOKEN> parse(Input<TOKEN> input) throws Error {
-		return getConsumption(input).getResult();
+	public RESULT parse(Input input) throws Error {
+		return getConsumption(input).getResult().result;
 	}
 
-	public static abstract class Input<TOKEN> {
-		public final TOKEN head;
+	protected static abstract class Input {
+		public final char head;
 
-		public abstract Input<TOKEN> tail() throws Error;
+		public abstract Input tail() throws Error;
 
 		public abstract String getPosition();
 
-		public Input(TOKEN head) {
+		public Input(char head) {
 			this.head = head;
 		}
 	}
 
-	public static class Error extends Exception {
+	protected static class Error extends Exception {
 		private static final long serialVersionUID = -151114319314581777L;
+		public List<String> expecting = new ArrayList<String>();
+
+		public String getMessage() {
+			String s = " expecting: ";
+			for (int i = 0; i < expecting.size(); ++i) {
+				if (i != 0)
+					s += ", ";
+
+				s += expecting.get(i);
+			}
+
+			return super.getMessage() + s;
+		}
 
 		public Error(String message) {
 			super(message);
 		}
+
+		public Error(String message, String expected) {
+			super(message);
+			expecting.add(expected);
+		}
 	}
 
-	public static abstract class Consumption<RESULT, TOKEN> {
+	protected static abstract class Consumption<RESULT> {
 		public final boolean consumed;
 
 		public Consumption(boolean consumed) {
 			this.consumed = consumed;
 		}
 
-		public abstract Result<RESULT, TOKEN> getResult() throws Error;
+		public abstract Result<RESULT> getResult() throws Error;
 
 		public void addExpected(List<String> expected) {
+			assert (consumed == false);
 		}
 	}
 
-	public static final class Result<RESULT, TOKEN> {
+	protected static final class Result<RESULT> {
 		public final RESULT result;
-		public final Input<TOKEN> leftover;
+		public final Input leftover;
 
-		public Result(RESULT result, Input<TOKEN> leftover) {
+		public Result(RESULT result, Input leftover) {
 			this.result = result;
 			this.leftover = leftover;
 		}
