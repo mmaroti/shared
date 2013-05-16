@@ -18,38 +18,43 @@
 
 package org.mmaroti.parsec;
 
-public abstract class Combine2<RESULT1, RESULT2, RESULT> extends Parser<RESULT> {
+public abstract class Many<ELEM, RESULT> extends Parser<RESULT> {
+	public final Parser<ELEM> elem;
 
-	public final Parser<RESULT1> first;
-	public final Parser<RESULT2> second;
-
-	public abstract RESULT compute(RESULT1 first);
-
-	public abstract RESULT combine(RESULT1 first, RESULT2 second);
-
-	public Combine2(Parser<RESULT1> first, Parser<RESULT2> second) {
-		this.first = first;
-		this.second = second;
+	public Many(Parser<ELEM> elem) {
+		this.elem = elem;
 	}
 
-	public Consumption<RESULT> getConsumption(Input input) {
-		final Consumption<RESULT1> fc = first.getConsumption(input);
+	public abstract RESULT createAccumulator();
 
-		if (fc.consumed) {
+	public abstract void combine(RESULT result, ELEM elem);
+
+	public Consumption<RESULT> getConsumption(final Input input) {
+		final Consumption<ELEM> c = elem.getConsumption(input);
+		if (c.consumed) {
 			return new Consumption<RESULT>(true) {
 				@Override
 				public Result<RESULT> getResult() throws Error {
-					Result<RESULT1> fr = fc.getResult();
-					Consumption<RESULT2> sc = second
-							.getConsumption(fr.leftover);
-					Result<RESULT2> sr = sc.getResult();
+					RESULT accumulator = createAccumulator();
 
-					return new Result<RESULT>(combine(fr.result, sr.result),
-							sr.leftover);
+					Consumption<ELEM> d = c;
+					Result<ELEM> r;
+					do {
+						r = d.getResult();
+						combine(accumulator, r.result);
+						d = elem.getConsumption(r.leftover);
+					} while (d.consumed);
+
+					return new Result<RESULT>(accumulator, r.leftover);
+				}
+			};
+		} else {
+			return new Consumption<RESULT>(false) {
+				@Override
+				public Result<RESULT> getResult() throws Error {
+					return new Result<RESULT>(createAccumulator(), input);
 				}
 			};
 		}
-
-		return null;
 	}
 }

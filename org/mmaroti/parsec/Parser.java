@@ -21,7 +21,7 @@ package org.mmaroti.parsec;
 import java.util.*;
 
 public abstract class Parser<RESULT> {
-	public abstract Consumption<RESULT> getConsumption(Input input);
+	protected abstract Consumption<RESULT> getConsumption(Input input);
 
 	public RESULT parse(Input input) throws Error {
 		return getConsumption(input).getResult().result;

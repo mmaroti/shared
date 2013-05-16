@@ -18,7 +18,8 @@
 
 package org.mmaroti.parsec;
 
-public class CodeTokenizer {
+public class Test {
+
 	public static final Parser<Character> DIGIT = new Char("digit") {
 		@Override
 		public boolean test(char head) {
@@ -40,8 +41,21 @@ public class CodeTokenizer {
 		}
 	};
 
+	public static final Parser<StringBuffer> LETTERS = new Many<Character, StringBuffer>(
+			LETTER) {
+		@Override
+		public StringBuffer createAccumulator() {
+			return new StringBuffer();
+		}
+
+		@Override
+		public void combine(StringBuffer result, Character elem) {
+			result.append(elem);
+		}
+	};
+
 	public static void main(String[] args) throws Exception {
-		Parser.Input input = StringList.create("a");
-		System.out.println(LETTER.parse(input));
+		Parser.Input input = StringList.create("Ab1");
+		System.out.println(LETTERS.parse(input));
 	}
 }

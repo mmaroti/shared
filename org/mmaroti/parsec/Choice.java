@@ -21,15 +21,15 @@ package org.mmaroti.parsec;
 import java.util.List;
 
 public class Choice<RESULT> extends Parser<RESULT> {
-	public final Parser<RESULT> first;
-	public final Parser<RESULT> second;
+	protected final Parser<RESULT> first;
+	protected final Parser<RESULT> second;
 
-	public Choice(Parser<RESULT> first, Parser<RESULT> second) {
+	protected Choice(Parser<RESULT> first, Parser<RESULT> second) {
 		this.first = first;
 		this.second = second;
 	}
 
-	public Consumption<RESULT> getConsumption(Input input) {
+	protected Consumption<RESULT> getConsumption(Input input) {
 		final Consumption<RESULT> fc = first.getConsumption(input);
 		if (fc.consumed)
 			return fc;

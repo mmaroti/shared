@@ -21,15 +21,15 @@ package org.mmaroti.parsec;
 import java.util.List;
 
 public abstract class Char extends Parser<Character> {
-	public final String name;
+	protected final String name;
 
-	public abstract boolean test(char head);
+	protected abstract boolean test(char head);
 
-	public Char(String name) {
+	protected Char(String name) {
 		this.name = name;
 	}
 
-	public Consumption<Character> getConsumption(final Input input) {
+	protected Consumption<Character> getConsumption(final Input input) {
 		if (input == null) {
 			return new Consumption<Character>(false) {
 				@Override
