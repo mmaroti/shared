@@ -486,5 +486,7 @@ public class WeakNU
 				System.out.println((m > 0 ? "+ " : "? ") + line);
 			}
 		}
+		
+		file.close();
 	}
 }
