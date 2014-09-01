@@ -89,14 +89,14 @@ public class DecisionDiagram
 		}
 	}
 				
-	protected WeakHashSet nodes;
+	protected WeakHashSet<Node> nodes;
 
 	protected NodeBuffer buffer;
 	public Node canonicalize(Node[] subNodes)
 	{
 		buffer.set(subNodes);
 
-		Node node = (Node)nodes.canonicalize(buffer);
+		Node node = nodes.canonicalize(buffer);
 		if( node == null )
 		{
 			node = new Node(buffer);
@@ -108,7 +108,7 @@ public class DecisionDiagram
 	
 	public DecisionDiagram()
 	{
-		nodes = new WeakHashSet();
+		nodes = new WeakHashSet<Node>();
 		buffer = new NodeBuffer();
 	}
 }

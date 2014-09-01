@@ -7,128 +7,117 @@ package mmaroti.ua.util;
 import java.lang.ref.*;
 import java.util.HashMap;
 
-public class WeakHashSet
-{
-	protected static class Key extends WeakReference
-	{
+public class WeakHashSet<T> {
+	protected static class Key<T> extends WeakReference<T> {
 		protected int hashCode;
-		public int hashCode() { return hashCode; }
-		
-		public boolean equals(Object o)
-		{
-			Key other = (Key)o;
-			if( hashCode != other.hashCode )
-				return false;
-			
-			// for garbage collected keys
-			if( this == other )
-				return true;
 
-			o = this.get();				
-			return o != null && o.equals(other.get());
+		public int hashCode() {
+			return hashCode;
 		}
 
-		public Key(Object referent, ReferenceQueue queue)
-		{
+		@SuppressWarnings("unchecked")
+		public boolean equals(Object o) {
+			Key<T> other = (Key<T>) o;
+			if (hashCode != other.hashCode)
+				return false;
+
+			// for garbage collected keys
+			if (this == other)
+				return true;
+
+			T ref = this.get();
+			return ref != null && ref.equals(other.get());
+		}
+
+		public Key(T referent, ReferenceQueue<T> queue) {
 			super(referent, queue);
 			hashCode = referent.hashCode();
 		}
 
-		protected Key()
-		{
+		protected Key() {
 			super(null);
-		}		
+		}
 	}
 
-	protected static class KeyBuffer extends Key
-	{
-		Object referent;
-		public Object get() { return referent; }
-		
-		void set(Object referent)
-		{
+	protected static class Needle<T> extends Key<T> {
+		T referent;
+
+		public T get() {
+			return referent;
+		}
+
+		void set(T referent) {
 			this.referent = referent;
 			hashCode = referent.hashCode();
 		}
 	}
 
-	protected HashMap map;
-	protected ReferenceQueue queue;
-	protected KeyBuffer keyBuffer;
-	
-	protected final void removeGarbage()
-	{
-		Reference a;
-		while( (a = queue.poll()) != null )
+	protected HashMap<Key<T>, Key<T>> map;
+	protected ReferenceQueue<T> queue;
+	protected Needle<T> needle;
+
+	protected final void removeGarbage() {
+		Reference<? extends T> a;
+		while ((a = queue.poll()) != null)
 			map.remove(a);
 	}
-	
-	public void clear()
-	{
+
+	public void clear() {
 		map.clear();
-		while( queue.poll() != null )
+		while (queue.poll() != null)
 			;
 	}
-	
-	public boolean isEmpty()
-	{
+
+	public boolean isEmpty() {
 		removeGarbage();
 		return map.isEmpty();
 	}
-	
-	public int size()
-	{
+
+	public int size() {
 		removeGarbage();
 		return map.size();
 	}
 
-	public boolean add(Object o)
-	{
+	public boolean add(T o) {
 		removeGarbage();
-		Key key = new Key(o, queue);
+		Key<T> key = new Key<T>(o, queue);
 		return map.put(key, key) != null;
 	}
 
-	public boolean contains(Object o)
-	{
+	public boolean contains(T o) {
 		removeGarbage();
-		keyBuffer.set(o);
-		return map.containsKey(keyBuffer);
-	}
-	
-	public boolean remove(Object o)
-	{
-		removeGarbage();
-		keyBuffer.set(o);
-		return map.remove(keyBuffer) != null;
+		needle.set(o);
+		return map.containsKey(needle);
 	}
 
-	public Object canonicalize(Object o)
-	{
+	public boolean remove(T o) {
 		removeGarbage();
-		keyBuffer.set(o);
-		Key key = (Key)map.get(keyBuffer);
+		needle.set(o);
+		return map.remove(needle) != null;
+	}
+
+	public T canonicalize(T o) {
+		removeGarbage();
+		needle.set(o);
+		Key<T> key = map.get(needle);
 		return key != null ? key.get() : null;
 	}
-	
-	public WeakHashSet()
-	{
-		map = new HashMap();
-		queue = new ReferenceQueue();
-		keyBuffer = new KeyBuffer();
+
+	public WeakHashSet() {
+		map = new HashMap<Key<T>, Key<T>>();
+		queue = new ReferenceQueue<T>();
+		needle = new Needle<T>();
 	}
 
-	public WeakHashSet(int initialCapacity)
-	{
-		map = new HashMap(initialCapacity);
-		queue = new ReferenceQueue();
-		keyBuffer = new KeyBuffer();
+	public WeakHashSet(int initialCapacity) {
+		map = new HashMap<Key<T>, Key<T>>(initialCapacity);
+		queue = new ReferenceQueue<T>();
+		needle = new Needle<T>();
 	}
 
-	public WeakHashSet(int initialCapacity, float loadFactor)
-	{
-		map = new HashMap(initialCapacity, loadFactor);
-		queue = new ReferenceQueue();
-		keyBuffer = new KeyBuffer();
+	public WeakHashSet(int initialCapacity, float loadFactor) {
+		map = new HashMap<Key<T>, Key<T>>(initialCapacity, loadFactor);
+		queue = new ReferenceQueue<T>();
+		needle = new Needle<T>();
 	}
 }

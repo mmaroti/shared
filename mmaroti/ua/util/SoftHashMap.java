@@ -7,126 +7,115 @@ package mmaroti.ua.util;
 import java.lang.ref.*;
 import java.util.HashMap;
 
-public class SoftHashMap
-{
-	protected static class Key extends SoftReference
-	{
+public class SoftHashMap<K, V> {
+	protected static class Key<K> extends SoftReference<K> {
 		protected int hashCode;
-		public int hashCode() { return hashCode; }
-		
-		public boolean equals(Object o)
-		{
-			Key other = (Key)o;
-			if( hashCode != other.hashCode )
-				return false;
-			
-			// for garbage collected keys
-			if( this == other )
-				return true;
 
-			o = this.get();				
-			return o != null && o.equals(other.get());
+		public int hashCode() {
+			return hashCode;
 		}
 
-		public Key(Object referent, ReferenceQueue queue)
-		{
+		@SuppressWarnings("unchecked")
+		public boolean equals(Object o) {
+			Key<K> other = (Key<K>) o;
+			if (hashCode != other.hashCode)
+				return false;
+
+			// for garbage collected keys
+			if (this == other)
+				return true;
+
+			K ref = this.get();
+			return ref != null && ref.equals(other.get());
+		}
+
+		public Key(K referent, ReferenceQueue<K> queue) {
 			super(referent, queue);
 			hashCode = referent.hashCode();
 		}
 
-		protected Key()
-		{
+		protected Key() {
 			super(null);
-		}		
+		}
 	}
 
-	protected static class KeyBuffer extends Key
-	{
-		Object referent;
-		public Object get() { return referent; }
-		
-		void set(Object referent)
-		{
+	protected static class Needle<K> extends Key<K> {
+		K referent;
+
+		public K get() {
+			return referent;
+		}
+
+		void set(K referent) {
 			this.referent = referent;
 			hashCode = referent.hashCode();
 		}
 	}
 
-	protected HashMap map;
-	protected ReferenceQueue queue;
-	protected KeyBuffer keyBuffer;
-	
-	protected final void removeGarbage()
-	{
-		Reference a;
-		while( (a = queue.poll()) != null )
+	protected HashMap<Key<K>, V> map;
+	protected ReferenceQueue<K> queue;
+	protected Needle<K> needle;
+
+	protected final void removeGarbage() {
+		Reference<? extends K> a;
+		while ((a = queue.poll()) != null)
 			map.remove(a);
 	}
-	
-	public void clear()
-	{
+
+	public void clear() {
 		map.clear();
-		while( queue.poll() != null )
+		while (queue.poll() != null)
 			;
 	}
-	
-	public boolean isEmpty()
-	{
+
+	public boolean isEmpty() {
 		removeGarbage();
 		return map.isEmpty();
 	}
-	
-	public int size()
-	{
+
+	public int size() {
 		removeGarbage();
 		return map.size();
 	}
 
-	public Object put(Object key, Object o)
-	{
+	public V put(K key, V value) {
 		removeGarbage();
-		return map.put(new Key(key, queue), o);
+		return map.put(new Key<K>(key, queue), value);
 	}
 
-	public Object get(Object key)
-	{
+	public V get(K key) {
 		removeGarbage();
-		keyBuffer.set(key);
-		return map.get(keyBuffer);
-	}
-	
-	public boolean containsKey(Object key)
-	{
-		removeGarbage();
-		keyBuffer.set(key);
-		return map.containsKey(keyBuffer);
-	}
-	
-	public boolean remove(Object key)
-	{
-		removeGarbage();
-		keyBuffer.set(key);
-		return map.remove(keyBuffer) != null;
+		needle.set(key);
+		return map.get(needle);
 	}
 
-	public SoftHashMap()
-	{
-		map = new HashMap();
-		queue = new ReferenceQueue();
-		keyBuffer = new KeyBuffer();
+	public boolean containsKey(K key) {
+		removeGarbage();
+		needle.set(key);
+		return map.containsKey(needle);
 	}
 
-	public SoftHashMap(int initialCapacity)
-	{
-		map = new HashMap(initialCapacity);
-		queue = new ReferenceQueue();
-		keyBuffer = new KeyBuffer();
+	public boolean remove(K key) {
+		removeGarbage();
+		needle.set(key);
+		return map.remove(needle) != null;
 	}
 
-	public SoftHashMap(int initialCapacity, float loadFactor)
-	{
-		map = new HashMap(initialCapacity, loadFactor);
-		queue = new ReferenceQueue();
-		keyBuffer = new KeyBuffer();
+	public SoftHashMap() {
+		map = new HashMap<Key<K>, V>();
+		queue = new ReferenceQueue<K>();
+		needle = new Needle<K>();
+	}
+
+	public SoftHashMap(int initialCapacity) {
+		map = new HashMap<Key<K>, V>(initialCapacity);
+		queue = new ReferenceQueue<K>();
+		needle = new Needle<K>();
+	}
+
+	public SoftHashMap(int initialCapacity, float loadFactor) {
+		map = new HashMap<Key<K>, V>(initialCapacity, loadFactor);
+		queue = new ReferenceQueue<K>();
+		needle = new Needle<K>();
 	}
 }
