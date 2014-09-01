@@ -251,9 +251,9 @@ public class Term
 	/**
 	 * This function returns the set of variables of this term.
 	 */
-	public SubSet getVariableSet()
+	public SubUniverse getVariableSet()
 	{
-		SubSet variables = new SubSet(Symbol.VARIABLES);
+		SubUniverse variables = new SubUniverse(Symbol.VARIABLES);
 		addMyVariablesTo(variables);
 		return variables;
 	}
@@ -262,7 +262,7 @@ public class Term
 	 * This function adds the generators of this term to the set of 
 	 * generators stored in <code>set</code>.
 	 */
-	public void addMyVariablesTo(SubSet set)
+	public void addMyVariablesTo(SubUniverse set)
 	{
 		if( ! isVariable() )
 		{

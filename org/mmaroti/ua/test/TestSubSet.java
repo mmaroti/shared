@@ -22,9 +22,9 @@ import org.mmaroti.ua.set.*;
 
 public class TestSubSet 
 {
-	public static class MySubSet extends SubSet
+	public static class MySubSet extends SubUniverse
 	{
-		public MySubSet(Set base)
+		public MySubSet(Universe base)
 		{
 			super(base);
 		}

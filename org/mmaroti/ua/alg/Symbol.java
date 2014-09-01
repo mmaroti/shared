@@ -201,7 +201,7 @@ public class Symbol
 	/**
 	 * This is the universe of all variables
 	 */
-	public static Set VARIABLES = new Set()
+	public static Universe VARIABLES = new Universe()
 	{
 		public int getSize()
 		{

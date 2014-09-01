@@ -25,9 +25,9 @@ import org.mmaroti.ua.set.*;
  * this class does not satisfy the axioms of reals, only
  * approximate values are returned.
  */
-public class Reals extends Set implements Field
+public class Reals extends Universe implements Field
 {
-	private SubSet reals = new SubSet(Objects.INSTANCE);
+	private SubUniverse reals = new SubUniverse(Objects.INSTANCE);
 	
 	public int getIndex(Object a)
 	{

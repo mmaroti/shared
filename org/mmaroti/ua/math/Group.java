@@ -24,7 +24,7 @@ import org.mmaroti.ua.set.*;
  * This is the general interface for groups. We use multiplicative
  * names regardless whether the group is Abelian or not.
  */
-public abstract class Group extends Set
+public abstract class Group extends Universe
 {
 	/**
 	 * Returns the product of the two arguments.

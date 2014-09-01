@@ -24,9 +24,9 @@ import java.math.BigInteger;
 /**
  * This class represents the ring of integers.
  */
-public class Integers extends Set implements Ring
+public class Integers extends Universe implements Ring
 {
-	private SubSet integers = new SubSet(Objects.INSTANCE);
+	private SubUniverse integers = new SubUniverse(Objects.INSTANCE);
 
 	public int getIndex(Object a)
 	{

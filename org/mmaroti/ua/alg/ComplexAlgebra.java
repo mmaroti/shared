@@ -35,8 +35,8 @@ public class ComplexAlgebra implements Algebra
 	protected Object fullSet;
 	public Object getFullSet() { return fullSet; }
 
-	protected CanonicalSet subsets = new CanonicalSet(Unifiers.identityArray);
-	protected CacheMap unionCache = new CacheMap(Unifiers.identityArray);
+	protected Memoize subsets = new Memoize(Unifiers.identityArray);
+	protected Cache unionCache = new Cache(Unifiers.identityArray);
 
 	public Object union(Object a, Object b)
 	{
@@ -59,7 +59,7 @@ public class ComplexAlgebra implements Algebra
 			for(int i = 0; i < algebraSize; ++i)
 				union[i] = next.union(as[i], bs[i]);
 		
-			ret = subsets.canonicalize(union);
+			ret = subsets.memoize(union);
 			unionCache.put(pair, ret);
 		}
 		

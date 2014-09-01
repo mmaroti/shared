@@ -147,7 +147,7 @@ public class Algebras
 		writer.endElem();
 	}
 
-	public static void printUniverseTo(Set universe, XmlWriter writer)
+	public static void printUniverseTo(Universe universe, XmlWriter writer)
 	{
 		int size = universe.getSize();
 		

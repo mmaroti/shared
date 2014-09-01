@@ -31,7 +31,7 @@ public class StructureBuffer extends Structure
 {
 	protected FiniteSet universe;
 	
-	public Set getUniverse()
+	public Universe getUniverse()
 	{
 		return universe;
 	}
@@ -366,7 +366,7 @@ public class StructureBuffer extends Structure
 			table[getPosition(args)] = value;
 		}
 
-		public Set getUniverse()
+		public Universe getUniverse()
 		{
 			return universe;
 		}

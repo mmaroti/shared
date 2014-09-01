@@ -34,7 +34,7 @@ package org.mmaroti.ua.set;
  * 
  * @author mmaroti@math.vanderbilt.edu
  */
-public class FiniteSet extends Set
+public class FiniteSet extends Universe
 {
 	/**
 	 * Constructs a finite set of size <code>size</code>. 

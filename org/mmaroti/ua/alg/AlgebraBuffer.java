@@ -31,7 +31,7 @@ public class AlgebraBuffer extends Algebra
 {
 	protected FiniteSet universe;
 	
-	public Set getUniverse()
+	public Universe getUniverse()
 	{
 		return universe;
 	}
@@ -366,7 +366,7 @@ public class AlgebraBuffer extends Algebra
 			table[getPosition(args)] = universe.getIndex(value);
 		}
 		
-		public Set getUniverse()
+		public Universe getUniverse()
 		{
 			return universe;
 		}

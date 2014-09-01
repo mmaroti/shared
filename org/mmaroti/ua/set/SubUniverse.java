@@ -23,11 +23,11 @@ import java.util.*;
 /**
  * This class implements subsets of an underlying universe using hash tables.
  */
-public class SubSet extends Set
+public class SubUniverse extends Universe
 {
-	protected Set base;
+	protected Universe base;
 
-	public Set getBase()
+	public Universe getBase()
 	{
 		return base;
 	}
@@ -37,7 +37,7 @@ public class SubSet extends Set
 	 * 
 	 * @param base the base universe
 	 */
-	public SubSet(Set base)
+	public SubUniverse(Universe base)
 	{
 		this.base = base;
 		keys = new Object[1];

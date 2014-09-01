@@ -13,7 +13,7 @@
  *
  * You should have received a copy of the GNU General Public License along 
  * with this program; if not, write to the Free Software Foundation, Inc., 
- * 59 Temple Place, Suite 330, Boston,MA 02111-1307 USA
+ * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 package org.mmaroti.ua.util;
@@ -22,25 +22,25 @@ import java.lang.ref.*;
 import java.util.HashMap;
 
 /**
- * Canonical sets can be used to keep and find canonical forms of 
- * immutable objects. The use of canonical objects are especially
- * useful for deeply structured objects where checking the equality
- * of two objects is very time consuming. When these objects are
- * stored in their canonical form, equality can be checked simply
- * by the == operator. The CanonicalSet automatically frees and removes
- * non-referenced objects (by employing weak references).
+ * Cache maps can be used to cache results that are time consuming
+ * to compute and is beneficial to remember if there is available
+ * memory. The CacheMap automatically frees and removes
+ * entries when memory is running short by employing soft references on
+ * the key object. This to work, no references must be kept on the
+ * key object.
  */
-public final class CanonicalSet
+public final class Cache
 {
 	/**
-	 * We wrap the canonical objects in week references, 
-	 * and store these week references in a HashMap.
+	 * We wrap the cached entries in soft references, 
+	 * and store these soft references in a HashMap.
 	 */
-	protected static final class Entry extends WeakReference<Object>
+	protected final class Entry extends SoftReference<Object>
 	{
 		/**
 		 * We need to store the hashCode in case 
-		 * the underlying object is already freed.
+		 * the underlying object is already freed
+		 * and we want to remove this object from the hashmap.
 		 */
 		protected int hashCode;
 		
@@ -59,7 +59,7 @@ public final class CanonicalSet
 			return ((Seeker)o).equals(this);
 		}
 
-		public Entry(Object referent, CanonicalSet map)
+		public Entry(Object referent, Cache map)
 		{
 			super(referent, map.queue);
 			hashCode = map.comparator.hashCode(referent);
@@ -111,11 +111,6 @@ public final class CanonicalSet
 				
 			return comparator.equals(sample, o);
 		}
-		
-		public Object cloneSample()
-		{
-			return comparator.clone(sample);
-		}
 	}
 
 	protected HashMap<Entry, Object> map = new HashMap<Entry, Object>();
@@ -124,8 +119,8 @@ public final class CanonicalSet
 	protected Seeker seeker = new Seeker();
 
 	/**
-	 * Returns true if the object is already canonicalized,
-	 * false otherwise.
+	 * Returns true if the object is in the map,
+	 * that is, some information is associated with it.
 	 */
 	public boolean contains(Object object)
 	{
@@ -138,31 +133,33 @@ public final class CanonicalSet
 	}
 	
 	/**
-	 * Returns the canonical form of an object. If the
-	 * 	CanonicalSet does not contain an object equivalent to the sample,
-	 *  then this sample will become the canonical form and be returned.
-	 * @param sample The sample object whose canonical form we want.
-	 * @return The canonical form of the sample object. 
+	 * Returns the cached value associated with the specified
+	 * key. If there is no value associated or it was removed
+	 * because memory was tight, then <code>null</code> is returned.
 	 */
-	public Object canonicalize(Object sample)
+	public Object get(Object key)
 	{
 		removeGarbage();
 		
-		seeker.sample = sample;
+		seeker.sample = key;
 		Entry entry = (Entry)map.get(seeker);
 		
-		if( entry != null && (sample = entry.get()) != null )
-			return sample;
-			
-		sample = seeker.cloneSample();
-		entry = new Entry(sample, this);
-		map.put(entry, entry);
-		return sample;
+		return entry == null ? null : entry.get();
+	}
+
+	/**
+	 * Updates the cache with the new object. It is important
+	 * that no other references exist to the specified key
+	 * for this cache object to work, otherwise the key and
+	 * its associated value will not be freed.
+	 */
+	public void put(Object key, Object value)
+	{
+		map.put(new Entry(key, this), value);
 	}
 	
 	/**
-	 * Returns the current number of canonical objects that are still referenced.
-	 * @return the number of canonical objects
+	 * Returns the current number of cached entries.
 	 */
 	public int size()
 	{
@@ -171,12 +168,11 @@ public final class CanonicalSet
 	}
 
 	/**
-	 * Creates a new CanonicalSet that hold canonical objects
-	 * 	based on the comparator equivalence relation.
+	 * Creates a new cache map based on the comparator equivalence relation.
 	 * @param comparator The comparator object that is consulted
 	 * 		when two objects need to be compared.
 	 */
-	public CanonicalSet(Unifier comparator)
+	public Cache(Unifier comparator)
 	{
 		this.comparator = comparator;
 		seeker.comparator = comparator;

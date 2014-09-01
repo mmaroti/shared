@@ -22,12 +22,12 @@ package org.mmaroti.ua.set;
  * This class implements partial maps from a base set to arbitrary objects.
  * The class also returns its domain as a subset of the base set. 
  */
-public class Map extends SubSet
+public class Map extends SubUniverse
 {
 	/**
 	 * Constructs an empty map with the given underlying universe.
 	 */
-	public Map(Set base)
+	public Map(Universe base)
 	{
 		super(base);
 		values = new Object[keys.length];

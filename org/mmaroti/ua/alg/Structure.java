@@ -34,7 +34,7 @@ public abstract class Structure
 	/**
 	 * Returns the underlying set of the relational structure
 	 */
-	public abstract Set getUniverse();
+	public abstract Universe getUniverse();
 
 	/**
 	 * Returns the list of operations of the algebra.
@@ -43,7 +43,7 @@ public abstract class Structure
 	
 	/**
 	 * Returns the size of the universe of the algebra.
-	 * @see Set.getSize
+	 * @see Universe.getSize
 	 */
 	public final int getSize()
 	{

@@ -18,7 +18,7 @@
 
 package org.mmaroti.ua.alg;
 
-import org.mmaroti.ua.set.Set;
+import org.mmaroti.ua.set.Universe;
 import org.mmaroti.ua.util.*;
 import java.util.*;
 
@@ -66,7 +66,7 @@ public class TermAlgebra extends Algebra
 	{
 		protected Symbol symbol;
 		
-		public Set getUniverse()
+		public Universe getUniverse()
 		{
 			return universe;
 		}
@@ -359,7 +359,7 @@ public class TermAlgebra extends Algebra
 		return false;
 	}
 	
-	class Universe extends Set
+	class TermUniverse extends Universe
 	{
 		/**
 		 * This method always throws an exception, because the elements are not
@@ -415,9 +415,9 @@ public class TermAlgebra extends Algebra
 		}
 	}
 	
-	protected Universe universe = new Universe();
+	protected TermUniverse universe = new TermUniverse();
 	
-	public Set getUniverse()
+	public Universe getUniverse()
 	{
 		return universe;
 	}

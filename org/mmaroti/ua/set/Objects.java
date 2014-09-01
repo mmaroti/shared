@@ -23,7 +23,7 @@ package org.mmaroti.ua.set;
  * All methods are implemented by invoking the appropriate
  * methods in the <code>Object</code> class.
  */
-public class Objects extends Set
+public class Objects extends Universe
 {
 	/**
 	 * To prevent this object to be created
@@ -35,7 +35,7 @@ public class Objects extends Set
 	/**
 	 * There is only one object universe, and this object is that
 	 */
-	public static Set INSTANCE = new Objects(); 
+	public static Universe INSTANCE = new Objects(); 
 	
 	public int getSize()
 	{

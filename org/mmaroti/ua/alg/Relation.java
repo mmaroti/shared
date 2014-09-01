@@ -1,6 +1,6 @@
 package org.mmaroti.ua.alg;
 
-import org.mmaroti.ua.set.Set;
+import org.mmaroti.ua.set.Universe;
 
 /**
  * Represents a relation of a {@link Structure}. If the elements of the
@@ -53,7 +53,7 @@ public abstract class Relation
 	/**
 	 * Returns the universe of this operation.
 	 */
-	public abstract Set getUniverse();
+	public abstract Universe getUniverse();
 
 	/**
 	 * Evaluates a constant relational value.

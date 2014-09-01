@@ -4,8 +4,8 @@ import org.mmaroti.ua.set.*;
 
 public class MinmalMajorityClones
 {
-	static Set functions = new ProductSet(new FiniteSet(5), 60, "");
-	static SubSet clone = new SubSet(functions);
+	static Universe functions = new ProductUniverse(new FiniteSet(5), 60, "");
+	static SubUniverse clone = new SubUniverse(functions);
 	
 	static Object projx;
 	static Object projy;

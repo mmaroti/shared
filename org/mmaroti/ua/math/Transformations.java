@@ -23,7 +23,7 @@ import org.mmaroti.ua.set.*;
 /**
  * This class captures transformation semigroups
  */
-public class Transformations extends Set
+public class Transformations extends Universe
 {
 	int universe;
 	int size;

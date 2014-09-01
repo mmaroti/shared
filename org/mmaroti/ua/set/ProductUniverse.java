@@ -35,12 +35,12 @@ import java.util.*;
  *  
  * @author mmaroti@math.u-szeged.hu
  */
-public class ProductSet extends Set
+public class ProductUniverse extends Universe
 {
 	/**
 	 * Holds the factor universes.
 	 */
-	protected Set[] factors;
+	protected Universe[] factors;
 	
 	/**
 	 * Holds the sizes of the factor universes if the product is enumerable.
@@ -49,10 +49,10 @@ public class ProductSet extends Set
 	
 	/**
 	 * @return the list of factor universes that was originally
-	 * passed to {@link ProductSet#ProductSet}. 
+	 * passed to {@link ProductUniverse#ProductSet}. 
 	 * The returned list should not be modified.
 	 */
-	public Set[] getFactors()
+	public Universe[] getFactors()
 	{
 		return factors;
 	}
@@ -86,7 +86,7 @@ public class ProductSet extends Set
 			long s = 1;
 			for(int i = 0; i < factors.length; ++i)
 			{
-				Set universe = factors[i];
+				Universe universe = factors[i];
 				universeSizes[i] = universe.getSize();
 
 				s *= universeSizes[i];
@@ -134,9 +134,9 @@ public class ProductSet extends Set
 	 * 
 	 * @param universes The list of universes.
 	 */
-	public ProductSet(List<? extends Set> universes)
+	public ProductUniverse(List<? extends Universe> universes)
 	{
-		this.factors = new Set[universes.size()];
+		this.factors = new Universe[universes.size()];
 		universes.toArray(this.factors);
 
 		calculateSizes();
@@ -148,12 +148,12 @@ public class ProductSet extends Set
 	 * @param universe the underlying set
 	 * @param power the exponent
 	 */
-	public ProductSet(Set universe, int power)
+	public ProductUniverse(Universe universe, int power)
 	{
 		if(power <= 0 )
 			throw new IllegalArgumentException("the exponent must be positive");
 		
-		factors = new Set[power];
+		factors = new Universe[power];
 		for(int i = 0; i < power; ++i)
 			factors[i] = universe;
 	
@@ -167,12 +167,12 @@ public class ProductSet extends Set
 	 * @param power the exponent
 	 * @param style the style of the string representation
 	 */
-	public ProductSet(Set universe, int power, String style)
+	public ProductUniverse(Universe universe, int power, String style)
 	{
 		if(power <= 0 )
 			throw new IllegalArgumentException("the exponent must be positive");
 		
-		factors = new Set[power];
+		factors = new Universe[power];
 		for(int i = 0; i < power; ++i)
 			factors[i] = universe;
 	

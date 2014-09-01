@@ -40,9 +40,9 @@ import org.mmaroti.ua.set.*;
  */
 public class ProductAlgebra extends Algebra
 {
-	protected ProductSet universe;
+	protected ProductUniverse universe;
 	
-	public Set getUniverse()
+	public Universe getUniverse()
 	{
 		return universe;
 	}
@@ -58,7 +58,7 @@ public class ProductAlgebra extends Algebra
 	public ProductAlgebra(List<Algebra> algebras)
 	{
 		factors = new Algebra[algebras.size()];
-		ArrayList<Set> universes = new ArrayList<Set>(factors.length);
+		ArrayList<Universe> universes = new ArrayList<Universe>(factors.length);
 		
 		for(int i = 0; i < algebras.size(); ++i)
 		{
@@ -66,7 +66,7 @@ public class ProductAlgebra extends Algebra
 			universes.add(factors[i].getUniverse());
 		}
 		
-		universe = new ProductSet(universes);
+		universe = new ProductUniverse(universes);
 
 		if( ! Algebra.areCompatible(algebras) )
 			throw new IllegalArgumentException("the provided list of algebras " +
@@ -100,7 +100,7 @@ public class ProductAlgebra extends Algebra
 	 */
 	public class Op extends Operation
 	{
-		public Set getUniverse()
+		public Universe getUniverse()
 		{
 			return universe;
 		}

@@ -23,9 +23,9 @@ import org.mmaroti.ua.set.*;
 
 public class SubAlgebra extends Algebra
 {
-	protected SubSet universe;
+	protected SubUniverse universe;
 
-	public Set getUniverse()
+	public Universe getUniverse()
 	{
 		return universe;
 	}
@@ -36,7 +36,7 @@ public class SubAlgebra extends Algebra
 	 */
 	public SubAlgebra(Algebra base)
 	{
-		universe = new SubSet(base.getUniverse());
+		universe = new SubUniverse(base.getUniverse());
 		
 		Operation[] operations = base.getOperations(); 
 
@@ -126,7 +126,7 @@ public class SubAlgebra extends Algebra
 			this.os = new Object[op.getSymbol().arity];
 		}
 		
-		public Set getUniverse()
+		public Universe getUniverse()
 		{
 			return universe;
 		}

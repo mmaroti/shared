@@ -24,9 +24,9 @@ import java.math.BigInteger;
 /**
  * This class represents the ring of integers.
  */
-public class Rationals extends Set implements Field
+public class Rationals extends Universe implements Field
 {
-	private SubSet rationals = new SubSet(new ProductSet(Objects.INSTANCE,2));
+	private SubUniverse rationals = new SubUniverse(new ProductUniverse(Objects.INSTANCE,2));
 
 	public int getIndex(Object a)
 	{

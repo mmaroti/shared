@@ -32,7 +32,7 @@ package org.mmaroti.ua.set;
  *
  * @author mmaroti@math.u-szeged.hu
  */
-public abstract class Set
+public abstract class Universe
 {
 	/**
 	 * Returns the size of the underlying set. For the empty set this method 
