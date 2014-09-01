@@ -26,39 +26,39 @@ public class EnvelopeFreqFilter
 		return filtered;
 	}
 
-	protected static List filterRips(List ripsData)
+	protected static List<Data.Rips> filterRips(List<Data.Rips> ripsData)
 	{	
-		Map lists = new HashMap();
-		Iterator iter = ripsData.iterator();
+		Map<String, List<Data.Rips>> lists = new HashMap<String, List<Data.Rips>>();
+		Iterator<Data.Rips> iter = ripsData.iterator();
 		while( iter.hasNext() )
 		{
-			Data.Rips rips = (Data.Rips)iter.next();
+			Data.Rips rips = iter.next();
 			
 			String name = rips.scenario + " " + rips.time + " " + rips.master + " " 
 				+ rips.assistant + " " + rips.channel + " " + rips.power;
 
-			List list = (List)lists.get(name);
+			List<Data.Rips> list = lists.get(name);
 			if( list == null )
 			{
-				list = new ArrayList();
+				list = new ArrayList<Data.Rips>();
 				lists.put(name, list);
 			}
 			list.add(rips);
 		}
 
-		List output = new ArrayList();
+		List<Data.Rips> output = new ArrayList<Data.Rips>();
 		
-		iter = lists.values().iterator();
-		while( iter.hasNext() )
+		Iterator<List<Data.Rips>> iter2 = lists.values().iterator();
+		while( iter2.hasNext() )
 		{
-			List list = (List)iter.next();
+			List<Data.Rips> list = iter2.next();
 			filterSingle(list, output);
 		}
 		
 		return output;
 	}
 
-	protected static void filterSingle(List data, List output)
+	protected static void filterSingle(List<Data.Rips> data, List<Data.Rips> output)
 	{
 		if( data.isEmpty() )
 			return;
@@ -66,7 +66,7 @@ public class EnvelopeFreqFilter
 		double[] freqs = new double[data.size()];
 
 		for(int i = 0; i < freqs.length; ++i)
-			freqs[i] = ((Data.Rips)data.get(i)).envelopeFreq;
+			freqs[i] = data.get(i).envelopeFreq;
 		
 		Arrays.sort(freqs);
 		
@@ -92,7 +92,7 @@ public class EnvelopeFreqFilter
 		
 		for(int i = 0; i < freqs.length; ++i)
 		{
-			Data.Rips rips = (Data.Rips)data.get(i);
+			Data.Rips rips = data.get(i);
 			if( rips.envelopeFreq >= freqs[bestFirst] && rips.envelopeFreq <= freqs[bestLast] )
 				output.add(rips);
 		}

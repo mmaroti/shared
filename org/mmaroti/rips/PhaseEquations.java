@@ -29,7 +29,7 @@ public class PhaseEquations
 	/**
 	 * Holds a map from variable names to variable indices
 	 */
-	protected TreeMap variables = new TreeMap();
+	protected TreeMap<String, Integer> variables = new TreeMap<String, Integer>();
 
 	/**
 	 * Get the index of a variable with this method.
@@ -37,17 +37,17 @@ public class PhaseEquations
 	protected int getVariable(String name)
 	{
 		if( variables.containsKey(name) )
-			return ((Integer)variables.get(name)).intValue();
+			return variables.get(name);
 
 		int n = variables.size();
-		variables.put(name, new Integer(n));
+		variables.put(name, n);
 		return n;
 	}
 
 	/**
 	 * Returns the set of variable names in the system. 
 	 */
-	public Set getVariables()
+	public Set<String> getVariables()
 	{
 		return variables.keySet();
 	}
@@ -168,12 +168,12 @@ public class PhaseEquations
 	/**
 	 * Holds the list of equations.
 	 */
-	protected List equations = new ArrayList();
+	protected List<Equation> equations = new ArrayList<Equation>();
 
 	/**
 	 * Returns the list of equations in the system.
 	 */
-	public List getEquations()
+	public List<Equation> getEquations()
 	{
 		return equations;
 	}
@@ -229,22 +229,22 @@ public class PhaseEquations
 		public double getValue(String name)
 		{
 			if( variables.containsKey(name) )
-				return values[((Integer)variables.get(name)).intValue()];
+				return values[variables.get(name)];
 				
 			return Double.NaN;
 		}
 
-		public Map getValueMap()
+		public Map<String, Double> getValueMap()
 		{
-			Map assignment = new HashMap();
+			Map<String, Double> assignment = new HashMap<String, Double>();
 			
-			Iterator iter = variables.entrySet().iterator();
+			Iterator<Map.Entry<String, Integer>> iter = variables.entrySet().iterator();
 			while( iter.hasNext() )
 			{
-				Map.Entry entry = (Map.Entry)iter.next();
+				Map.Entry<String, Integer> entry = iter.next();
 				
-				double value = values[((Integer)entry.getValue()).intValue()];
-				assignment.put(entry.getKey(), new Double(value));
+				double value = values[entry.getValue()];
+				assignment.put(entry.getKey(), value);
 			}
 			
 			return assignment;
@@ -266,11 +266,11 @@ public class PhaseEquations
 		 */		
 		public void print()
 		{
-			Iterator iter = variables.keySet().iterator();
+			Iterator<String> iter = variables.keySet().iterator();
 			while( iter.hasNext() )
 			{
-				String name = (String)iter.next();
-				int index = ((Integer)variables.get(name)).intValue();
+				String name = iter.next();
+				int index = variables.get(name);
 				System.out.println(name + " = " + values[index]);
 			}
 			System.out.println("Average Error " + getAverageError());
@@ -279,10 +279,10 @@ public class PhaseEquations
 
 		public void printErrors()
 		{
-			Iterator iter = equations.iterator();
+			Iterator<Equation> iter = equations.iterator();
 			while( iter.hasNext() )
 			{
-				Equation equation = (Equation)iter.next();
+				Equation equation = iter.next();
 				System.out.println(equation.getSignedError(this));
 			}
 		}
@@ -294,10 +294,10 @@ public class PhaseEquations
 		{
 			double d = 0.0;
 		
-			Iterator iter = equations.iterator();
+			Iterator<Equation> iter = equations.iterator();
 			while( iter.hasNext() )
 			{
-				Equation equation = (Equation)iter.next();
+				Equation equation = iter.next();
 				d += equation.getAbsoluteError(this);
 			}
 		
@@ -311,10 +311,10 @@ public class PhaseEquations
 		{
 			double d = 0.0;
 		
-			Iterator iter = equations.iterator();
+			Iterator<Equation> iter = equations.iterator();
 			while( iter.hasNext() )
 			{
-				Equation equation = (Equation)iter.next();
+				Equation equation = iter.next();
 				double e = equation.getAbsoluteError(this);
 				if( e > d )
 					d = e;
@@ -328,10 +328,10 @@ public class PhaseEquations
 			double d = -1.0;
 			Equation a = null;
 		
-			Iterator iter = equations.iterator();
+			Iterator<Equation> iter = equations.iterator();
 			while( iter.hasNext() )
 			{
-				Equation equation = (Equation)iter.next();
+				Equation equation = iter.next();
 				double e = equation.getAbsoluteError(this);
 				if( e > d )
 				{
@@ -539,10 +539,10 @@ public class PhaseEquations
 	 */	
 	public void removeLargeErrorEquations(Solution solution, double maxError)
 	{
-		Iterator iter = equations.iterator();
+		Iterator<Equation> iter = equations.iterator();
 		while( iter.hasNext() )
 		{
-			Equation equation = (Equation)iter.next();
+			Equation equation = iter.next();
 			if( equation.getAbsoluteError(solution) > maxError )
 				iter.remove();
 		}

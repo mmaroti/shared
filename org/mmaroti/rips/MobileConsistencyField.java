@@ -29,7 +29,7 @@ public class MobileConsistencyField
 		double fraction;
 		
 		/**
-		 * Returns the absolute error (between 0 and 0.5) of the measuremed
+		 * Returns the absolute error (between 0 and 0.5) of the measured
 		 * and theoretical phases for this position.
 		 */
 		public double getError(double x, double y, double z)
@@ -42,7 +42,7 @@ public class MobileConsistencyField
 		}
 
 		/**
-		 * Returns the difference (between 0 and 1) of the measuremed
+		 * Returns the difference (between 0 and 1) of the measured
 		 * and theoretical phases for this position.
 		 */
 		public double getDifference(double x, double y, double z)
@@ -62,45 +62,45 @@ public class MobileConsistencyField
 		}
 	}
 	
-	public List hyperbolas = new ArrayList();
+	public List<Hyperbola> hyperbolas = new ArrayList<Hyperbola>();
 
 	protected void loadNotTransmitter(Data data, String scenario, int node)
 	{
-		Map transmissions = new HashMap();
+		Map<String, List<Data.Rips>> transmissions = new HashMap<String, List<Data.Rips>>();
 		
-		Iterator iter = data.ripsData.iterator();
+		Iterator<Data.Rips> iter = data.ripsData.iterator();
 		while( iter.hasNext() )
 		{
-			Data.Rips rips = (Data.Rips)iter.next();
+			Data.Rips rips = iter.next();
 			if( ! rips.scenario.equals(scenario) || rips.master == node || rips.assistant == node )
 				continue;
 
 			String transmission = rips.time + " " + rips.master + " " + rips.assistant + " " + rips.channel + " " + rips.power;
-			List entries = (List)transmissions.get(transmission);
+			List<Data.Rips> entries = transmissions.get(transmission);
 			
 			if( entries == null )
 			{
-				entries = new ArrayList();
+				entries = new ArrayList<Data.Rips>();
 				transmissions.put(transmission, entries);
 			}
 			
 			entries.add(rips);
 		}
 		
-		iter = transmissions.values().iterator();
+		Iterator<List<Data.Rips>> iter2 = transmissions.values().iterator();
 		while( iter.hasNext() )
 		{
-			List entries = (List)iter.next();
+			List<Data.Rips> entries = iter2.next();
 			
 			Data.Rips mobile = null;
-			Iterator iter2 = entries.iterator();
-			while( iter2.hasNext() )
+			Iterator<Data.Rips> iter3 = entries.iterator();
+			while( iter3.hasNext() )
 			{
-				Data.Rips rips = (Data.Rips)iter2.next();
+				Data.Rips rips = iter3.next();
 				if( rips.receiver == node )
 				{
 					mobile = rips;
-					iter2.remove();
+					iter3.remove();
 					break;
 				}
 			}
@@ -111,10 +111,10 @@ public class MobileConsistencyField
 			Data.Pos A = data.getPosition(scenario, mobile.master);
 			Data.Pos B = data.getPosition(scenario, mobile.assistant);
 			
-			iter2 = entries.iterator();
-			while( iter2.hasNext() )
+			iter3 = entries.iterator();
+			while( iter3.hasNext() )
 			{
-				Data.Rips rips = (Data.Rips)iter2.next();
+				Data.Rips rips = iter3.next();
 				if( Math.abs(rips.envelopeFreq - mobile.envelopeFreq) > ENVELOPE_FREQ_CUTOFF )
 					continue;
 				
@@ -142,35 +142,35 @@ public class MobileConsistencyField
 	
 	protected void loadTransmitter(Data data, String scenario, int node)
 	{
-		Map transmissions = new HashMap();
+		Map<String, List<Data.Rips>> transmissions = new HashMap<String, List<Data.Rips>>();
 		
-		Iterator iter = data.ripsData.iterator();
+		Iterator<Data.Rips> iter = data.ripsData.iterator();
 		while( iter.hasNext() )
 		{
-			Data.Rips rips = (Data.Rips)iter.next();
+			Data.Rips rips = iter.next();
 			if( ! rips.scenario.equals(scenario) || (rips.master != node && rips.assistant != node) )
 				continue;
 
 			String transmission = rips.time + " " + rips.master + " " + rips.assistant + " " + rips.channel + " " + rips.power;
-			List entries = (List)transmissions.get(transmission);
+			List<Data.Rips> entries = transmissions.get(transmission);
 
 			if( entries == null )
 			{
-				entries = new ArrayList();
+				entries = new ArrayList<Data.Rips>();
 				transmissions.put(transmission, entries);
 			}
 			
 			entries.add(rips);
 		}
 		
-		iter = transmissions.values().iterator();
+		Iterator<List<Data.Rips>> iter2 = transmissions.values().iterator();
 		while( iter.hasNext() )
 		{
-			List entries = (List)iter.next();
+			List<Data.Rips> entries = iter2.next();
 			
 			for(int i = 0; i < entries.size(); ++i)
 			{
-				Data.Rips slaveC = (Data.Rips)entries.get(i); 
+				Data.Rips slaveC = entries.get(i); 
 				Data.Pos C = data.getPosition(scenario, slaveC.receiver);
 
 				Data.Pos other = data.getPosition(scenario,
@@ -181,7 +181,7 @@ public class MobileConsistencyField
 					if( i == j )
 						continue;
 						
-					Data.Rips slaveD = (Data.Rips)entries.get(j); 
+					Data.Rips slaveD = entries.get(j); 
 					if( Math.abs(slaveC.envelopeFreq - slaveD.envelopeFreq) > ENVELOPE_FREQ_CUTOFF )
 						continue;
 					
@@ -226,13 +226,13 @@ public class MobileConsistencyField
 			getAverageError(B.x, B.y, B.z));
 	}
 
-	protected Map solutions = new HashMap();
+	protected Map<String, Map<String, Double>> solutions = new HashMap<String, Map<String, Double>>();
 
-	public Map getSolution(Data data, String scenario, int channel)
+	public Map<String, Double> getSolution(Data data, String scenario, int channel)
 	{
 		String name = "" + System.identityHashCode(data) + " " + scenario + " " + channel;
 		
-		Map solution = (Map)solutions.get(name);
+		Map<String, Double> solution = solutions.get(name);
 		if( solution == null )
 		{
 			AbsolutePhaseSolver solver = new AbsolutePhaseSolver();
@@ -245,26 +245,26 @@ public class MobileConsistencyField
 		return solution;
 	}
 
-	public double getPhase(Map solution, int A, int B, int C, int D)
+	public double getPhase(Map<String, Double> solution, int A, int B, int C, int D)
 	{
 		double phase = 0.0;
 		
-		Double d = (Double)solution.get(AbsolutePhaseSolver.getDistanceVar(A, D));
+		Double d = solution.get(AbsolutePhaseSolver.getDistanceVar(A, D));
 		if( d == null )
 			return Double.NaN;
 		phase += d.doubleValue();
 		
-		d = (Double)solution.get(AbsolutePhaseSolver.getDistanceVar(B, D));
+		d = solution.get(AbsolutePhaseSolver.getDistanceVar(B, D));
 		if( d == null )
 			return Double.NaN;
 		phase -= d.doubleValue();
 		
-		d = (Double)solution.get(AbsolutePhaseSolver.getDistanceVar(B, C));
+		d = solution.get(AbsolutePhaseSolver.getDistanceVar(B, C));
 		if( d == null )
 			return Double.NaN;
 		phase += d.doubleValue();
 
-		d = (Double)solution.get(AbsolutePhaseSolver.getDistanceVar(A, C));
+		d = solution.get(AbsolutePhaseSolver.getDistanceVar(A, C));
 		if( d == null )
 			return Double.NaN;
 		phase -= d.doubleValue();
@@ -285,12 +285,12 @@ public class MobileConsistencyField
 			}
 		}
 		
-		Iterator channels = data.channels.iterator();
+		Iterator<Integer> channels = data.channels.iterator();
 		while( channels.hasNext() )
 		{
-			int channel = ((Integer)channels.next()).intValue();
+			int channel = channels.next();
 			
-			Map solution = getSolution(data, scenario, channel);
+			Map<String, Double> solution = getSolution(data, scenario, channel);
 
 			Data.Pos B = data.getPosition(scenario, nodes[1]);
 			Data.Pos C = data.getPosition(scenario, nodes[2]);
@@ -358,10 +358,10 @@ public class MobileConsistencyField
 	{
 		double error = 0.0;
 		
-		Iterator iter = hyperbolas.iterator();
+		Iterator<Hyperbola> iter = hyperbolas.iterator();
 		while( iter.hasNext() )
 		{
-			Hyperbola hyperbola = (Hyperbola)iter.next();
+			Hyperbola hyperbola = iter.next();
 			error += hyperbola.getError(x, y, z);
 		}
 		
@@ -372,10 +372,10 @@ public class MobileConsistencyField
 	{
 		double error = 0.0;
 		
-		Iterator iter = hyperbolas.iterator();
+		Iterator<Hyperbola> iter = hyperbolas.iterator();
 		while( iter.hasNext() )
 		{
-			Hyperbola hyperbola = (Hyperbola)iter.next();
+			Hyperbola hyperbola = iter.next();
 			if( hyperbola.getError(x, y, z) < 0.10 )
 				++error;
 		}
@@ -387,10 +387,10 @@ public class MobileConsistencyField
 	{
 		ComplexNumber error = new ComplexNumber(0.0, 0.0);
 		
-		Iterator iter = hyperbolas.iterator();
+		Iterator<Hyperbola> iter = hyperbolas.iterator();
 		while( iter.hasNext() )
 		{
-			Hyperbola hyperbola = (Hyperbola)iter.next();
+			Hyperbola hyperbola = iter.next();
 			error.addTrigForm(1.0, TWO_PI * hyperbola.getDifference(x, y, z));
 		}
 
@@ -418,10 +418,10 @@ public class MobileConsistencyField
 		
 		MobileConsistencyField field = new MobileConsistencyField();
 
-		Iterator iter = data.nodes.iterator();
+		Iterator<Integer> iter = data.nodes.iterator();
 		while( iter.hasNext() )
 		{
-			int node = ((Integer)iter.next()).intValue();
+			int node = iter.next();
 
 			field.load(data, scenario, node);
 
@@ -436,10 +436,10 @@ public class MobileConsistencyField
 	{
 		double e = 0.0;
 		
-		Iterator iter = data.scenarios.iterator();
+		Iterator<String> iter = data.scenarios.iterator();
 		while( iter.hasNext() )
 		{
-			String scenario = (String)iter.next();
+			String scenario = iter.next();
 			e += computeAverageError(data, scenario);
 		}
 		

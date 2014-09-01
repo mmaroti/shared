@@ -11,7 +11,7 @@ import java.util.*;
  */
 public class AbsolutePhaseSolver
 {
-	public Set nodes = new TreeSet();
+	public Set<Integer> nodes = new TreeSet<Integer>();
 
 	public static class Quad
 	{
@@ -19,24 +19,24 @@ public class AbsolutePhaseSolver
 		public double radian;
 	}
 	
-	public List quads = new ArrayList();
+	public List<Quad> quads = new ArrayList<Quad>();
 	
-	public void load(List ripsData, String scenario, int channel)
+	public void load(List<Data.Rips> ripsData, String scenario, int channel)
 	{
 		nodes.clear();
 		quads.clear();
 		
-		Map references = new HashMap();
+		Map<String, Data.Rips> references = new HashMap<String, Data.Rips>();
 		
-		Iterator iter = ripsData.iterator();
+		Iterator<Data.Rips> iter = ripsData.iterator();
 		while( iter.hasNext() )
 		{
-			Data.Rips rips = (Data.Rips)iter.next();
+			Data.Rips rips = iter.next();
 			if( ! rips.scenario.equals(scenario) || rips.channel != channel )
 				continue;
 			
 			String refName = rips.time + " " + rips.master + " " + rips.assistant + " " + rips.power;
-			Data.Rips ref = (Data.Rips)references.get(refName);
+			Data.Rips ref = references.get(refName);
 			if( ref == null )
 			{
 				references.put(refName, rips);
@@ -76,10 +76,10 @@ public class AbsolutePhaseSolver
 	{
 		equations.clear();
 		
-		Iterator iter = quads.iterator();
+		Iterator<Quad> iter = quads.iterator();
 		while( iter.hasNext() )
 		{
-			Quad quad = (Quad)iter.next();
+			Quad quad = iter.next();
 			
 			PhaseEquations.Equation equation = equations.createEquation();
 			equation.addCoefficient(getDistanceVar(quad.A,quad.D), 1.0);

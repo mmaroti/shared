@@ -16,10 +16,10 @@ public class Data
 	public static final double CHANNEL_SEPARATION = 526628.5;	// herz
 	public static final double SPEED_OF_LIGHT  = 299792458;		// meters per seconds
 
-	public Set scenarios = new TreeSet();	// set of scenarios names (string)
-	public Set nodes = new TreeSet();		// set of node ids (integer)
-	public Set channels = new TreeSet();	// set of channel ids (integer)
-	public Set powers = new TreeSet();		// set of power setting names (string)
+	public Set<String> scenarios = new TreeSet<String>();	// set of scenarios names (string)
+	public Set<Integer> nodes = new TreeSet<Integer>();		// set of node ids (integer)
+	public Set<Integer> channels = new TreeSet<Integer>();	// set of channel ids (integer)
+	public Set<String> powers = new TreeSet<String>();		// set of power setting names (string)
 	
 	public void clear()
 	{
@@ -72,29 +72,29 @@ public class Data
 		}
 	}
 	
-	public List positions = new ArrayList();
+	public List<Pos> positions = new ArrayList<Pos>();
 	
 	public void addPosition(Pos pos)
 	{
 		positions.add(pos);
 
-		nodes.add(new Integer(pos.node));
+		nodes.add(pos.node);
 		scenarios.add(pos.scenario);
 	}
 	
-	public void addAllPositions(List positions)
+	public void addAllPositions(List<Pos> positions)
 	{
-		Iterator iter = positions.iterator();
+		Iterator<Pos> iter = positions.iterator();
 		while( iter.hasNext() )
-			addPosition((Pos)iter.next());
+			addPosition(iter.next());
 	}
 	
 	public Pos getPosition(String scenario, int nodeID)
 	{
-		Iterator iter = positions.iterator();
+		Iterator<Pos> iter = positions.iterator();
 		while( iter.hasNext() )
 		{
-			Pos pos = (Pos)iter.next();
+			Pos pos = iter.next();
 			if( pos.scenario.equals(scenario) && pos.node == nodeID )
 				return pos;
 		}
@@ -108,8 +108,10 @@ public class Data
 		for(;;)
 		{
 			String line = r.readLine();
-			if( line == null )
+			if( line == null ) {
+				r.close();
 				break;
+			}
 				
 			if( line.startsWith("#") )
 				continue;
@@ -126,8 +128,10 @@ public class Data
 			pos.z = Double.parseDouble(t.nextToken());
 			addPosition(pos);
 			
-			if( t.hasMoreTokens() )
+			if( t.hasMoreTokens() ) {
+				r.close();
 				throw new IOException("incorrect pos line: " + line);
+			}
 		}
 	}
 
@@ -136,9 +140,9 @@ public class Data
 		int[] ns = new int[nodes.size()];
 		
 		int i = 0;
-		Iterator iter = nodes.iterator();
+		Iterator<Integer> iter = nodes.iterator();
 		while( i < ns.length )
-			ns[i++] = ((Integer)iter.next()).intValue();
+			ns[i++] = iter.next();
 			
 		Arrays.sort(ns);
 		
@@ -168,7 +172,7 @@ public class Data
 		}
 	}
 
-	public List ripsData = new ArrayList();
+	public List<Rips> ripsData = new ArrayList<Rips>();
 
 	public void addRipsData(Rips rips)
 	{
@@ -182,11 +186,11 @@ public class Data
 		powers.add(rips.power);
 	}
 	
-	public void addAllRipsData(List ripsData)
+	public void addAllRipsData(List<Rips> ripsData)
 	{
-		Iterator iter = ripsData.iterator();
+		Iterator<Rips> iter = ripsData.iterator();
 		while( iter.hasNext() )
-			addRipsData((Rips)iter.next());
+			addRipsData(iter.next());
 	}
 	
 	protected void loadRipsData(String file) throws IOException
@@ -196,8 +200,10 @@ public class Data
 		for(;;)
 		{
 			String line = r.readLine();
-			if( line == null )
+			if( line == null ) {
+				r.close();
 				break;
+			}
 				
 			if( line.startsWith("#") )
 				continue;
@@ -218,8 +224,10 @@ public class Data
 			rips.envelopeFreq = Double.parseDouble(t.nextToken());
 			addRipsData(rips);
 			
-			if( t.hasMoreTokens() )
+			if( t.hasMoreTokens() ) {
+				r.close();
 				throw new IOException("incorrect rips line: " + line);
+			}
 		}
 	}
 	
@@ -234,7 +242,7 @@ public class Data
 		public int rssi;				// measured rssi value 
 	}
 
-	public List rssiData = new ArrayList();
+	public List<Rssi> rssiData = new ArrayList<Rssi>();
 
 	public void addRssiData(Rssi rssi)
 	{
@@ -247,11 +255,11 @@ public class Data
 		powers.add(rssi.power);
 	}
 	
-	public void addAllRssiData(List rssiData)
+	public void addAllRssiData(List<Rssi> rssiData)
 	{
-		Iterator iter = rssiData.iterator();
+		Iterator<Rssi> iter = rssiData.iterator();
 		while( iter.hasNext() )
-			addRssiData((Rssi)iter.next());
+			addRssiData(iter.next());
 	}
 	
 	protected void loadRssiData(String file) throws IOException
@@ -261,8 +269,10 @@ public class Data
 		for(;;)
 		{
 			String line = r.readLine();
-			if( line == null )
+			if( line == null ) {
+				r.close();
 				break;
+			}
 				
 			if( line.startsWith("#") )
 				continue;
@@ -281,8 +291,10 @@ public class Data
 			rssi.rssi = Integer.parseInt(t.nextToken());
 			addRssiData(rssi);
 
-			if( t.hasMoreTokens() )
+			if( t.hasMoreTokens() ) {
+				r.close();
 				throw new IOException("incorrect rssi line: " + line);
+			}
 		}
 	}
 }
