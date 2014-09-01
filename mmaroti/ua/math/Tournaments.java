@@ -32,7 +32,7 @@ public class Tournaments
 		return alg;
 	}
 	
-	public static ArrayList createAllCompletions(FunctionBuffer relation)
+	public static List<Algebra> createAllCompletions(FunctionBuffer relation)
 	{
 		int size = relation.size();
 		int[] indices = new int[(size * (size-1)) / 2];
@@ -47,7 +47,7 @@ public class Tournaments
 				}
 				
 		int[] buffer = relation.buffer();
-		ArrayList algebras = new ArrayList();
+		List<Algebra> algebras = new ArrayList<Algebra>();
 
 		int i;
 		do
@@ -68,13 +68,13 @@ public class Tournaments
 		if( size * size != partial.length )
 			throw new IllegalArgumentException();
 
-		ArrayList algebras = createAllCompletions(
+		List<Algebra> algebras = createAllCompletions(
 			new FunctionBuffer(size, 2, partial));
 
-		ArrayList generators = new ArrayList();
+		List<List<Integer>> generators = new ArrayList<List<Integer>>();
 		for(int i = 0; i < size; ++i)
 		{
-			ArrayList function = new ArrayList();
+			List<Integer> function = new ArrayList<Integer>();
 			Integer n = new Integer(i);
 
 			int j = algebras.size();

@@ -10,11 +10,11 @@ import mmaroti.ua.alg.*;
 
 public class SemiLattices
 {
-	public static List covers(Function op)
+	public static List<IntPair> covers(Function op)
 	{
 		Functions.Binary o = new Functions.Binary(op);
 	
-		ArrayList list = new ArrayList();
+		List<IntPair> list = new ArrayList<IntPair>();
 		int size = o.size();
 		
 		for(int i = 0; i < size; ++i)

@@ -17,14 +17,14 @@ public class DigraphAlgebras
 			-1, 0,-1,
 			-1,-1, 0 };
 
-		ArrayList algebras = createAllCompletions(new FunctionBuffer(3, 2, partial));
-		ArrayList simples = new ArrayList();
+		List<Algebra> algebras = createAllCompletions(new FunctionBuffer(3, 2, partial));
+		List<Algebra> simples = new ArrayList<Algebra>();
 
 		int c = 0;
-		Iterator iter = algebras.iterator();
+		Iterator<Algebra> iter = algebras.iterator();
 		while( iter.hasNext() )
 		{
-			Algebra alg = (Algebra)iter.next();
+			Algebra alg = iter.next();
 
 			if( isSimple(alg) )
 			{
@@ -33,10 +33,10 @@ public class DigraphAlgebras
 			}
 		}
 
-		ArrayList generators = new ArrayList();
+		List<List<Integer>> generators = new ArrayList<List<Integer>>();
 		for(int i = 0; i < 3; ++i)
 		{
-			ArrayList function = new ArrayList();
+			List<Integer> function = new ArrayList<Integer>();
 			Integer n = new Integer(i);
 
 			int j = simples.size();
@@ -69,7 +69,7 @@ public class DigraphAlgebras
 			 0,-1,
 			-1, 0 };
 		
-		ArrayList algebras = createAllCompletions(new FunctionBuffer(2, 2, partial));
+		List<Algebra> algebras = createAllCompletions(new FunctionBuffer(2, 2, partial));
 		ComplexProdAlgebra complex = new ComplexProdAlgebra(algebras);
 		
 		DecisionDiagram.Node full = complex.emptySet();
@@ -103,7 +103,7 @@ public class DigraphAlgebras
 			-1, 0,-1,
 			-1,-1, 0 };
 
-		ArrayList algebras = createAllCompletions(new FunctionBuffer(3, 2, partial));
+		List<Algebra> algebras = createAllCompletions(new FunctionBuffer(3, 2, partial));
 		ComplexProdAlgebra complex = new ComplexProdAlgebra(algebras);
 		
 		DecisionDiagram.Node full = complex.emptySet();
@@ -147,7 +147,7 @@ public class DigraphAlgebras
 			-1, 0,-1,
 			-1,-1, 0 };
 
-		ArrayList algebras = createAllCompletions(new FunctionBuffer(3, 2, partial));
+		List<Algebra> algebras = createAllCompletions(new FunctionBuffer(3, 2, partial));
 		ComplexProdAlgebra complex = new ComplexProdAlgebra(algebras);
 		
 		DecisionDiagram.Node full = complex.emptySet();
@@ -191,7 +191,7 @@ public class DigraphAlgebras
 			-1, 0,-1,
 			-1,-1, 0 };
 
-		ArrayList algebras = createAllCompletions(new FunctionBuffer(3, 2, partial));
+		List<Algebra> algebras = createAllCompletions(new FunctionBuffer(3, 2, partial));
 		ComplexProdAlgebra complex = new ComplexProdAlgebra(algebras);
 		
 		DecisionDiagram.Node full = complex.emptySet();
@@ -275,7 +275,7 @@ public class DigraphAlgebras
 		return alg;
 	}
 	
-	public static ArrayList createAllCompletions(FunctionBuffer relation)
+	public static List<Algebra> createAllCompletions(FunctionBuffer relation)
 	{
 		int size = relation.size();
 		int[] indices = new int[size * size];
@@ -290,7 +290,7 @@ public class DigraphAlgebras
 				}
 				
 		int[] buffer = relation.buffer();
-		ArrayList algebras = new ArrayList();
+		List<Algebra> algebras = new ArrayList<Algebra>();
 
 		int i;
 		do
@@ -311,13 +311,13 @@ public class DigraphAlgebras
 		if( size * size != partial.length )
 			throw new IllegalArgumentException();
 
-		ArrayList algebras = createAllCompletions(
+		List<Algebra> algebras = createAllCompletions(
 			new FunctionBuffer(size, 2, partial));
 
-		ArrayList generators = new ArrayList();
+		List<List<Integer>> generators = new ArrayList<List<Integer>>();
 		for(int i = 0; i < size; ++i)
 		{
-			ArrayList function = new ArrayList();
+			List<Integer> function = new ArrayList<Integer>();
 			Integer n = new Integer(i);
 
 			int j = algebras.size();

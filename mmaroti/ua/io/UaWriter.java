@@ -80,8 +80,9 @@ public class UaWriter
 		}
 	}
 
-	public void print(Algebra algebra) { print(algebra, -1); }
-	public void print(Algebra algebra, int index)
+	public void printAlgebra(Algebra algebra) { printAlgebra(algebra, -1); }
+	
+	public void printAlgebra(Algebra algebra, int index)
 	{
 		xml.startElem("algebra");
 		xml.attr("size", algebra.size());
@@ -112,8 +113,9 @@ public class UaWriter
 		xml.endElem();
 	}
 
-	public void print(Equivalence equ) { print(equ, -1); }
-	public void print(Equivalence equ, int index)
+	public void printEquivalence(Equivalence equ) { printEquivalence(equ, -1); }
+	
+	public void printEquivalence(Equivalence equ, int index)
 	{
 		xml.startElem("equivalence");
 		int size = equ.size();
@@ -142,8 +144,9 @@ public class UaWriter
 		xml.endElem();
 	}
 
-	public void print(IntArray vector) { print(vector, -1); }
-	public void print(IntArray vector, int index)
+	public void printArray(IntArray vector) { printArray(vector, -1); }
+	
+	public void printArray(IntArray vector, int index)
 	{
 		xml.startElem("vector");
 		int length = vector.length();
@@ -157,8 +160,9 @@ public class UaWriter
 		xml.endElem();
 	}
 
-	public void print(int[] vector) { print(vector, -1); }
-	public void print(int[] vector, int index)
+	public void printVector(int[] vector) { printVector(vector, -1); }
+	
+	public void printVector(int[] vector, int index)
 	{
 		xml.startElem("vector");
 		int length = vector.length;
@@ -172,8 +176,9 @@ public class UaWriter
 		xml.endElem();
 	}
 
-	public void print(List list) { print(list, -1); }
-	public void print(List list, int index)
+	public void printList(List<Object> list) { printList(list, -1); }
+	
+	public void printList(List<Object> list, int index)
 	{
 		xml.startElem("list");
 		int size = list.size();
@@ -182,7 +187,7 @@ public class UaWriter
 		if( index >= 0 )
 			xml.attr("index", index);
 
-		Iterator iter = list.iterator();
+		Iterator<Object> iter = list.iterator();
 		index = 0;
 
 		while( iter.hasNext() )
@@ -191,8 +196,9 @@ public class UaWriter
 		xml.endElem();
 	}
 
-	public void print(Set set) { print(set, -1); }
-	public void print(Set set, int index)
+	public void printSet(Set<Object> set) { printSet(set, -1); }
+	
+	public void printSet(Set<Object> set, int index)
 	{
 		xml.startElem("set");
 		int size = set.size();
@@ -201,7 +207,7 @@ public class UaWriter
 		if( index >= 0 )
 			xml.attr("index", index);
 
-		Iterator iter = set.iterator();
+		Iterator<Object> iter = set.iterator();
 		index = 0;
 
 		while( iter.hasNext() )
@@ -210,8 +216,9 @@ public class UaWriter
 		xml.endElem();
 	}
 
-	public void print(Integer value) { print(value, -1); }
-	public void print(Integer value, int index)
+	public void printInteger(Integer value) { printInteger(value, -1); }
+	
+	public void printInteger(Integer value, int index)
 	{
 		xml.startElem("int");
 		xml.attr("value", value.intValue());
@@ -223,22 +230,24 @@ public class UaWriter
 	}
 
 	public void print(Object obj) { print(obj, -1); }
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void print(Object obj, int index)
 	{
 		if( obj instanceof Algebra )
-			print((Algebra)obj, index);
+			printAlgebra((Algebra)obj, index);
 		else if( obj instanceof Equivalence )
-			print((Equivalence)obj, index);
+			printEquivalence((Equivalence)obj, index);
 		else if( obj instanceof IntArray )
-			print((IntArray)obj, index);
+			printArray((IntArray)obj, index);
 		else if( obj instanceof int[] )
-			print((int[])obj, index);
+			printVector((int[])obj, index);
 		else if( obj instanceof List )
-			print((List)obj, index);
+			printList((List)obj, index);
 		else if( obj instanceof Integer )
-			print((Integer)obj, index);
+			printInteger((Integer)obj, index);
 		else if( obj instanceof Set )
-			print((Set)obj, index);
+			printSet((Set)obj, index);
 		else
 			throw new IllegalArgumentException(
 			"Unsuported Object type");

@@ -36,7 +36,7 @@ public class TuringAlg
 	}
 
 	public static void createGeneratingVectors(int edges, 
-		ArrayList algebras, ArrayList generators)
+		List<Algebra> algebras, List<List<Integer>> generators)
 	{
 		algebras.clear();
 		generators.clear();
@@ -44,7 +44,7 @@ public class TuringAlg
 		Algebra alg = createTuringAlgebra();
 
 		for(int i = 0; i <= edges; ++i)
-			generators.add(new ArrayList());
+			generators.add(new ArrayList<Integer>());
 
 		for(int i = 0; i < 3; ++i)
 		{
@@ -54,11 +54,10 @@ public class TuringAlg
 			{
 				algebras.add(alg);
 				
-				((List)generators.get(0)).add(new Integer(i));
+				generators.get(0).add(i);
 				
 				for(int j = 0; j < edges; ++j)
-					((List)generators.get(1+j)).
-						add(new Integer(args.args()[j] + 3));
+					generators.get(1+j).add(args.args()[j] + 3);
 			} while( args.next() );
 		}
 	}
@@ -90,8 +89,8 @@ public class TuringAlg
 
 	static void main2(String[] args)
 	{
-		ArrayList algebras = new ArrayList();
-		ArrayList generators = new ArrayList();
+		List<Algebra> algebras = new ArrayList<Algebra>();
+		List<List<Integer>> generators = new ArrayList<List<Integer>>();
 
 		createGeneratingVectors(3, algebras, generators);
 /*

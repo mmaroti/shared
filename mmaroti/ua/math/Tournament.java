@@ -34,9 +34,9 @@ public class Tournament implements Algebra
 		size = alg.size();
 	}
 
-	public LinkedList chains(int length)
+	public List<IntArray> chains(int length)
 	{
-		LinkedList list = new LinkedList();
+		List<IntArray> list = new LinkedList<IntArray>();
 		SquareArgument arg = new SquareArgument(length, size);
 		int[] args = arg.args();
 
@@ -66,9 +66,9 @@ public class Tournament implements Algebra
 		return list;
 	}
 
-	public LinkedList covers()
+	public List<IntPair> covers()
 	{
-		LinkedList list = new LinkedList();
+		List<IntPair> list = new LinkedList<IntPair>();
 
 		for(int i = 0; i < size; ++i)
 			outer: for(int j = 0; j < size; ++j)
@@ -106,9 +106,9 @@ public class Tournament implements Algebra
 		throw new IllegalArgumentException();
 	}
 
-	public LinkedList triangles()
+	public List<IntArray> triangles()
 	{
-		LinkedList list = new LinkedList();
+		List<IntArray> list = new LinkedList<IntArray>();
 
 		for(int i = 0; i < size; ++i)
 			for(int j = 0; j < size; ++j)
@@ -123,9 +123,9 @@ public class Tournament implements Algebra
 		return list;
 	}
 
-	public HashSet edges()
+	public Set<IntPair> edges()
 	{
-		HashSet set = new HashSet();
+		Set<IntPair> set = new HashSet<IntPair>();
 		
 		for(int i = 0; i < size; ++i)
 			for(int j = 0; j < size; ++j)
@@ -135,13 +135,13 @@ public class Tournament implements Algebra
 		return set;
 	}
 
-	public HashSet edgeTranslations(Set input)
+	public Set<IntPair> edgeTranslations(Set<IntPair> input)
 	{
-		HashSet ret = new HashSet();
+		Set<IntPair> ret = new HashSet<IntPair>();
 	
 		while( !input.isEmpty() )
 		{
-			IntPair pair = (IntPair)input.iterator().next();
+			IntPair pair = input.iterator().next();
 			
 			int a = pair.first;
 			int b = pair.second;
@@ -175,20 +175,20 @@ public class Tournament implements Algebra
 		return ret;	
 	}
 	
-	public HashSet edgeTranslations(int a, int b)
+	public Set<IntPair> edgeTranslations(int a, int b)
 	{
-		HashSet set = new HashSet();
+		Set<IntPair> set = new HashSet<IntPair>();
 		set.add(new IntPair(a,b));
 		return edgeTranslations(set);
 	}
 
-	public HashSet cycleTranslations(Set input)
+	public Set<IntPair> cycleTranslations(Set<IntPair> input)
 	{
-		HashSet ret = new HashSet();
+		Set<IntPair> ret = new HashSet<IntPair>();
 	
 		while( !input.isEmpty() )
 		{
-			IntPair pair = (IntPair)input.iterator().next();
+			IntPair pair = input.iterator().next();
 			
 			int a = pair.first;
 			int b = pair.second;
@@ -222,45 +222,45 @@ public class Tournament implements Algebra
 		return ret;	
 	}
 	
-	public HashSet cycleTranslations(int a, int b)
+	public Set<IntPair> cycleTranslations(int a, int b)
 	{
-		HashSet set = new HashSet();
+		Set<IntPair> set = new HashSet<IntPair>();
 		set.add(new IntPair(a,b));
 		return cycleTranslations(set);
 	}
 
-	public Equivalence closure(Set edges)
+	public Equivalence closure(Set<IntPair> edges)
 	{
 		Equivalence equiv = Equivalence.diagonalRelation(size);
 		
-		Iterator iter = edges.iterator();
+		Iterator<IntPair> iter = edges.iterator();
 		while( iter.hasNext() )
 		{
-			IntPair pair = (IntPair)iter.next();
+			IntPair pair = iter.next();
 			equiv.join(pair.first, pair.second);
 		}
 		
 		return equiv;
 	}
 
-	public LinkedList cycleIdeals(Set edges)
+	public List<IntArray> cycleIdeals(Set<IntPair> edges)
 	{
-		LinkedList ideals = new LinkedList();
+		List<IntArray> ideals = new LinkedList<IntArray>();
 
 		while( !edges.isEmpty() )
 		{
-			IntPair pair = (IntPair)edges.iterator().next();
+			IntPair pair = edges.iterator().next();
 	
-			Set ideal = cycleTranslations(pair.first, pair.second);
+			Set<IntPair> ideal = cycleTranslations(pair.first, pair.second);
 			edges.removeAll(ideal);
 
-			HashSet elems = new HashSet();
-			Iterator iter = ideal.iterator();
+			HashSet<Integer> elems = new HashSet<Integer>();
+			Iterator<IntPair> iter = ideal.iterator();
 			while( iter.hasNext() )
 			{
-				pair = (IntPair)iter.next();
-				elems.add(new Integer(pair.first));
-				elems.add(new Integer(pair.second));
+				pair = iter.next();
+				elems.add(pair.first);
+				elems.add(pair.second);
 			}
 
 			if( elems.size() >= 3 )

@@ -10,7 +10,7 @@ import java.util.*;
 public class XmlWriter
 {
 	protected PrintWriter out;
-	protected Stack elems;
+	protected Stack<String> elems;
 
 	protected boolean inElement;
 	protected boolean hasIndent;
@@ -145,7 +145,7 @@ public class XmlWriter
 
 	public void endElem()
 	{
-		String name = (String)elems.pop();
+		String name = elems.pop();
 		
 		if( inElement )
 		{
@@ -169,7 +169,7 @@ public class XmlWriter
 	public XmlWriter(PrintWriter out)
 	{
 		this.out = out;
-		elems = new Stack();
+		elems = new Stack<String>();
 		
 		inElement = false;
 	}
