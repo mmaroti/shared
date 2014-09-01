@@ -44,7 +44,7 @@ public class Test {
 	public static final Parser<StringBuffer> LETTERS = new Many<Character, StringBuffer>(
 			LETTER) {
 		@Override
-		public StringBuffer createAccumulator() {
+		public StringBuffer create() {
 			return new StringBuffer();
 		}
 
@@ -54,8 +54,44 @@ public class Test {
 		}
 	};
 
+	public static final Parser<Character> IDENTIFIER_START = new Char(
+			"identifier start") {
+		@Override
+		public boolean test(char head) {
+			return Character.isUnicodeIdentifierStart(head);
+		}
+	};
+
+	public static final Parser<Character> IDENTIFIER_PART = new Char(
+			"identifier part") {
+		@Override
+		public boolean test(char head) {
+			return Character.isUnicodeIdentifierPart(head);
+		}
+	};
+
+	public static final Parser<StringBuffer> IDENTIFIER = new Sequence<Character, StringBuffer>(
+			IDENTIFIER_START) {
+		@Override
+		public Parser<StringBuffer> getSecond(final Character result) {
+			return new Many<Character, StringBuffer>(IDENTIFIER_PART) {
+				@Override
+				public StringBuffer create() {
+					StringBuffer buffer = new StringBuffer();
+					buffer.append(result);
+					return buffer;
+				}
+
+				@Override
+				public void combine(StringBuffer result, Character elem) {
+					result.append(elem);
+				}
+			};
+		}
+	};
+
 	public static void main(String[] args) throws Exception {
 		Parser.Input input = StringList.create("Ab1");
-		System.out.println(LETTERS.parse(input));
+		System.out.println(IDENTIFIER.parse(input));
 	}
 }

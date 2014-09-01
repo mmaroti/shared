@@ -25,7 +25,7 @@ public abstract class Many<ELEM, RESULT> extends Parser<RESULT> {
 		this.elem = elem;
 	}
 
-	public abstract RESULT createAccumulator();
+	public abstract RESULT create();
 
 	public abstract void combine(RESULT result, ELEM elem);
 
@@ -35,7 +35,7 @@ public abstract class Many<ELEM, RESULT> extends Parser<RESULT> {
 			return new Consumption<RESULT>(true) {
 				@Override
 				public Result<RESULT> getResult() throws Error {
-					RESULT accumulator = createAccumulator();
+					RESULT accumulator = create();
 
 					Consumption<ELEM> d = c;
 					Result<ELEM> r;
@@ -52,7 +52,7 @@ public abstract class Many<ELEM, RESULT> extends Parser<RESULT> {
 			return new Consumption<RESULT>(false) {
 				@Override
 				public Result<RESULT> getResult() throws Error {
-					return new Result<RESULT>(createAccumulator(), input);
+					return new Result<RESULT>(create(), input);
 				}
 			};
 		}
