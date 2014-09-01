@@ -141,7 +141,7 @@ public class Room
 	public Wall top 	= new Wall(3.0, 7.0);		// greater than bottom
 	public Wall bottom	= new Wall(0.0, 4.0);
 
-	List components = new ArrayList();
+	List<PathComponent> components = new ArrayList<PathComponent>();
 
 	public void addRoomComponents(Transmitter transmitter, Position position, int reflections)
 	{
@@ -192,10 +192,10 @@ public class Room
 		int m = 0;
 		int a = 0;
 		
-		Iterator iter = components.iterator();
+		Iterator<PathComponent> iter = components.iterator();
 		while( iter.hasNext() )
 		{
-			PathComponent component = (PathComponent)iter.next();
+			PathComponent component = iter.next();
 			
 			if( component.transmitter == master )
 				++m;
@@ -212,7 +212,7 @@ public class Room
 		iter = components.iterator();
 		while( iter.hasNext() )
 		{
-			PathComponent component = (PathComponent)iter.next();
+			PathComponent component = iter.next();
 			
 			if( component.transmitter == master )
 				masterComponents[m++] = component;

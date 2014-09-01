@@ -138,9 +138,9 @@ public class ProductAlgebra implements Algebra
 		}
 	}
 	
-	public List concreteElems()
+	public List<IntArray> concreteElems()
 	{
-		ArrayList list = new ArrayList(size);
+		List<IntArray> list = new ArrayList<IntArray>(size);
 		int[] func = new int[sizes.length];
 		
 		for(int i = 0; i < size; ++i)

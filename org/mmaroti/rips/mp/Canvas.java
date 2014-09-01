@@ -222,10 +222,10 @@ public class Canvas extends java.awt.Canvas
 	{
 		graphics.setColor(Color.RED);
 		
-		Iterator iter = room.components.iterator();
+		Iterator<PathComponent> iter = room.components.iterator();
 		while( iter.hasNext() )
 		{
-			PathComponent component = (PathComponent)iter.next();
+			PathComponent component = iter.next();
 			Point pos = getPoint(component.position);
 			
 //			graphics.fillOval(pos.x-3 , pos.y-3, 7, 7);
@@ -249,8 +249,6 @@ public class Canvas extends java.awt.Canvas
 		
 		return colors[color];
 	}
-
-	HashMap rssiResults = new HashMap();
 
 	public void paintRssi(Graphics graphics, boolean master)
 	{

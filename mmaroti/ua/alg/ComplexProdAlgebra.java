@@ -27,7 +27,7 @@ public class ComplexProdAlgebra
 	protected DecisionDiagram.Node[] nodePair;
 	protected DecisionDiagram.Node[] subNodes;
 
-	protected SoftArrayHashMap unionCache;
+	protected SoftArrayHashMap<DecisionDiagram.Node,DecisionDiagram.Node> unionCache;
 	public DecisionDiagram.Node union(DecisionDiagram.Node a, 
 		DecisionDiagram.Node b)
 	{
@@ -40,8 +40,7 @@ public class ComplexProdAlgebra
 
 		nodePair[0] = a;
 		nodePair[1] = b;
-		DecisionDiagram.Node ret = 
-			(DecisionDiagram.Node)unionCache.get(nodePair);
+		DecisionDiagram.Node ret = unionCache.get(nodePair);
 		if( ret != null )
 			return ret;
 		
@@ -57,7 +56,7 @@ public class ComplexProdAlgebra
 		return ret;
 	}	
 
-	protected SoftArrayHashMap intersectionCache;
+	protected SoftArrayHashMap<DecisionDiagram.Node,DecisionDiagram.Node> intersectionCache;
 	public DecisionDiagram.Node intersection(DecisionDiagram.Node a, 
 		DecisionDiagram.Node b)
 	{
@@ -70,8 +69,7 @@ public class ComplexProdAlgebra
 			
 		nodePair[0] = a;
 		nodePair[1] = b;
-		DecisionDiagram.Node ret = 
-			(DecisionDiagram.Node)intersectionCache.get(nodePair);
+		DecisionDiagram.Node ret = intersectionCache.get(nodePair);
 		if( ret != null )
 			return ret;
 		
@@ -86,7 +84,7 @@ public class ComplexProdAlgebra
 		return ret;
 	}	
 
-	protected SoftHashMap complementCache;
+	protected SoftHashMap<DecisionDiagram.Node,DecisionDiagram.Node> complementCache;
 	public DecisionDiagram.Node complement(DecisionDiagram.Node a)
 	{
 		if( a == emptySet )
@@ -94,8 +92,7 @@ public class ComplexProdAlgebra
 		else if( a == fullSet )
 			return emptySet;
 			
-		DecisionDiagram.Node ret = 
-			(DecisionDiagram.Node)complementCache.get(a);
+		DecisionDiagram.Node ret = complementCache.get(a);
 		if( ret != null )
 			return ret;
 		
@@ -200,10 +197,10 @@ public class ComplexProdAlgebra
 		
 			operation = algebra.operations()[opIndex];
 			nextOp = next.operations[opIndex];
-			valueCache = new SoftArrayHashMap();
+			valueCache = new SoftArrayHashMap<DecisionDiagram.Node,DecisionDiagram.Node>();
 		}
 	
-		protected SoftArrayHashMap valueCache;
+		protected SoftArrayHashMap<DecisionDiagram.Node, DecisionDiagram.Node> valueCache;
 		public DecisionDiagram.Node value(DecisionDiagram.Node[] args)
 		{
 			if( next == null )
@@ -216,8 +213,7 @@ public class ComplexProdAlgebra
 				return fullSet;
 			}
 
-			DecisionDiagram.Node ret = 
-				(DecisionDiagram.Node)valueCache.get(args);
+			DecisionDiagram.Node ret = valueCache.get(args);
 			if( ret != null )
 				return ret;
 
@@ -391,9 +387,9 @@ public class ComplexProdAlgebra
 		nodePair = new DecisionDiagram.Node[2];
 		subNodes = new DecisionDiagram.Node[algebraSize];
 		
-		unionCache = new SoftArrayHashMap();
-		intersectionCache = new SoftArrayHashMap();
-		complementCache = new SoftHashMap();
+		unionCache = new SoftArrayHashMap<DecisionDiagram.Node,DecisionDiagram.Node>();
+		intersectionCache = new SoftArrayHashMap<DecisionDiagram.Node,DecisionDiagram.Node>();
+		complementCache = new SoftHashMap<DecisionDiagram.Node,DecisionDiagram.Node>();
 		
 		for(int i = 0; i < algebraSize; ++i)
 			subNodes[i] = next.emptySet;

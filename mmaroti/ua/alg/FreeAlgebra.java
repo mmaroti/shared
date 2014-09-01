@@ -110,21 +110,21 @@ public class FreeAlgebra implements Algebra
 		return false;
 	}
 
-	public static void removeFactor(List algebras, List generators, 
+	public static void removeFactor(List<Algebra> algebras, List<List<Integer>> generators, 
 		int target)
 	{
 		algebras.remove(target);
 		
-		Iterator iter = generators.iterator();
+		Iterator<List<Integer>> iter = generators.iterator();
 		while( iter.hasNext() )
 		{
-			List function = (List)iter.next();
+			List<Integer> function = iter.next();
 			function.remove(target);
 		}
 	}
 
-	public static void removeRedundantFactors(List algebras, 
-		List generators)
+	public static void removeRedundantFactors(List<Algebra> algebras, 
+		List<List<Integer>> generators)
 	{
 		for(int testSize = 1; testSize <= 5 ; ++testSize )
 		{
@@ -147,28 +147,28 @@ public class FreeAlgebra implements Algebra
 	public Function[] relations() { return algebra.relations(); }
 	public int[] generators() { return generators; }
 
-	protected void Init(List algs, List gens)
+	protected void Init(List<Algebra> algs, List<List<Integer>> gens)
 	{
 		removeRedundantFactors(algs, gens);
 		algebra = new SubProdAlgebra(algs, gens);
 
 		generators = new int[gens.size()];
-		Iterator iter = gens.iterator();
+		Iterator<List<Integer>> iter = gens.iterator();
 		for(int i = 0; i < generators.length; ++i)
-			generators[i] = algebra.toAbstractElem((List)iter.next());
+			generators[i] = algebra.toAbstractElem(iter.next());
 	}
 
-	protected void Init(List algs, int size)
+	protected void Init(List<Algebra> algs, int size)
 	{
-		ArrayList algebras = new ArrayList();
-		ArrayList generators = new ArrayList();
+		List<Algebra> algebras = new ArrayList<Algebra>();
+		List<List<Integer>> generators = new ArrayList<List<Integer>>();
 		for(int i = 0; i < size; ++i)
-			generators.add(new ArrayList());
+			generators.add(new ArrayList<Integer>());
 
-		Iterator iter = algs.iterator();
+		Iterator<Algebra> iter = algs.iterator();
 		while( iter.hasNext() )
 		{
-			Algebra algebra = (Algebra)iter.next();
+			Algebra algebra = iter.next();
 			
 			SquareArgument arg = new SquareArgument(size, algebra.size());
 			int[] args = arg.args();
@@ -183,8 +183,8 @@ public class FreeAlgebra implements Algebra
 					// add the generator
 					int b = alg.toAbstractElem(args[i]);
 
-					List function = (List)generators.get(i);
-					function.add(new Integer(b));
+					List<Integer> function = generators.get(i);
+					function.add(b);
 				}
 
 				alg.generate();
@@ -202,7 +202,7 @@ public class FreeAlgebra implements Algebra
 		Init(algebras, generators);
 	}
 
-	public FreeAlgebra(List algebras, int size) 
+	public FreeAlgebra(List<Algebra> algebras, int size) 
 	{
 		if( algebras.isEmpty() || size < 0 )
 			throw new IllegalArgumentException();
@@ -215,13 +215,13 @@ public class FreeAlgebra implements Algebra
 		if( size < 0 )
 			throw new IllegalArgumentException();
 	
-		LinkedList algebras = new LinkedList();
+		List<Algebra> algebras = new LinkedList<Algebra>();
 		algebras.add(algebra);
 		
 		Init(algebras, size);
 	}
 	
-	public FreeAlgebra(List algebras, List generators)
+	public FreeAlgebra(List<Algebra> algebras, List<List<Integer>> generators)
 	{
 		Init(algebras, generators);
 	}

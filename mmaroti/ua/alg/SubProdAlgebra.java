@@ -60,17 +60,17 @@ public class SubProdAlgebra implements Algebra
 		return index;
 	}
 
-	public int toAbstractElem(List func)
+	public int toAbstractElem(List<Integer> func)
 	{
 		if( func.size() != algebras.length )
 			throw new IllegalArgumentException();
 		
 		int index = 0;
 		DecisionDiagram.Node[] subNodes = universe.subNodes;
-		Iterator iter = func.iterator();
+		Iterator<Integer> iter = func.iterator();
 		while( iter.hasNext() )
 		{
-			int a = ((Integer)iter.next()).intValue();
+			int a = iter.next();
 			
 			int j = a;
 			while( --j >= 0 )
@@ -244,18 +244,18 @@ public class SubProdAlgebra implements Algebra
 		InitOpRel();
 	}
 	
-	public SubProdAlgebra(List algebras, List generators)
+	public SubProdAlgebra(List<Algebra> algebras, List<List<Integer>> generators)
 	{
-		this.algebras = (Algebra[])algebras.toArray(new Algebra[0]);
+		this.algebras = algebras.toArray(new Algebra[algebras.size()]);
 		
 		ComplexProdAlgebra complex = new ComplexProdAlgebra(algebras);
 		universe = complex.emptySet();
 		
-		Iterator iter = generators.iterator();
+		Iterator<List<Integer>> iter = generators.iterator();
 		while( iter.hasNext() )
 		{
 			DecisionDiagram.Node spike = complex.spike(
-				Arrays2.toIntArray((List)iter.next()));
+				Arrays2.toIntArray((List<Integer>)iter.next()));
 			universe = complex.union(universe, spike);
 		}
 		

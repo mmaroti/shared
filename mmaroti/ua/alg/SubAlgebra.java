@@ -9,8 +9,8 @@ import java.util.*;
 public class SubAlgebra implements Algebra
 {
 	protected Algebra algebra;
-	protected HashMap abstractMap;
-	protected ArrayList concreteMap;
+	protected Map<Integer, Integer> abstractMap;
+	protected List<Integer> concreteMap;
 
 	protected Op[] operations;
 	public Function[] operations() { return operations; }
@@ -86,13 +86,13 @@ public class SubAlgebra implements Algebra
 		return ((Integer)concreteMap.get(a)).intValue();
 	}
 	
-	public List concreteElems()
+	public List<Integer> concreteElems()
 	{
 		int size = size();
-		ArrayList list = new ArrayList(size);
+		List<Integer> list = new ArrayList<Integer>(size);
 		
 		for(int i = 0; i < size; ++i)
-			list.add(new Integer(toConcreteElem(i)));
+			list.add(toConcreteElem(i));
 			
 		return list;
 	}
@@ -129,20 +129,20 @@ public class SubAlgebra implements Algebra
 	}
 
 	public boolean addHomomorphismGenerator(int concreteElem,
-		int targetElem, ArrayList map)
+		int targetElem, List<Integer> map)
 	{
 		int a = toAbstractElem(concreteElem);
 		
 		if( a == map.size() )
 		{
-			map.add(new Integer(targetElem));
+			map.add(targetElem);
 			return true;
 		}
 
-		return ((Integer)map.get(a)).intValue() == targetElem;
+		return map.get(a) == targetElem;
 	}
 
-	public boolean generateHomomorphism(ArrayList map, Algebra target)
+	public boolean generateHomomorphism(List<Integer> map, Algebra target)
 	{
 		int radius = -2;
 		while( ++radius < size() )
@@ -195,8 +195,8 @@ public class SubAlgebra implements Algebra
 	public SubAlgebra(Algebra algebra)
 	{
 		this.algebra = algebra;
-		abstractMap = new HashMap();
-		concreteMap = new ArrayList();
+		abstractMap = new HashMap<Integer, Integer>();
+		concreteMap = new ArrayList<Integer>();
 
 		Function[] funcs = algebra.operations();
 		operations = new Op[funcs.length];
