@@ -95,11 +95,11 @@ public class IntArrayBuffer implements IntArray
 		array[2] = c;
 	}
 	
-	public IntArrayBuffer(Collection c)
+	public IntArrayBuffer(Collection<Integer> c)
 	{
 		array = new int[c.size()];
-		Iterator iter = c.iterator();
+		Iterator<Integer> iter = c.iterator();
 		for(int i = 0; ; ++i)
-			array[i] = ((Integer)iter.next()).intValue();
+			array[i] = iter.next();
 	}
 }

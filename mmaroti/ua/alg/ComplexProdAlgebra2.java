@@ -79,7 +79,7 @@ public class ComplexProdAlgebra2
 
 	protected Node[] subNodes;
 
-	protected HashMap<ShallowPair,Node> unionCache;
+	protected HashMap<ShallowPair<Node,Node>,Node> unionCache;
 	public Node union(Node a, Node b)
 	{
 		if( a == emptySet || a == b )
@@ -89,7 +89,7 @@ public class ComplexProdAlgebra2
 		else if( a == fullSet || b == fullSet )
 			return fullSet;
 
-		ShallowPair pair = new ShallowPair(a, b);
+		ShallowPair<Node,Node> pair = new ShallowPair<Node,Node>(a, b);
 		Node ret = unionCache.get(pair);
 		if( ret != null )
 			return ret;
@@ -102,7 +102,7 @@ public class ComplexProdAlgebra2
 		return ret;
 	}	
 
-	protected HashMap<ShallowPair,Node> intersectionCache;
+	protected HashMap<ShallowPair<Node,Node>,Node> intersectionCache;
 	public Node intersection(Node a, Node b)
 	{
 		if( a == fullSet || a == b )
@@ -112,7 +112,7 @@ public class ComplexProdAlgebra2
 		else if( a == emptySet || b == emptySet )
 			return emptySet;
 			
-		ShallowPair pair = new ShallowPair(a, b);
+		ShallowPair<Node,Node> pair = new ShallowPair<Node,Node>(a, b);
 		Node ret = intersectionCache.get(pair);
 		if( ret != null )
 			return ret;
@@ -236,10 +236,10 @@ public class ComplexProdAlgebra2
 		
 			operation = algebra.operations()[opIndex];
 			nextOp = next.operations[opIndex];
-			valueCache = new HashMap<ShallowArray,Node>();
+			valueCache = new HashMap<ShallowArray<Node>,Node>();
 		}
 	
-		protected HashMap<ShallowArray,Node> valueCache;
+		protected HashMap<ShallowArray<Node>,Node> valueCache;
 		public Node value(Node[] args)
 		{
 			if( next == null )
@@ -252,7 +252,7 @@ public class ComplexProdAlgebra2
 				return fullSet;
 			}
 
-			Node ret = valueCache.get(new ShallowArray(args));
+			Node ret = valueCache.get(new ShallowArray<Node>(args));
 			if( ret != null )
 				return ret;
 
@@ -274,7 +274,7 @@ public class ComplexProdAlgebra2
 			while( next() );
 			
 			ret = getRepresentative(subNodes);
-			valueCache.put(new ShallowArray(args.clone()), ret);
+			valueCache.put(new ShallowArray<Node>(args.clone()), ret);
 		
 			return ret;
 		}
@@ -422,8 +422,8 @@ public class ComplexProdAlgebra2
 		representatives = new HashMap<Node,Node>();
 		subNodes = new Node[algebraSize];
 		
-		unionCache = new HashMap<ShallowPair,Node>();
-		intersectionCache = new HashMap<ShallowPair,Node>();
+		unionCache = new HashMap<ShallowPair<Node,Node>,Node>();
+		intersectionCache = new HashMap<ShallowPair<Node,Node>,Node>();
 		complementCache = new HashMap<Node,Node>();
 		
 		for(int i = 0; i < algebraSize; ++i)

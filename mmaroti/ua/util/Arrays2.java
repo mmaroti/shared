@@ -64,14 +64,14 @@ public class Arrays2
 		return hash0;
 	}
 	
-	public static int[] toIntArray(Collection collection)
+	public static int[] toIntArray(Collection<Integer> collection)
 	{
 		int[] ret = new int[collection.size()];
 		int index = 0;
 		
-		Iterator iter = collection.iterator();
+		Iterator<Integer> iter = collection.iterator();
 		while( iter.hasNext() )
-			ret[index++] = ((Integer)iter.next()).intValue();
+			ret[index++] = iter.next();
 		
 		return ret;
 	}
