@@ -556,7 +556,7 @@ public class GraphPolyApplet extends Applet
 			solver.printValues(output);
 
 			time = System.currentTimeMillis() - time;
-			output.println("execution time: " + (0.0001 * time) + " seconds");
+			output.println("execution time: " + (0.001 * time) + " seconds");
 			
 			return buffer.toString();
 		}
