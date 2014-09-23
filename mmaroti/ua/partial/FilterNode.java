@@ -62,7 +62,7 @@ public class FilterNode extends Node
 				Equivalence ac = FactorAlgebra.congruence(algebra, a, c);
 				Equivalence bc = FactorAlgebra.congruence(algebra, b, c);
 				
-				if( ! Equivalence.meet(ac, bc).isDiagonalRelation() )
+				if( ! Equivalence.meet(ac, bc).isZero() )
 					return false;
 				
 				if( ! isSubdirectProductOfTournaments(new AlgebraBuffer(new FactorAlgebra(algebra, ac))) )

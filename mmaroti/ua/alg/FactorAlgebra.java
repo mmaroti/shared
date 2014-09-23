@@ -104,7 +104,7 @@ public class FactorAlgebra implements Algebra
 	{
 		int size = algebra.size();
 		Function[] operations = algebra.operations();
-		Equivalence equ = Equivalence.diagonalRelation(size);
+		Equivalence equ = Equivalence.zero(size);
 
 		Iterator<IntPair> iter = pairs.iterator();
 		while( iter.hasNext() )
@@ -158,7 +158,7 @@ public class FactorAlgebra implements Algebra
 	public static Equivalence getMonolith(Algebra algebra)
 	{
 		int size = algebra.size();
-		Equivalence cong = Equivalence.fullRelation(size);
+		Equivalence cong = Equivalence.one(size);
 		
 		for(int i = 0; i < size-1; ++i)
 			for(int j = i+1; j < size; ++j)

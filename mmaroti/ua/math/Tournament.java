@@ -231,7 +231,7 @@ public class Tournament implements Algebra
 
 	public Equivalence closure(Set<IntPair> edges)
 	{
-		Equivalence equiv = Equivalence.diagonalRelation(size);
+		Equivalence equiv = Equivalence.zero(size);
 		
 		Iterator<IntPair> iter = edges.iterator();
 		while( iter.hasNext() )
