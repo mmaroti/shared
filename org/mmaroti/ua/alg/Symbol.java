@@ -28,8 +28,7 @@ public class Symbol {
 	/**
 	 * Creates a new symbol with the given parameters.
 	 */
-	public Symbol(int index, String name, int arity, int priority,
-			int properties) {
+	public Symbol(String name, int arity, int priority, int properties) {
 		if (arity < 0)
 			throw new IllegalArgumentException("The arity must be nonnegative");
 
@@ -37,7 +36,6 @@ public class Symbol {
 		this.arity = arity;
 		this.priority = priority;
 		this.properties = properties;
-		this.index = index;
 	}
 
 	protected String name;
@@ -143,28 +141,15 @@ public class Symbol {
 		return (properties & property) == property;
 	}
 
-	/**
-	 * The index of a symbol is used to quickly find corresponding operations of
-	 * different signatures. Also, variables in terms are differentiated by this
-	 * index field
-	 */
-	protected int index;
-
-	public int getIndex() {
-		return index;
-	}
-
 	public boolean equals(Object object) {
 		Symbol s = (Symbol) object;
 
 		return s.name.equals(name) && s.arity == arity
-				&& s.priority == priority && s.properties == properties
-				&& s.index == index;
+				&& s.priority == priority && s.properties == properties;
 	}
 
 	public int hashCode() {
-		return name.hashCode() + 7 * arity + 17 * priority + 37 * properties
-				+ index;
+		return name.hashCode() + 7 * arity + 17 * priority + 37 * properties;
 	}
 
 	/**
@@ -181,7 +166,7 @@ public class Symbol {
 		if (index < 0)
 			throw new IllegalArgumentException();
 
-		return new Symbol(index, "x", 0, 0, Symbol.VARIABLE);
+		return new Symbol("x" + index, 0, 0, Symbol.VARIABLE);
 	}
 
 	/**
@@ -198,7 +183,7 @@ public class Symbol {
 			if (!symbol.isVariable())
 				throw new IllegalArgumentException("this is not a variable");
 
-			return symbol.index;
+			return Integer.parseInt(symbol.name.substring(1));
 		}
 
 		public Object getElement(int index) {
@@ -215,7 +200,7 @@ public class Symbol {
 
 		public String toString(Object element) {
 			Symbol symbol = (Symbol) element;
-			return symbol.name + symbol.index;
+			return symbol.name;
 		}
 
 		public Object parse(String string) {

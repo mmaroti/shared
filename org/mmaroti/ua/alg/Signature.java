@@ -20,21 +20,15 @@ package org.mmaroti.ua.alg;
 
 /**
  * A class representing the signature of structures.
- *  
+ * 
  * @author mmaroti@math.vanderbilt.edu
  */
-public class Signature
-{
+public class Signature {
 	/**
 	 * Creates a signature whose operation and relation symbols are the
 	 * specified symbols. Either of the lists can be <code>null</code>.
 	 */
-	public Signature(Symbol[] operations)
-	{
-		for(int i = 0; i < operations.length; ++i)
-			if( operations[i].index != i )
-				throw new IllegalArgumentException("the operation symbols are not properly indexed");
-		
+	public Signature(Symbol[] operations) {
 		this.operations = operations;
 		this.relations = null;
 	}
@@ -42,58 +36,46 @@ public class Signature
 	/**
 	 * Constructs the signature object of an algebra
 	 */
-	public Signature(Algebra algebra)
-	{
+	public Signature(Algebra algebra) {
 		operations = new Symbol[algebra.getOperations().length];
-		for(int i = 0; i < operations.length; ++i)
+		for (int i = 0; i < operations.length; ++i)
 			operations[i] = algebra.getOperations()[i].getSymbol();
-		
+
 		relations = null;
 	}
-	
+
 	/**
 	 * Creates a signature whose operation and relation symbols are the
 	 * specified symbols. Either of the lists can be <code>null</code>.
 	 */
-	public Signature(Symbol[] operations, Symbol[] relations)
-	{
-		for(int i = 0; i < operations.length; ++i)
-			if( operations[i].index != i )
-				throw new IllegalArgumentException("the operation symbols are not properly indexed");
-		
+	public Signature(Symbol[] operations, Symbol[] relations) {
 		this.operations = operations;
 		this.relations = relations;
 	}
-	
+
 	protected Symbol[] operations;
-	
+
 	/**
 	 * Returns the list of operation symbols of this signature.
 	 */
-	public Symbol[] getOperations()
-	{
+	public Symbol[] getOperations() {
 		return operations;
 	}
-	
+
 	protected Symbol[] relations;
-	
+
 	/**
 	 * Returns the list of relation symbols of this signature.
 	 */
-	public Symbol[] getRelations()
-	{
+	public Symbol[] getRelations() {
 		return relations;
 	}
-	
-	public boolean equals(Object other)
-	{
-		Signature s = (Signature)other;
-		return operations.equals(s.operations)
-			&& relations.equals(s.relations);
+
+	public boolean equals(Object other) {
+		Signature s = (Signature) other;
+		return operations.equals(s.operations) && relations.equals(s.relations);
 	}
 
-	public static Signature GROUPOID = new Signature(new Symbol[]
-	{
-		new Symbol(0, "*", 2, 0, Symbol.INFIX | Symbol.LEFT_ASSOCIATIVE),
-	}); 
+	public static Signature GROUPOID = new Signature(new Symbol[] { new Symbol(
+			"*", 2, 0, Symbol.INFIX | Symbol.LEFT_ASSOCIATIVE), });
 }

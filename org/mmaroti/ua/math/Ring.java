@@ -26,7 +26,7 @@ import org.mmaroti.ua.alg.Symbol;
  * multiplication distributes over addition.
  */
 public interface Ring {
-	public static Symbol PLUS = new Symbol(0, "+", 2, 0, Symbol.INFIX
+	public static Symbol PLUS = new Symbol("+", 2, 0, Symbol.INFIX
 			| Symbol.LEFT_ASSOCIATIVE);
 
 	/**
@@ -39,7 +39,7 @@ public interface Ring {
 	 */
 	public abstract int sum(int a, int b);
 
-	public static Symbol NEG = new Symbol(1, "-", 1, 1, Symbol.INFIX);
+	public static Symbol NEG = new Symbol("-", 1, 1, Symbol.INFIX);
 
 	/**
 	 * Returns the additive inverse of an element.
@@ -51,7 +51,7 @@ public interface Ring {
 	 */
 	public abstract int negative(int a);
 
-	public static Symbol ZERO = new Symbol(2, "0", 0, 0, 0);
+	public static Symbol ZERO = new Symbol("0", 0, 0, 0);
 
 	/**
 	 * Returns the unit element of the field as an object.
@@ -63,7 +63,7 @@ public interface Ring {
 	 */
 	public abstract int zero();
 
-	public static Symbol PROD = new Symbol(3, "*", 2, 10, Symbol.INFIX
+	public static Symbol PROD = new Symbol("*", 2, 10, Symbol.INFIX
 			| Symbol.LEFT_ASSOCIATIVE);
 
 	/**
@@ -76,7 +76,7 @@ public interface Ring {
 	 */
 	public abstract int product(int a, int b);
 
-	public static Symbol UNIT = new Symbol(4, "1", 0, 0, Symbol.INFIX
+	public static Symbol UNIT = new Symbol("1", 0, 0, Symbol.INFIX
 			| Symbol.LEFT_ASSOCIATIVE);
 
 	/**
