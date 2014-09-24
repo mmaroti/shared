@@ -18,111 +18,211 @@
 
 package org.mmaroti.ua.math;
 
-import org.mmaroti.ua.set.*;
+import org.mmaroti.ua.alg.*;
+
 import java.math.BigInteger;
 
 /**
  * This class represents the ring of integers.
  */
-public class Integers extends Universe implements Ring
-{
-	private SubUniverse integers = new SubUniverse(Objects.INSTANCE);
-
-	public int getIndex(Object a)
-	{
-		return integers.getIndex(integers.add(a));
-	}
-
-	public Object getElement(int a)
-	{
-		if( a < 0 || a >= integers.getSize() )
-			throw new IllegalArgumentException("this index was never assigned to an" +				" integer from this class");
-		
-		return integers.getElement(a);
-	}
-	
-	public int getSize()
-	{
-		throw new UnsupportedOperationException();
-	}
-	
+public class Integers extends Algebra implements Ring {
 	/**
-	 * Constructs the field of reals.
+	 * This method always throws an exception, because the integers cannot be
+	 * enumerated.
+	 * 
+	 * @throws UnsupportedOperationException
 	 */
-	public Integers()
-	{
+	public int getSize() {
+		throw new UnsupportedOperationException(
+				"the integers are not enumerable");
 	}
 
-	public int sum(int a, int b)
-	{
-		return getIndex(sum(getElement(a), getElement(b)));
+	/**
+	 * This method always throws an {@link UnsupportedOperationException}
+	 * exception.
+	 * 
+	 * @see #getSize()
+	 */
+	public int getIndex(Object element) {
+		throw new UnsupportedOperationException(
+				"the integers are not enumerable");
 	}
 
-	public int negative(int a)
-	{
-		return getIndex(negative(getElement(a)));
+	/**
+	 * This method always throws an {@link UnsupportedOperationException}
+	 * exception, because the elements of term algebras are not enumerated.
+	 * 
+	 * @see #getSize()
+	 */
+	public Object getElement(int index) {
+		throw new UnsupportedOperationException(
+				"the integers are not enumerable");
 	}
 
-	public int zero()
-	{
-		return getIndex(zeroElement());
+	public boolean areEquals(Object a, Object b) {
+		return a.equals(b);
 	}
 
-	public int product(int a, int b)
-	{
-		return getIndex(product(getElement(a), getElement(b)));
-	}
-
-	public int unit()
-	{
-		return getIndex(unitElement());
-	}
-
-	public Object sum(Object a, Object b)
-	{
-		return ((BigInteger)a).add((BigInteger)b);
-	}
-
-	public Object negative(Object a)
-	{
-		return ((BigInteger)a).negate();
-	}
-
-	public Object zeroElement()
-	{
-		return BigInteger.ZERO;
-	}
-
-	public Object product(Object a, Object b)
-	{
-		return ((BigInteger)a).multiply((BigInteger)b);
-	}
-
-	public Object unitElement()
-	{
-		return BigInteger.ONE;
-	}
-
-	public boolean areEquals(Object elem1, Object elem2)
-	{
-		return elem1.equals(elem2);
-	}
-
-	public int hashCode(Object element)
-	{
+	public int hashCode(Object element) {
 		return element.hashCode();
 	}
 
-	public String toString(Object element)
-	{
+	public String toString(Object element) {
 		return element.toString();
 	}
 
-	public Object parse(String string)
-	{
+	public Integers() {
+	}
+
+	public int sum(int a, int b) {
+		return getIndex(sum(getElement(a), getElement(b)));
+	}
+
+	public int negative(int a) {
+		return getIndex(negative(getElement(a)));
+	}
+
+	public int zero() {
+		return getIndex(zeroElement());
+	}
+
+	public int product(int a, int b) {
+		return getIndex(product(getElement(a), getElement(b)));
+	}
+
+	public int unit() {
+		return getIndex(unitElement());
+	}
+
+	public Object sum(Object a, Object b) {
+		return ((BigInteger) a).add((BigInteger) b);
+	}
+
+	public Object negative(Object a) {
+		return ((BigInteger) a).negate();
+	}
+
+	public Object zeroElement() {
+		return BigInteger.ZERO;
+	}
+
+	public Object product(Object a, Object b) {
+		return ((BigInteger) a).multiply((BigInteger) b);
+	}
+
+	public Object unitElement() {
+		return BigInteger.ONE;
+	}
+
+	public Object parse(String string) {
 		string = string.trim();
-	
-		long d = Long.parseLong(string);
-		return BigInteger.valueOf(d);
+		BigInteger a = new BigInteger(string);
+
+		if (a.toString().equals(string))
+			return a;
+		else
+			throw new IllegalArgumentException("this is not a valid integer");
+	}
+
+	Operation[] operations = new Operation[] { new Operation() {
+		public Symbol getSymbol() {
+			return PLUS;
+		}
+
+		public int getSize() {
+			return getSize();
+		}
+
+		public int getValue(int[] args) {
+			assert (args.length == 2);
+			return sum(args[0], args[1]);
+		}
+
+		public Object getValue(Object[] args) {
+			assert (args.length == 2);
+			return sum(args[0], args[1]);
+		}
+	}, new Operation() {
+		public Symbol getSymbol() {
+			return NEG;
+		}
+
+		public int getSize() {
+			return getSize();
+		}
+
+		public int getValue(int[] args) {
+			assert (args.length == 1);
+			return negative(args[0]);
+		}
+
+		public Object getValue(Object[] args) {
+			assert (args.length == 1);
+			return negative(args[0]);
+		}
+	}, new Operation() {
+		public Symbol getSymbol() {
+			return ZERO;
+		}
+
+		public int getSize() {
+			return getSize();
+		}
+
+		public int getValue(int[] args) {
+			assert (args.length == 0);
+			return zero();
+		}
+
+		public Object getValue(Object[] args) {
+			assert (args.length == 0);
+			return zeroElement();
+		}
+	}, new Operation() {
+		public Symbol getSymbol() {
+			return PROD;
+		}
+
+		public int getSize() {
+			return getSize();
+		}
+
+		public int getValue(int[] args) {
+			assert (args.length == 2);
+			return product(args[0], args[1]);
+		}
+
+		public Object getValue(Object[] args) {
+			assert (args.length == 2);
+			return product(args[0], args[1]);
+		}
+	}, new Operation() {
+		public Symbol getSymbol() {
+			return UNIT;
+		}
+
+		public int getSize() {
+			return getSize();
+		}
+
+		public int getValue(int[] args) {
+			assert (args.length == 0);
+			return unit();
+		}
+
+		public Object getValue(Object[] args) {
+			assert (args.length == 0);
+			return unitElement();
+		}
+	} };
+
+	public Operation[] getOperations() {
+		return operations;
+	}
+
+	Relation[] relations = new Relation[] {};
+
+	public Relation[] getRelations() {
+		return relations;
 	}
 }

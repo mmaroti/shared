@@ -29,12 +29,12 @@ import org.mmaroti.ua.set.*;
  * @author mmaroti@math.u-szeged.hu
  */
 public class Evaluation {
-	public Evaluation(TermAlgebra domain, Algebra coDomain) {
-		if (!domain.isCompatible(coDomain))
+	public Evaluation(TermAlgebra domain, Algebra codomain) {
+		if (!domain.isCompatible(codomain))
 			throw new IllegalArgumentException("codomain is not compatible");
 
 		this.domain = domain;
-		this.coDomain = coDomain;
+		this.codomain = codomain;
 		map = new Map(Symbol.VARIABLES);
 	}
 
@@ -47,13 +47,13 @@ public class Evaluation {
 		return domain;
 	}
 
-	protected Algebra coDomain;
+	protected Algebra codomain;
 
 	/**
 	 * Returns the codomain of the homomorphism
 	 */
 	public Algebra getCoDomain() {
-		return coDomain;
+		return codomain;
 	}
 
 	/**
@@ -74,7 +74,7 @@ public class Evaluation {
 
 			// if this is an endomorphism then the identity entries are not
 			// stored
-			if (domain == coDomain)
+			if (domain == codomain)
 				return term;
 
 			throw new IllegalArgumentException(
@@ -87,7 +87,7 @@ public class Evaluation {
 		for (int i = 0; i < args.length; ++i)
 			args[i] = getValue(subterms[i]);
 
-		return coDomain.getOperations()[term.symbol.index].getValue(args);
+		return codomain.getOperations()[term.symbol.index].getValue(args);
 	}
 
 	/**
@@ -96,7 +96,7 @@ public class Evaluation {
 	 * the domain of the specified homomorphism.
 	 */
 	public void compose(Evaluation homomorphism) {
-		if (homomorphism.getDomain() != coDomain)
+		if (homomorphism.getDomain() != codomain)
 			throw new IllegalArgumentException(
 					"the codomain of this homomorphism"
 							+ " and the domain of the specified homomorphism are not the same");
@@ -106,7 +106,7 @@ public class Evaluation {
 			map.setValue(i, homomorphism.getValue((Term) map.getValue(i)));
 
 		// if this is an endomorphism then the identity entries are not stored
-		if (domain == coDomain) {
+		if (domain == codomain) {
 			final Map otherMap = homomorphism.map;
 
 			i = otherMap.getSize();
@@ -117,7 +117,7 @@ public class Evaluation {
 		}
 
 		// update the codomain
-		coDomain = homomorphism.coDomain;
+		codomain = homomorphism.codomain;
 	}
 
 	/**
@@ -134,7 +134,7 @@ public class Evaluation {
 				return true;
 			}
 
-			return coDomain.areEquals(o, target);
+			return codomain.areEquals(o, target);
 		}
 
 		if (source.symbol != target.symbol)

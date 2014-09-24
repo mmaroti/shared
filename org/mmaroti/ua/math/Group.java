@@ -18,13 +18,11 @@
 
 package org.mmaroti.ua.math;
 
-import org.mmaroti.ua.set.*;
-
 /**
  * This is the general interface for groups. We use multiplicative
  * names regardless whether the group is Abelian or not.
  */
-public abstract class Group extends Universe
+public interface Group
 {
 	/**
 	 * Returns the product of the two arguments.

@@ -18,14 +18,17 @@
 
 package org.mmaroti.ua.math;
 
+import org.mmaroti.ua.alg.Symbol;
+
 /**
- * This is the general interface for rings. 
- * The additive structure of a ring is an abelian group,
- * the multiplicative structure is a semigroup,
- * and multiplication distributes over addition.
+ * This is the general interface for rings. The additive structure of a ring is
+ * an Abelian group, the multiplicative structure is a semigroup or monoid, and
+ * multiplication distributes over addition.
  */
-public interface Ring
-{
+public interface Ring {
+	public static Symbol PLUS = new Symbol(0, "+", 2, 0, Symbol.INFIX
+			| Symbol.LEFT_ASSOCIATIVE);
+
 	/**
 	 * Returns the sum of two elements.
 	 */
@@ -35,16 +38,20 @@ public interface Ring
 	 * Returns the sum of two elements.
 	 */
 	public abstract int sum(int a, int b);
-	
+
+	public static Symbol NEG = new Symbol(1, "-", 1, 1, Symbol.INFIX);
+
 	/**
-	 * Returns the inverse of an element.
+	 * Returns the additive inverse of an element.
 	 */
 	public abstract Object negative(Object a);
 
 	/**
-	 * Returns the inverse of an element.
+	 * Returns the additive inverse of an element.
 	 */
 	public abstract int negative(int a);
+
+	public static Symbol ZERO = new Symbol(2, "0", 0, 0, 0);
 
 	/**
 	 * Returns the unit element of the field as an object.
@@ -56,13 +63,29 @@ public interface Ring
 	 */
 	public abstract int zero();
 
+	public static Symbol PROD = new Symbol(3, "*", 2, 10, Symbol.INFIX
+			| Symbol.LEFT_ASSOCIATIVE);
+
 	/**
 	 * Returns the product of two elements.
 	 */
 	public abstract Object product(Object a, Object b);
-	
+
 	/**
 	 * Returns the product of two elements.
 	 */
 	public abstract int product(int a, int b);
+
+	public static Symbol UNIT = new Symbol(4, "1", 0, 0, Symbol.INFIX
+			| Symbol.LEFT_ASSOCIATIVE);
+
+	/**
+	 * Returns the multiplicative unit element if there is one.
+	 */
+	public abstract Object unitElement();
+
+	/**
+	 * Returns the multiplicative unit element if there is one.
+	 */
+	public abstract int unit();
 }

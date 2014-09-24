@@ -18,35 +18,76 @@
 
 package org.mmaroti.ua.alg;
 
-import org.mmaroti.ua.set.Universe;
 import org.mmaroti.ua.util.*;
 import java.util.*;
 
 /**
- * This structure represents the (absolutely free) term algebra over a set. The
- * generator set is given by an indexed set. The elements of the term algebra 
- * are are not enumerated, even if there are only constant operations.
+ * This structure represents the (absolutely free) term algebra over a finite
+ * set of variables. The elements of the term algebra are not enumerated, even
+ * if there are only constant operations.
  * 
  * @author mmaroti@math.u-szeged.hu
  */
-public class TermAlgebra extends Algebra
-{
+public class TermAlgebra extends Algebra {
+	/**
+	 * This method always throws an exception, because the elements are not
+	 * enumerated (even if there are only constant operations).
+	 * 
+	 * @throws UnsupportedOperationException
+	 */
+	public int getSize() {
+		throw new UnsupportedOperationException("all terms are not enumerable");
+	}
+
+	/**
+	 * This method always throws an {@link UnsupportedOperationException}
+	 * exception.
+	 * 
+	 * @see #getSize()
+	 */
+	public int getIndex(Object element) {
+		throw new UnsupportedOperationException("all terms are not enumerable");
+	}
+
+	/**
+	 * This method always throws an {@link UnsupportedOperationException}
+	 * exception, because the elements of term algebras are not enumerated.
+	 * 
+	 * @see #getSize()
+	 */
+	public Object getElement(int index) {
+		throw new UnsupportedOperationException("all terms are not enumerable");
+	}
+
+	public boolean areEquals(Object a, Object b) {
+		return a.equals(b);
+	}
+
+	public int hashCode(Object element) {
+		return element.hashCode();
+	}
+
+	public String toString(Object element) {
+		return element.toString();
+	}
+
+	public Object parse(String string) {
+		return Term.parse(TermAlgebra.this, string);
+	}
+
 	/**
 	 * Constructs an empty term algebra.
 	 */
-	protected TermAlgebra()
-	{
+	protected TermAlgebra() {
 	}
-	
+
 	/**
-	 * Constructs a term algebra with the specified list of operation symbols. 
+	 * Constructs a term algebra with the specified list of operation symbols.
 	 */
-	public TermAlgebra(Signature signature)
-	{
+	public TermAlgebra(Signature signature) {
 		operations = new Op[signature.operations.length];
-		
-		for(int i = 0; i < operations.length; ++i)
-		{
+
+		for (int i = 0; i < operations.length; ++i) {
 			Symbol symbol = signature.operations[i];
 			this.operations[i] = new Op(symbol);
 		}
@@ -54,44 +95,29 @@ public class TermAlgebra extends Algebra
 
 	protected Op[] operations;
 
-	public final Operation[] getOperations()
-	{
+	public final Operation[] getOperations() {
 		return operations;
 	}
 
 	/**
 	 * A basic operation of a term algebra.
 	 */
-	protected class Op extends Operation
-	{
+	protected class Op extends Operation {
 		protected Symbol symbol;
-		
-		public Universe getUniverse()
-		{
-			return universe;
-		}
-		
-		public Symbol getSymbol()
-		{
-			return symbol;
-		}
 
-		/**
-		 * Returns the arity of the operation
-		 */
-		public int getArity()
-		{
-			return symbol.getArity();
+		public Symbol getSymbol() {
+			return symbol;
 		}
 
 		/**
 		 * Constructs a new Operation.
 		 * 
-		 * @param name The name of the operation.
-		 * @param arity The arity of the operation. This must be non-negative.
+		 * @param name
+		 *            The name of the operation.
+		 * @param arity
+		 *            The arity of the operation. This must be non-negative.
 		 */
-		public Op(Symbol symbol)
-		{
+		public Op(Symbol symbol) {
 			this.symbol = symbol;
 		}
 
@@ -101,105 +127,101 @@ public class TermAlgebra extends Algebra
 		 * 
 		 * @see #getSize()
 		 */
-		public int getValue(int[] args)
-		{
+		public int getValue(int[] args) {
 			throw new UnsupportedOperationException(
 					"the elements of a term algebra cannot be enumerated");
 		}
 
 		/**
 		 * Returns the {@link TermAlgebra.Term} whose topmost operation is
-		 * <code>this</code> and arguments are <code>args</code>. We copy
-		 * the passed argument array, so <code>args</code> can be freely used
-		 * after this call.
+		 * <code>this</code> and arguments are <code>args</code>. We copy the
+		 * passed argument array, so <code>args</code> can be freely used after
+		 * this call.
 		 */
-		public Object getValue(Object[] args)
-		{
+		public Object getValue(Object[] args) {
 			Term[] subterms = new Term[symbol.arity];
 
 			System.arraycopy(args, 0, subterms, 0, subterms.length);
-//			for(int i = 0; i < symbol.arity; ++i)
-//				subterms[i] = (Term)args[i];
+			// for(int i = 0; i < symbol.arity; ++i)
+			// subterms[i] = (Term)args[i];
 
 			return new Term(symbol, subterms);
 		}
 
 		/**
 		 * Returns the {@link TermAlgebra.Term}whose topmost operation is
-		 * <code>this</code> and arguments are <code>args</code>. We do NOT
-		 * copy the passed argument array, so <code>args</code> should not be
+		 * <code>this</code> and arguments are <code>args</code>. We do NOT copy
+		 * the passed argument array, so <code>args</code> should not be
 		 * modified after this call.
 		 */
-		public Term getValue(Term[] args)
-		{
+		public Term getValue(Term[] args) {
 			return new Term(symbol, args);
+		}
+
+		public int getSize() {
+			return getSize();
 		}
 	}
 
 	/**
 	 * Returns the variable with the specified index.
 	 */
-	public Term getVariable(int index)
-	{
+	public Term getVariable(int index) {
 		return new Term(Symbol.getVariable(index), new Term[0]);
 	}
-	
+
 	/**
-	 * Returns the list of first <code>count</code> many
-	 * terms in increasing complexity generated by the
-	 * first <code>vars</code> many variables.
+	 * Returns the list of first <code>count</code> many terms in increasing
+	 * complexity generated by the first <code>vars</code> many variables.
 	 */
-	public List<Term> getSmallTerms(int count, int vars)
-	{
+	public List<Term> getSmallTerms(int count, int vars) {
 		ArrayList<Term> terms = new ArrayList<Term>();
-		if( count <= 0 )
+		if (count <= 0)
 			return terms;
 
 		// add the constants
-		for(int i = 0; i < operations.length; ++i)
-			if( operations[i].getArity() == 0 )
-			{
-				terms.add((Term)operations[i].getValue(new Object[0]));
-				if( --count <= 0 )
+		for (int i = 0; i < operations.length; ++i)
+			if (operations[i].getArity() == 0) {
+				terms.add((Term) operations[i].getValue(new Object[0]));
+				if (--count <= 0)
 					return terms;
 			}
-		
+
 		// add the variables
-		for(int i = 0; i < vars; ++i)
-		{
+		for (int i = 0; i < vars; ++i) {
 			terms.add(getVariable(i));
-			if( --count <= 0 )
+			if (--count <= 0)
 				return terms;
 		}
-		
-		if( terms.size()  == vars + operations.length )
-			throw new IllegalArgumentException("There are no non-constant operations");
-		else if( terms.size() == 0 )
-			throw new IllegalArgumentException("There are no constants or variables");
-		
+
+		if (terms.size() == vars + operations.length)
+			throw new IllegalArgumentException(
+					"There are no non-constant operations");
+		else if (terms.size() == 0)
+			throw new IllegalArgumentException(
+					"There are no constants or variables");
+
 		// add more complex terms
 		int level = 0;
-		for(;;)
-		{
+		for (;;) {
 			++level;
-			for(int op = 0; op < operations.length; ++op)
-			{
-				if( operations[op].getArity() == 0 )
+			for (int op = 0; op < operations.length; ++op) {
+				if (operations[op].getArity() == 0)
 					continue;
 
-				Argument args = new SphereArgument(operations[op].getArity(), level);
+				Argument args = new SphereArgument(operations[op].getArity(),
+						level);
 				Object[] objs = new Object[operations[op].getArity()];
-				
-				if( args.reset() ) do
-				{
-					for(int i = 0; i < args.vector.length; ++i)
-						objs[i] = terms.get(args.vector[i]);
-					
-					terms.add((Term)operations[op].getValue(objs));
-					if( --count <= 0 )
-						return terms;
-				}
-				while( args.next() );
+
+				if (args.reset())
+					do {
+						for (int i = 0; i < args.vector.length; ++i)
+							objs[i] = terms.get(args.vector[i]);
+
+						terms.add((Term) operations[op].getValue(objs));
+						if (--count <= 0)
+							return terms;
+					} while (args.next());
 			}
 		}
 	}
@@ -207,80 +229,72 @@ public class TermAlgebra extends Algebra
 	/**
 	 * Returns the identity endomorphism of this term algebra.
 	 */
-	public Evaluation createEndomorphism()
-	{
+	public Evaluation createEndomorphism() {
 		return new Evaluation(this, this);
 	}
 
 	/**
-	 * Creates an endomorphism that maps the specified generator
-	 * to the specified term and maps all other variables to themselves.
-	 */	
-	public Evaluation createEndomorphism(Object generator, Term image)
-	{
+	 * Creates an endomorphism that maps the specified generator to the
+	 * specified term and maps all other variables to themselves.
+	 */
+	public Evaluation createEndomorphism(Object generator, Term image) {
 		Evaluation end = new Evaluation(this, this);
-		
+
 		end.map.put(generator, image);
-		
+
 		return end;
 	}
 
 	/**
-	 * Returns the minimal endomorphism that maps the source term to
-	 * the target term, or <code>null</code> is no such endomorphism
-	 * exists.
+	 * Returns the minimal endomorphism that maps the source term to the target
+	 * term, or <code>null</code> is no such endomorphism exists.
 	 */
-	public Evaluation createExtension(Term source, Term target)
-	{
+	public Evaluation createExtension(Term source, Term target) {
 		Evaluation end = new Evaluation(this, this);
 
-		if( end.extend(source, target) )
+		if (end.extend(source, target))
 			return end;
-			
+
 		return null;
 	}
-	
+
 	/**
-	 * Finds the smallest endomorphism that maps the terms <code>a</code>
-	 * and <code>b</code> to the same term. By smallest we mean that every
-	 * other such endomorphism can be represented as the minimal one composed 
-	 * with an arbitrary endomorphism. If no such endomorphism can collapse 
-	 * the two terms, then <code>null</code> is returned.
+	 * Finds the smallest endomorphism that maps the terms <code>a</code> and
+	 * <code>b</code> to the same term. By smallest we mean that every other
+	 * such endomorphism can be represented as the minimal one composed with an
+	 * arbitrary endomorphism. If no such endomorphism can collapse the two
+	 * terms, then <code>null</code> is returned.
 	 */
-	public Evaluation findCommonExtension(Term a, Term b)
-	{
+	public Evaluation findCommonExtension(Term a, Term b) {
 		Evaluation end = new Evaluation(this, this);
-		
-		if( universe.areEquals(a, b) )
+
+		if (areEquals(a, b))
 			return end;
-		else if( a.isVariable() )
-		{
-			if( b.hasSubterm(a) )
+		else if (a.isVariable()) {
+			if (b.hasSubterm(a))
 				return null;
-			
+
 			end.set(a.symbol, b);
 			return end;
-		}
-		else if( b.isVariable() )
-		{
-			if( a.hasSubterm(b) )
+		} else if (b.isVariable()) {
+			if (a.hasSubterm(b))
 				return null;
-				
+
 			end.set(b.symbol, a);
 			return end;
 		}
-		
-		if( a.symbol != b.symbol )
-			return null;
-		
-		for(int i = 0; i < a.subterms.length; ++i)
-		{
-			Evaluation e = findCommonExtension((Term)end.getValue(a.subterms[i]),
-				(Term)end.getValue(b.subterms[i]));
 
-			if( e == null )
+		if (a.symbol != b.symbol)
+			return null;
+
+		for (int i = 0; i < a.subterms.length; ++i) {
+			Evaluation e = findCommonExtension(
+					(Term) end.getValue(a.subterms[i]),
+					(Term) end.getValue(b.subterms[i]));
+
+			if (e == null)
 				return null;
-			
+
 			end.compose(e);
 		}
 
@@ -288,137 +302,78 @@ public class TermAlgebra extends Algebra
 	}
 
 	/**
-	 * Creates a new endomorphism of this term algebra that renames
-	 * the variables from <code>variables</code> so that the new
-	 * variables are not in the collection <code>avoid</code>.
-	 * The variable collection can contain the same variable multiple times.
-	 *
-	 * @throws IllegalArgumentException if not enough variables are
-	 *  available to rename all variables
+	 * Creates a new endomorphism of this term algebra that renames the
+	 * variables from <code>variables</code> so that the new variables are not
+	 * in the collection <code>avoid</code>. The variable collection can contain
+	 * the same variable multiple times.
+	 * 
+	 * @throws IllegalArgumentException
+	 *             if not enough variables are available to rename all variables
 	 */
-	public Evaluation renameVariables(Collection<Symbol> variables, Collection<Symbol> avoid)
-	{
+	public Evaluation renameVariables(Collection<Symbol> variables,
+			Collection<Symbol> avoid) {
 		Evaluation endomorphism = new Evaluation(this, this);
 
 		Iterator<Symbol> iter = variables.iterator();
 		int i = -1;
-		while( iter.hasNext() )
-		{
+		while (iter.hasNext()) {
 			Symbol var = iter.next();
 
-			if( endomorphism.get(var) != null )
+			if (endomorphism.get(var) != null)
 				continue;
 
 			do
 				++i;
-			while( avoid.contains(Symbol.getVariable(i)) );
-			
-			endomorphism.set(var, getVariable(i)); 
+			while (avoid.contains(Symbol.getVariable(i)));
+
+			endomorphism.set(var, getVariable(i));
 		}
-		
+
 		return endomorphism;
 	}
-	
+
 	/**
-	 * Renames the variables of this term so that it has no common
-	 * variables of the specified collection of variables and
-	 * the indices of the new variables are small.
+	 * Renames the variables of this term so that it has no common variables of
+	 * the specified collection of variables and the indices of the new
+	 * variables are small.
 	 */
-	public Term renameVariables(Term term, Collection<Symbol> avoid)
-	{
+	public Term renameVariables(Term term, Collection<Symbol> avoid) {
 		HashSet<Symbol> variables = new HashSet<Symbol>();
 		term.addMyVariablesTo(variables);
-		
+
 		Evaluation endomorphism = renameVariables(variables, avoid);
-		return (Term)endomorphism.getValue(term);
+		return (Term) endomorphism.getValue(term);
 	}
-	
+
 	/**
 	 * Checks if a term is a specialization of one of the terms in a collection.
-	 * By specialization we mean that there exists an endomorphism of the term algebra
-	 * that maps one of the terms in the collection to the target term.
+	 * By specialization we mean that there exists an endomorphism of the term
+	 * algebra that maps one of the terms in the collection to the target term.
 	 * 
-	 * @param target the term that is checked against all terms in the collection.
-	 * @param terms the collection containing (sample) terms.
-	 * @return <code>true</code> if the specified term is a specialization
-	 * of one of the terms in the collection, <code>false</code> otherwise.
+	 * @param target
+	 *            the term that is checked against all terms in the collection.
+	 * @param terms
+	 *            the collection containing (sample) terms.
+	 * @return <code>true</code> if the specified term is a specialization of
+	 *         one of the terms in the collection, <code>false</code> otherwise.
 	 */
-	public boolean isSpecialization(Term target, Collection<Term> terms)
-	{
+	public boolean isSpecialization(Term target, Collection<Term> terms) {
 		Evaluation e = createEndomorphism();
 
 		Iterator<Term> iter = terms.iterator();
-		while( iter.hasNext() )
-		{
-			if( e.extend(iter.next(), target) )
+		while (iter.hasNext()) {
+			if (e.extend(iter.next(), target))
 				return true;
-				
+
 			e.clear();
 		}
-		
+
 		return false;
 	}
-	
-	class TermUniverse extends Universe
-	{
-		/**
-		 * This method always throws an exception, because the elements are not
-		 * enumerated (even if there are only constant operations).
-		 * 
-		 * @throws UnsupportedOperationException
-		 */
-		public int getSize()
-		{
-			throw new UnsupportedOperationException("all terms are not enumerable");
-		}
-		
-		/**
-		 * This method always throws an {@link UnsupportedOperationException}
-		 * exception.
-		 * 
-		 * @see #getSize()
-		 */
-		public int getIndex(Object element)
-		{
-			throw new UnsupportedOperationException("all terms are not enumerable");
-		}
-		
-		/**
-		 * This method always throws an {@link UnsupportedOperationException}
-		 * exception, because the elements of term algebras are not enumerated.
-		 * 
-		 * @see #getSize()
-		 */
-		public Object getElement(int index)
-		{
-			throw new UnsupportedOperationException("all terms are not enumerable");
-		}
 
-		public boolean areEquals(Object a, Object b)
-		{
-			return a.equals(b);
-		}
+	Relation[] relations = new Relation[0];
 
-		public int hashCode(Object element)
-		{
-			return element.hashCode();
-		}
-
-		public String toString(Object element)
-		{
-			return element.toString();
-		}
-		
-		public Object parse(String string)
-		{
-			return Term.parse(TermAlgebra.this, string);
-		}
-	}
-	
-	protected TermUniverse universe = new TermUniverse();
-	
-	public Universe getUniverse()
-	{
-		return universe;
+	public Relation[] getRelations() {
+		return relations;
 	}
 }

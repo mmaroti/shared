@@ -40,16 +40,6 @@ public interface Field extends Ring
 	public abstract int inverse(int elem);
 	
 	/**
-	 * Returns the multiplicative unit element of the field.
-	 */
-	public abstract Object unitElement();
-	
-	/**
-	 * Returns the multiplicative unit element of the field.
-	 */
-	public abstract int unit();
-	
-	/**
 	 * Returns the character of the field, which is either a
 	 * prime number, or zero if the character is infinite.
 	 */

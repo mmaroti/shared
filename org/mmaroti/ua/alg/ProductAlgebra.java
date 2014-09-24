@@ -387,9 +387,9 @@ public class ProductAlgebra extends Algebra {
 		}
 	}
 
-	@Override
+	Relation[] relations = new Relation[0];
+
 	public Relation[] getRelations() {
-		// TODO Auto-generated method stub
-		return null;
+		return relations;
 	}
 }

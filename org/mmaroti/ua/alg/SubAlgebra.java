@@ -455,7 +455,9 @@ public class SubAlgebra extends Algebra {
 		}
 	}
 
+	Relation[] relations = new Relation[0];
+
 	public Relation[] getRelations() {
-		return null;
+		return relations;
 	}
 }

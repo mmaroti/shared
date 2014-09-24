@@ -84,7 +84,7 @@ public abstract class Operation {
 	/**
 	 * Evaluates a constant operation.
 	 */
-	public int getConstantIndex() {
+	public int getConstant() {
 		return getValue(new int[] {});
 	}
 
