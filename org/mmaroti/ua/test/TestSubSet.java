@@ -18,102 +18,111 @@
 
 package org.mmaroti.ua.test;
 
-import org.mmaroti.ua.set.*;
+import org.mmaroti.ua.alg.*;
 
-public class TestSubSet 
-{
-	public static class MySubSet extends SubUniverse
-	{
-		public MySubSet(Universe base)
-		{
+public class TestSubSet {
+	public static class MySubSet extends SubAlgebra {
+		public MySubSet(Algebra base) {
 			super(base);
 		}
-		
-		public void print()
-		{
+
+		public void print() {
 			System.out.println("elements (size=" + size + "):");
-			for(int i = 0; i < keys.length; ++i)
-			{
-				if( keys[i] == null )
-				{
+			for (int i = 0; i < keys.length; ++i) {
+				if (keys[i] == null) {
 					System.out.println(i + ". empty");
 					continue;
 				}
-				
+
 				int hash = hashCode(keys[i]) & Integer.MAX_VALUE;
 				int slot = hash % table.length;
-				int step = 1 + (hash % (table.length-2));
-				
-				System.out.println(i + ". hash=" + hashCode(keys[i])
-						+ " slot=" + slot + " step=" + step + " object=" + keys[i]);
+				int step = 1 + (hash % (table.length - 2));
+
+				System.out.println(i + ". hash=" + hashCode(keys[i]) + " slot="
+						+ slot + " step=" + step + " object=" + keys[i]);
 			}
-			
+
 			System.out.println("table (emptySlots=" + emptySlots + "):");
-			for(int i = 0; i < table.length; ++i)
+			for (int i = 0; i < table.length; ++i)
 				System.out.println(i + ". " + table[i]);
 
 			System.out.println();
 		}
 	}
-	
-	public static class Element
-	{
+
+	public static class Objects extends Algebra {
+		public int getSize() {
+			throw new IllegalStateException("not enumerable");
+		}
+
+		public int getIndex(Object element) {
+			throw new IllegalStateException("not enumerable");
+		}
+
+		public Object getElement(int index) {
+			throw new IllegalStateException("not enumerable");
+		}
+
+		public Object parse(String string) {
+			return null;
+		}
+
+		public Operation[] getOperations() {
+			return new Operation[0];
+		}
+
+		public Relation[] getRelations() {
+			return new Relation[0];
+		}
+	}
+
+	public static class Element {
 		int value;
 		int id;
 		int hash;
-		
+
 		static int totalInstances = 0;
-		
-		public Element(int v)
-		{
+
+		public Element(int v) {
 			value = v;
 			id = ++totalInstances;
 			hash = value;
 		}
-		
-		public int hashCode()
-		{
+
+		public int hashCode() {
 			return hash;
 		}
-		
-		public boolean equals(Object o)
-		{
-			return value == ((Element)o).value;
+
+		public boolean equals(Object o) {
+			return value == ((Element) o).value;
 		}
-		
-		public String toString()
-		{
+
+		public String toString() {
 			return "(value=" + value + ", hash=" + hash + ", id=" + id + ")";
 		}
 	}
-	
-	MySubSet subset = new MySubSet(Objects.INSTANCE);
-	
-	public void add(int i)
-	{
+
+	MySubSet subset = new MySubSet(new Objects());
+
+	public void add(int i) {
 		System.out.println("adding " + i);
 		subset.add(new Element(i));
 		subset.print();
 	}
-	
-	public void remove(int i)
-	{
+
+	public void remove(int i) {
 		System.out.println("removing " + i);
 		subset.remove(new Element(i));
 		subset.print();
 	}
-	
-	public void resize()
-	{
+
+	public void resize() {
 		System.out.println("resizing");
 		subset.resize(subset.getSize());
 		subset.print();
 	}
-	
-	public void test()
-	{
-		MySubSet subset = new MySubSet(Objects.INSTANCE);
 
+	public void test() {
 		System.out.println("empty:");
 		subset.print();
 
@@ -141,10 +150,9 @@ public class TestSubSet
 		remove(8);
 		add(12);
 		resize();
-}
-	
-	public static void main(String[] _)
-	{
+	}
+
+	public static void main(String[] _) {
 		TestSubSet tss = new TestSubSet();
 		tss.test();
 	}

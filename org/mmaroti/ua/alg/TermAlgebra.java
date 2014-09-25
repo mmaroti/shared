@@ -60,38 +60,33 @@ public class TermAlgebra extends Algebra {
 		throw new UnsupportedOperationException("all terms are not enumerable");
 	}
 
-	public boolean areEquals(Object a, Object b) {
-		return a.equals(b);
-	}
-
-	public int hashCode(Object element) {
-		return element.hashCode();
-	}
-
-	public String toString(Object element) {
-		return element.toString();
-	}
-
-	public Object parse(String string) {
-		return Term.parse(TermAlgebra.this, string);
-	}
-
-	/**
-	 * Constructs an empty term algebra.
-	 */
-	protected TermAlgebra() {
-	}
-
 	/**
 	 * Constructs a term algebra with the specified list of operation symbols.
 	 */
-	public TermAlgebra(Signature signature) {
+	public TermAlgebra(Signature signature, int generators) {
+		if (generators < 0)
+			throw new IllegalArgumentException(
+					"the number of generator cannot be negative");
+
+		this.generators = generators;
 		operations = new Op[signature.operations.length];
 
-		for (int i = 0; i < operations.length; ++i) {
-			Symbol symbol = signature.operations[i];
-			this.operations[i] = new Op(symbol);
+		for (int index = 0; index < operations.length; ++index) {
+			Symbol symbol = signature.operations[index];
+			this.operations[index] = new Op(index, symbol);
 		}
+	}
+
+	protected final int generators;
+
+	public int getVariableCount() {
+		return generators;
+	}
+
+	public Term getVariable(int index) {
+		assert (0 <= index && index < generators);
+
+		return new Term(-index - 1, NOSUBTERM);
 	}
 
 	protected Op[] operations;
@@ -100,16 +95,20 @@ public class TermAlgebra extends Algebra {
 		return operations;
 	}
 
+	private static final Term[] NOSUBTERM = new Term[0];
+
 	public class Term {
 		/**
 		 * Constructs a term whose topmost operation is indexed by
 		 * <code>index</code> and subterms are <code>subterms</code>. If the
-		 * index is non-negative, then this term represents a variable. If it is
-		 * negative, then it is the index of the operation of the underlying
-		 * algebra.
+		 * index is negative, then this term is a variable with index
+		 * <code>-i-1</code>. If the index is non-negative, then it is the index
+		 * of the operation of the underlying algebra.
 		 */
 		protected Term(int index, Term[] subterms) {
-			assert (index < 0 || subterms == null);
+			assert (subterms != null);
+			assert (index < 0 || index < operations.length);
+			assert (index >= 0 || index >= -generators);
 
 			this.index = index;
 			this.subterms = subterms;
@@ -118,13 +117,34 @@ public class TermAlgebra extends Algebra {
 		protected final int index;
 
 		/**
-		 * Returns the topmost operation of this term. If this term is a
-		 * variable then this method returns a non-negative index. Otherwise the
-		 * returned value is <code>-(i+1)</code> which corresponds to the ith
-		 * operation.
+		 * Returns the topmost symbol of this term. If this term is a variable,
+		 * then this method throws an exception.
 		 */
-		public final int getIndex() {
+		public Symbol getSymbol() {
+			assert (index >= 0);
+			return operations[index].getSymbol();
+		}
+
+		public int getSymbolIndex() {
+			assert (index >= 0);
 			return index;
+		}
+
+		/**
+		 * If this term is a variable, then it returns its index, otherwise it
+		 * throws an exception.
+		 */
+		public final int getVariableIndex() {
+			assert (index < 0);
+			return -index - 1;
+		}
+
+		/**
+		 * Returns <code>true</code> if this term is a variable,
+		 * <code>false</code> otherwise.
+		 */
+		public boolean isVariable() {
+			return index < 0;
 		}
 
 		protected final Term[] subterms;
@@ -144,9 +164,8 @@ public class TermAlgebra extends Algebra {
 		public int getLength() {
 			int length = 1;
 
-			if (subterms != null)
-				for (int i = 0; i < subterms.length; ++i)
-					length += subterms[i].getLength();
+			for (int i = 0; i < subterms.length; ++i)
+				length += subterms[i].getLength();
 
 			return length;
 		}
@@ -158,12 +177,11 @@ public class TermAlgebra extends Algebra {
 		public int getDepth() {
 			int depth = 0;
 
-			if (subterms != null)
-				for (int i = 0; i < subterms.length; ++i) {
-					int d = subterms[i].getDepth();
-					if (d > depth)
-						depth = d;
-				}
+			for (int i = 0; i < subterms.length; ++i) {
+				int d = subterms[i].getDepth();
+				if (d > depth)
+					depth = d;
+			}
 
 			return depth + 1;
 		}
@@ -174,8 +192,6 @@ public class TermAlgebra extends Algebra {
 		public int getNumberOfOccurences(Term subterm) {
 			if (subterm == this)
 				return 1;
-			else if (subterms == null)
-				return 0;
 
 			int occurences = 0;
 			for (int i = 0; i < subterms.length; ++i)
@@ -184,18 +200,21 @@ public class TermAlgebra extends Algebra {
 			return occurences;
 		}
 
-		protected String subtermToString(int index) {
-			if (symbol.isBraced(index, subterms[index].symbol))
-				return "(" + subterms[index].toString() + ")";
-			else
-				return subterms[index].toString();
+		protected String subtermToString(int subterm) {
+			if (!subterms[subterm].isVariable()) {
+				if (getSymbol()
+						.isBraced(subterm, subterms[subterm].getSymbol()))
+					return "(" + subterms[subterm].toString() + ")";
+			}
+
+			return subterms[subterm].toString();
 		}
 
 		public String toString() {
-			if (index >= 0)
-				return "x" + index;
+			if (isVariable())
+				return "x" + getVariableIndex();
 
-			Symbol symbol = operations[-index - 1].symbol;
+			Symbol symbol = getSymbol();
 
 			if (symbol.hasProperty(Symbol.INFIX)) {
 				if (subterms.length == 0)
@@ -218,14 +237,6 @@ public class TermAlgebra extends Algebra {
 		}
 
 		/**
-		 * Returns <code>true</code> if this term is a variable,
-		 * <code>false</code> otherwise.
-		 */
-		public boolean isVariable() {
-			return index >= 0;
-		}
-
-		/**
 		 * This function returns the set of variables of this term.
 		 */
 		public Set<Integer> getVariables() {
@@ -238,12 +249,13 @@ public class TermAlgebra extends Algebra {
 		 * This function adds the generators of this term to the set of
 		 * generators stored in <code>set</code>.
 		 */
-		public void addMyVariablesTo(Collection<Integer> collection) {
-			if (!isVariable()) {
+		public void addMyVariablesTo(Set<Integer> collection) {
+			if (isVariable())
+				collection.add(index);
+			else {
 				for (int i = 0; i < subterms.length; ++i)
 					subterms[i].addMyVariablesTo(collection);
-			} else
-				collection.add(index);
+			}
 		}
 
 		/**
@@ -268,11 +280,10 @@ public class TermAlgebra extends Algebra {
 		public int hashCode() {
 			int hashcode = index;
 
-			int i = subterms.length;
-			while (--i >= 0) {
-				hashcode *= 1973;
-				hashcode += subterms[i].hashCode();
-			}
+				for (int i = 0; i < subterms.length; ++i) {
+					hashcode *= 1973;
+					hashcode += subterms[i].hashCode();
+				}
 
 			return hashcode;
 		}
@@ -285,8 +296,7 @@ public class TermAlgebra extends Algebra {
 
 			assert (subterms.length == other.subterms.length);
 
-			int i = subterms.length;
-			while (--i >= 0)
+			for (int i = 0; i < subterms.length; ++i)
 				if (!subterms[i].equals(other.subterms[i]))
 					return false;
 
@@ -294,54 +304,54 @@ public class TermAlgebra extends Algebra {
 		}
 	}
 
-	protected static Parser parser = new Parser();
+	protected Parser parser = new Parser();
 
-	private static boolean bracedLastParse;
+	private boolean bracedLastParse;
 
-	protected static Term parseSubterm(Symbol symbol, int index,
-			TermAlgebra algebra, String substring) {
-		Term term = parse(algebra, substring);
+	private Term parseSubterm(Symbol symbol, int index, String substring) {
+		Term term = parse(substring);
 
-		if (term != null && symbol.isBraced(index, term.symbol)
-				&& !bracedLastParse)
+		if (term != null && !term.isVariable()
+				&& symbol.isBraced(index, term.getSymbol()) && !bracedLastParse)
 			term = null;
 
 		return term;
 	}
 
-	public static Term parse(TermAlgebra algebra, String string) {
+	public Term parse(String string) {
 		string = string.trim();
 
 		if (string.startsWith("(") && string.endsWith(")")) {
-			Term term = parse(algebra, string.substring(1, string.length() - 1));
+			Term term = parse(string.substring(1, string.length() - 1));
 			if (term != null) {
 				bracedLastParse = true;
 				return term;
 			}
 		}
 
-		Symbol symbol = (Symbol) Symbol.VARIABLES.parse(string);
-		if (symbol != null) {
-			bracedLastParse = false;
-			return new Term(symbol, new Term[0]);
+		if (string.startsWith("x")) {
+			int n = Integer.parseInt(string.substring(1));
+			if (string.equals("x" + n)) {
+				bracedLastParse = false;
+				return new Term(-1 - n, null);
+			}
 		}
 
-		Operation[] ops = algebra.getOperations();
-		for (int i = 0; i < ops.length; ++i) {
-			symbol = ops[i].getSymbol();
+		for (int index = 0; index < operations.length; ++index) {
+			Symbol symbol = operations[index].getSymbol();
 			String name = symbol.getName();
 
 			if (symbol.hasProperty(Symbol.INFIX)) {
 				if (symbol.getArity() == 0 && string.equals(name)) {
 					bracedLastParse = false;
-					return new Term(symbol, new Term[0]);
+					return new Term(index, new Term[0]);
 				} else if (symbol.getArity() == 1 && string.startsWith(name)) {
-					Term subterm = parseSubterm(symbol, 0, algebra,
+					Term subterm = parseSubterm(symbol, 0,
 							string.substring(name.length()));
 
 					if (subterm != null) {
 						bracedLastParse = false;
-						return new Term(symbol, new Term[] { subterm });
+						return new Term(index, new Term[] { subterm });
 					}
 				} else if (symbol.getArity() == 2) {
 					int pos = -1;
@@ -350,14 +360,14 @@ public class TermAlgebra extends Algebra {
 						if (pos < 0)
 							break;
 
-						Term subterm1 = parseSubterm(symbol, 0, algebra,
+						Term subterm1 = parseSubterm(symbol, 0,
 								string.substring(0, pos));
-						Term subterm2 = parseSubterm(symbol, 1, algebra,
+						Term subterm2 = parseSubterm(symbol, 1,
 								string.substring(pos + name.length()));
 
 						if (subterm1 != null && subterm2 != null) {
 							bracedLastParse = false;
-							return new Term(symbol, new Term[] { subterm1,
+							return new Term(index, new Term[] { subterm1,
 									subterm2 });
 						}
 					}
@@ -372,11 +382,11 @@ public class TermAlgebra extends Algebra {
 
 					int j = subterms.length;
 					while (--j >= 0)
-						if ((subterms[j] = parse(algebra, substrings[j])) == null)
+						if ((subterms[j] = parse(substrings[j])) == null)
 							break;
 
 					if (j < 0)
-						return new Term(symbol, subterms);
+						return new Term(index, subterms);
 				}
 			}
 		}
@@ -407,7 +417,7 @@ public class TermAlgebra extends Algebra {
 		 * @param arity
 		 *            The arity of the operation. This must be non-negative.
 		 */
-		public Op(Symbol symbol, int index) {
+		public Op(int index, Symbol symbol) {
 			this.symbol = symbol;
 			this.index = index;
 		}
@@ -452,15 +462,6 @@ public class TermAlgebra extends Algebra {
 		public int getSize() {
 			return getSize();
 		}
-	}
-
-	/**
-	 * Returns the variable with the specified index.
-	 */
-	public Term getVariable(int index) {
-		assert (index >= 0);
-
-		return new Term(index, null);
 	}
 
 	/**
@@ -530,10 +531,10 @@ public class TermAlgebra extends Algebra {
 	 * Creates an endomorphism that maps the specified generator to the
 	 * specified term and maps all other variables to themselves.
 	 */
-	public Evaluation createEndomorphism(Object generator, Term image) {
+	public Evaluation createEndomorphism(int index, Term image) {
 		Evaluation end = new Evaluation(this, this);
 
-		end.map.put(generator, image);
+		end.set(index, image);
 
 		return end;
 	}
@@ -567,17 +568,17 @@ public class TermAlgebra extends Algebra {
 			if (b.hasSubterm(a))
 				return null;
 
-			end.set(a.symbol, b);
+			end.set(a.getVariableIndex(), b);
 			return end;
 		} else if (b.isVariable()) {
 			if (a.hasSubterm(b))
 				return null;
 
-			end.set(b.symbol, a);
+			end.set(b.getVariableIndex(), a);
 			return end;
 		}
 
-		if (a.symbol != b.symbol)
+		if (a.getSymbolIndex() != b.getSymbolIndex())
 			return null;
 
 		for (int i = 0; i < a.subterms.length; ++i) {
@@ -603,21 +604,23 @@ public class TermAlgebra extends Algebra {
 	 * @throws IllegalArgumentException
 	 *             if not enough variables are available to rename all variables
 	 */
-	public Evaluation renameVariables(Collection<Symbol> variables,
-			Collection<Symbol> avoid) {
+	public Evaluation renameVariables(Collection<Integer> variables,
+			Collection<Integer> avoid) {
 		Evaluation endomorphism = new Evaluation(this, this);
 
-		Iterator<Symbol> iter = variables.iterator();
-		int i = -1;
+		Iterator<Integer> iter = variables.iterator();
+		int i = 0;
 		while (iter.hasNext()) {
-			Symbol var = iter.next();
+			int var = iter.next();
 
 			if (endomorphism.get(var) != null)
 				continue;
 
-			do
+			while (avoid.contains(i))
 				++i;
-			while (avoid.contains(Symbol.getVariable(i)));
+
+			if (i >= generators)
+				throw new IllegalArgumentException("not enough generators");
 
 			endomorphism.set(var, getVariable(i));
 		}
@@ -630,8 +633,8 @@ public class TermAlgebra extends Algebra {
 	 * the specified collection of variables and the indices of the new
 	 * variables are small.
 	 */
-	public Term renameVariables(Term term, Collection<Symbol> avoid) {
-		HashSet<Symbol> variables = new HashSet<Symbol>();
+	public Term renameVariables(Term term, Collection<Integer> avoid) {
+		HashSet<Integer> variables = new HashSet<Integer>();
 		term.addMyVariablesTo(variables);
 
 		Evaluation endomorphism = renameVariables(variables, avoid);

@@ -87,7 +87,9 @@ public abstract class Algebra {
 	 * @return <code>true</code> if the two elements are equal,
 	 *         <code>false</code> otherwise
 	 */
-	public abstract boolean areEquals(Object elem1, Object elem2);
+	public boolean areEquals(Object elem1, Object elem2) {
+		return elem1.equals(elem2);
+	}
 
 	/**
 	 * Returns a hash code for the given element. Equal elements must return the
@@ -97,7 +99,9 @@ public abstract class Algebra {
 	 *            the element
 	 * @return the hash code of the element
 	 */
-	public abstract int hashCode(Object element);
+	public int hashCode(Object element) {
+		return element.hashCode();
+	}
 
 	/**
 	 * Formats the element as a string to be displayed on screen.
@@ -106,7 +110,9 @@ public abstract class Algebra {
 	 *            the element to be formatted
 	 * @return the string representation of the element
 	 */
-	public abstract String toString(Object element);
+	public String toString(Object element) {
+		return element.toString();
+	}
 
 	/**
 	 * Converts the string representation of an element into an element of the

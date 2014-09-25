@@ -23,7 +23,7 @@ import org.mmaroti.ua.alg.*;
 public class ResiduatedLattices
 {
 	static public TermAlgebra terms;
-	static public Term[] vars;
+	static public TermAlgebra.Term[] vars;
 
 	static public Operation product;
 	static public Operation under;
@@ -74,18 +74,18 @@ public class ResiduatedLattices
 	{
 		Signature signature = new Signature(new Symbol[]
         {
-			new Symbol(0, "*", 2, 20, Symbol.INFIX | Symbol.ASSOCIATIVE),
-			new Symbol(1, "\\", 2, 20, Symbol.INFIX),
-			new Symbol(2, "/", 2, 20, Symbol.INFIX),
-			new Symbol(3, " \\vee ", 2, 10, Symbol.INFIX | Symbol.ASSOCIATIVE),
-			new Symbol(4, " \\wedge ", 2, 10, Symbol.INFIX | Symbol.ASSOCIATIVE),
-			new Symbol(5, "1", 0, Integer.MAX_VALUE, Symbol.INFIX),
-			new Symbol(6, " <= ", 2, 0, Symbol.INFIX),
+			new Symbol("*", 2, 20, Symbol.INFIX | Symbol.ASSOCIATIVE),
+			new Symbol("\\", 2, 20, Symbol.INFIX),
+			new Symbol("/", 2, 20, Symbol.INFIX),
+			new Symbol(" \\vee ", 2, 10, Symbol.INFIX | Symbol.ASSOCIATIVE),
+			new Symbol(" \\wedge ", 2, 10, Symbol.INFIX | Symbol.ASSOCIATIVE),
+			new Symbol("1", 0, Integer.MAX_VALUE, Symbol.INFIX),
+			new Symbol(" <= ", 2, 0, Symbol.INFIX),
         });
 		
-		terms = new TermAlgebra(signature);
+		terms = new TermAlgebra(signature, 5);
 		
-		Term[] vars = new Term[] {
+		TermAlgebra.Term[] vars = new TermAlgebra.Term[] {
 				terms.getVariable(0),
 				terms.getVariable(1),
 				terms.getVariable(2),

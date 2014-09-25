@@ -127,11 +127,6 @@ public class Symbol {
 	 */
 	public static final int ASSOCIATIVE = 0x0003;
 
-	/**
-	 * This symbol is a variable.
-	 */
-	public static final int VARIABLE = 0x0020;
-
 	public int properties;
 
 	/**
@@ -151,82 +146,4 @@ public class Symbol {
 	public int hashCode() {
 		return name.hashCode() + 7 * arity + 17 * priority + 37 * properties;
 	}
-
-	/**
-	 * Returns true if this symbol is a variable.
-	 */
-	public final boolean isVariable() {
-		return hasProperty(VARIABLE);
-	}
-
-	/**
-	 * Returns the variable symbol for the given index.
-	 */
-	public static Symbol getVariable(int index) {
-		if (index < 0)
-			throw new IllegalArgumentException();
-
-		return new Symbol("x" + index, 0, 0, Symbol.VARIABLE);
-	}
-
-	/**
-	 * This is the universe of all variables
-	 */
-	public static Algebra VARIABLES = new Algebra() {
-		public int getSize() {
-			throw new UnsupportedOperationException(
-					"variables are not enumerable");
-		}
-
-		public int getIndex(Object element) {
-			Symbol symbol = (Symbol) element;
-			if (!symbol.isVariable())
-				throw new IllegalArgumentException("this is not a variable");
-
-			return Integer.parseInt(symbol.name.substring(1));
-		}
-
-		public Object getElement(int index) {
-			return getVariable(index);
-		}
-
-		public boolean areEquals(Object elem1, Object elem2) {
-			return elem1.equals(elem2);
-		}
-
-		public int hashCode(Object element) {
-			return element.hashCode();
-		}
-
-		public String toString(Object element) {
-			Symbol symbol = (Symbol) element;
-			return symbol.name;
-		}
-
-		public Object parse(String string) {
-			try {
-				string = string.trim();
-				if (string.startsWith("x")) {
-					int index = Integer.parseInt(string.substring(1));
-					if (index >= 0) {
-						Symbol symbol = getVariable(index);
-
-						if (toString(symbol).equals(string))
-							return symbol;
-					}
-				}
-			} catch (NumberFormatException e) {
-			}
-
-			return null;
-		}
-
-		public Operation[] getOperations() {
-			return new Operation[0];
-		}
-
-		public Relation[] getRelations() {
-			return new Relation[0];
-		}
-	};
 }

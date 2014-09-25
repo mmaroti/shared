@@ -18,8 +18,6 @@
 
 package org.mmaroti.ua.alg;
 
-import org.mmaroti.ua.set.*;
-
 /**
  * This class represents a homomorphism from the term algebra to another (or
  * possibly the same) compatible algebra. It allows to work with evaluations and
@@ -34,11 +32,14 @@ public class Evaluation {
 			throw new IllegalArgumentException("codomain is not compatible");
 
 		this.domain = domain;
+		map = new Object[domain.getVariableCount()];
+
 		this.codomain = codomain;
-		map = new Map(Symbol.VARIABLES);
+		this.codomainops = codomain.getOperations();
+
 	}
 
-	protected TermAlgebra domain;
+	protected final TermAlgebra domain;
 
 	/**
 	 * Returns the domain of the evaluation, which is a term algebra.
@@ -48,6 +49,7 @@ public class Evaluation {
 	}
 
 	protected Algebra codomain;
+	protected Operation[] codomainops;
 
 	/**
 	 * Returns the codomain of the homomorphism
@@ -59,35 +61,30 @@ public class Evaluation {
 	/**
 	 * Contains the mapping of the generators to elements of the codomain.
 	 */
-	protected Map map;
+	protected final Object[] map;
 
 	/**
 	 * Evaluates the specified term in the target algebra using the specified
 	 * map of generators to elements. This method returns an element of the
 	 * target algebra.
 	 */
-	public Object getValue(Term term) {
+	public Object getValue(TermAlgebra.Term term) {
 		if (term.isVariable()) {
-			Object image = map.getValue(term.symbol);
+			Object image = map[term.getVariableIndex()];
 			if (image != null)
 				return image;
 
-			// if this is an endomorphism then the identity entries are not
-			// stored
-			if (domain == codomain)
-				return term;
-
 			throw new IllegalArgumentException(
-					"the image of this variable is not set");
+					"the image of a variable is not set");
+		} else {
+			final TermAlgebra.Term[] subterms = term.subterms;
+			Object[] args = new Object[subterms.length];
+
+			for (int i = 0; i < args.length; ++i)
+				args[i] = getValue(subterms[i]);
+
+			return codomainops[term.getSymbolIndex()].getValue(args);
 		}
-
-		final Term[] subterms = term.subterms;
-		Object[] args = new Object[subterms.length];
-
-		for (int i = 0; i < args.length; ++i)
-			args[i] = getValue(subterms[i]);
-
-		return codomain.getOperations()[term.symbol.index].getValue(args);
 	}
 
 	/**
@@ -96,28 +93,16 @@ public class Evaluation {
 	 * the domain of the specified homomorphism.
 	 */
 	public void compose(Evaluation homomorphism) {
-		if (homomorphism.getDomain() != codomain)
+		if (codomain != homomorphism.getDomain())
 			throw new IllegalArgumentException(
-					"the codomain of this homomorphism"
-							+ " and the domain of the specified homomorphism are not the same");
+					"the codomain does not match the domain of other homomorphism");
 
-		int i = map.getSize();
-		while (--i >= 0)
-			map.setValue(i, homomorphism.getValue((Term) map.getValue(i)));
-
-		// if this is an endomorphism then the identity entries are not stored
-		if (domain == codomain) {
-			final Map otherMap = homomorphism.map;
-
-			i = otherMap.getSize();
-			while (--i >= 0) {
-				if (!map.contains(otherMap.getElement(i)))
-					map.put(otherMap.getElement(i), otherMap.getValue(i));
-			}
-		}
+		for (int i = 0; i < map.length; ++i)
+			map[i] = homomorphism.getValue((TermAlgebra.Term) map[i]);
 
 		// update the codomain
 		codomain = homomorphism.codomain;
+		codomainops = codomain.getOperations();
 	}
 
 	/**
@@ -126,18 +111,21 @@ public class Evaluation {
 	 * This endomorphism is extended. The function returns <code>true</code> if
 	 * a mapping was found, or <code>false</code> if there exists no extension.
 	 */
-	public boolean extend(Term source, Term target) {
+	public boolean extend(TermAlgebra.Term source, TermAlgebra.Term target) {
+		assert (domain == codomain);
+
 		if (source.isVariable()) {
-			Object o = map.getValue(source.symbol);
-			if (o == null) {
-				map.put(source.symbol, target);
+			int i = source.getVariableIndex();
+			if (map[i] == null) {
+				map[i] = target;
 				return true;
 			}
 
-			return codomain.areEquals(o, target);
+			return codomain.areEquals(map[i], target);
 		}
 
-		if (source.symbol != target.symbol)
+		if (target.isVariable()
+				|| source.getSymbolIndex() != target.getSymbolIndex())
 			return false;
 
 		for (int i = 0; i < source.subterms.length; ++i)
@@ -150,30 +138,23 @@ public class Evaluation {
 	/**
 	 * Sets the image of one of the variables elements.
 	 */
-	public final void set(Symbol variable, Object image) {
-		if (image instanceof Symbol)
-			throw new IllegalArgumentException("");
-
-		if (!variable.isVariable())
-			throw new IllegalArgumentException(
-					"only for variables can the image be specified");
-
-		map.put(variable, image);
+	public final void set(int index, Object image) {
+		map[index] = image;
 	}
 
 	/**
 	 * Returns the image of one of the variables.
 	 */
-	public final Object get(Symbol variable) {
-		return map.getValue(variable);
+	public final Object get(int index) {
+		return map[index];
 	}
 
 	/**
-	 * Clears all assigned values to the variables. If this homomorphism is an
-	 * endomorphism, then it resets it to the identity map.
+	 * Clears all assigned values to the variables.
 	 */
 	public final void clear() {
-		map.clear();
+		for (int i = 0; i < map.length; ++i)
+			map[i] = null;
 	}
 
 	/**
@@ -182,8 +163,14 @@ public class Evaluation {
 	public String toString() {
 		String s = "[";
 
-		for (int i = 0; i < map.getSize(); s += ", ", ++i)
-			s += map.getElement(i) + " |-> " + map.getValue(i);
+		for (int i = 0; i < map.length; ++i) {
+			if (map[i] != null) {
+				if (s.length() > 1)
+					s += ", ";
+
+				s += "x" + i + " = " + codomain.toString(map[i]);
+			}
+		}
 
 		return s + "]";
 	}

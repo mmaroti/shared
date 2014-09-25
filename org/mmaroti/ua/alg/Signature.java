@@ -76,6 +76,8 @@ public class Signature {
 		return operations.equals(s.operations) && relations.equals(s.relations);
 	}
 
+	public static Signature SET = new Signature(new Symbol[0]);
+
 	public static Signature GROUPOID = new Signature(new Symbol[] { new Symbol(
 			"*", 2, 0, Symbol.INFIX | Symbol.LEFT_ASSOCIATIVE), });
 }

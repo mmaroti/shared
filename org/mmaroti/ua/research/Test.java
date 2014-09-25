@@ -9,14 +9,14 @@ public class Test
 	{
 		Signature signature = new Signature(new Symbol[] 
 		{
-			new Symbol(0, "w", 2, 0, 0)
+			new Symbol("w", 2, 0, 0)
 		});
 		
 //		AlgebraBuffer A = new AlgebraBuffer(signature, 7);
 //		AlgebraBuffer.Operation f = A.getOperationTable(0);
 //		f.setValue(new int[] {1,1,1,1}, 0);
 
-		TermAlgebra A = new TermAlgebra(signature);
+		TermAlgebra A = new TermAlgebra(signature, 100);
 
 //		Algebras.printTo(A, XmlWriter.out);
 		

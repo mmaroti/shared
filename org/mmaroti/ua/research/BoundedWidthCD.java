@@ -28,11 +28,11 @@ public class BoundedWidthCD
 	{
 		Signature signature = new Signature(new Symbol[]
 		{
-				new Symbol(0, "p", 3, 0, 0),
-				new Symbol(1, "q", 3, 0, 0),
+				new Symbol("p", 3, 0, 0),
+				new Symbol("q", 3, 0, 0),
 		});
 		
-		TermAlgebra terms = new TermAlgebra(signature);
+		TermAlgebra terms = new TermAlgebra(signature, 2);
 	
 		RewriteSystem.Rule[] rules = new RewriteSystem.Rule[]
 		{
@@ -54,10 +54,10 @@ public class BoundedWidthCD
 
 		Operation p = CD2.getOperations()[0];
 //		Operation q = CD2.getOperations()[1];
-		Term x = CD2.getVariable(0);
-		Term y = CD2.getVariable(1);
+		Object x = CD2.getVariable(0);
+		Object y = CD2.getVariable(1);
 		
-		Term t = (Term)p.getValue(x,y,y);
+		Object t = p.getValue(x,y,y);
 		System.out.println(t);
 	}
 }
