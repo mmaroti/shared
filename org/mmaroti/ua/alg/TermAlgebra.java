@@ -249,9 +249,9 @@ public class TermAlgebra extends Algebra {
 		 * This function adds the generators of this term to the set of
 		 * generators stored in <code>set</code>.
 		 */
-		public void addMyVariablesTo(Set<Integer> collection) {
+		public void addMyVariablesTo(Collection<Integer> collection) {
 			if (isVariable())
-				collection.add(index);
+				collection.add(getVariableIndex());
 			else {
 				for (int i = 0; i < subterms.length; ++i)
 					subterms[i].addMyVariablesTo(collection);
@@ -280,10 +280,10 @@ public class TermAlgebra extends Algebra {
 		public int hashCode() {
 			int hashcode = index;
 
-				for (int i = 0; i < subterms.length; ++i) {
-					hashcode *= 1973;
-					hashcode += subterms[i].hashCode();
-				}
+			for (int i = 0; i < subterms.length; ++i) {
+				hashcode *= 1973;
+				hashcode += subterms[i].hashCode();
+			}
 
 			return hashcode;
 		}
