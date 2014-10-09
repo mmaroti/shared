@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+Permissions: sandbox
+Sealed: true
+Main-Class: org.mmaroti.ua.csp.GraphPolyApplet

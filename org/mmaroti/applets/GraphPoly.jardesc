@@ -1,16 +1,16 @@
-<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <jardesc>
-    <jar path="C:/Shared/www/applets/GraphPoly.jar"/>
-    <options buildIfNeeded="true" compress="true" descriptionLocation="/Shared Java/org/mmaroti/applets/GraphPoly.jardesc" exportErrors="false" exportWarnings="false" includeDirectoryEntries="false" overwrite="false" saveDescription="true" storeRefactorings="false" useSourceFolders="false"/>
+    <jar path="/home/mmaroti/shared/www/applets/GraphPoly.jar"/>
+    <options buildIfNeeded="true" compress="true" descriptionLocation="/shared/org/mmaroti/applets/GraphPoly.jardesc" exportErrors="false" exportWarnings="false" includeDirectoryEntries="false" overwrite="false" saveDescription="true" storeRefactorings="false" useSourceFolders="false"/>
     <storedRefactorings deprecationInfo="true" structuralOnly="false"/>
     <selectedProjects/>
-    <manifest generateManifest="true" mainClassHandleIdentifier="=Shared Java/&lt;org.mmaroti.ua.csp{GraphPolyApplet.java[GraphPolyApplet" manifestLocation="" manifestVersion="1.0" reuseManifest="false" saveManifest="false" usesManifest="true">
+    <manifest generateManifest="false" mainClassHandleIdentifier="=shared/&lt;org.mmaroti.ua.csp{GraphPolyApplet.java[GraphPolyApplet" manifestLocation="/shared/org/mmaroti/applets/GraphPoly.mf" manifestVersion="1.0" reuseManifest="false" saveManifest="true" usesManifest="true">
         <sealing sealJar="true">
             <packagesToSeal/>
             <packagesToUnSeal/>
         </sealing>
     </manifest>
     <selectedElements exportClassFiles="true" exportJavaFiles="true" exportOutputFolder="false">
-        <javaElement handleIdentifier="=Shared Java/&lt;org.mmaroti.ua.csp"/>
+        <javaElement handleIdentifier="=shared/&lt;org.mmaroti.ua.csp"/>
     </selectedElements>
 </jardesc>

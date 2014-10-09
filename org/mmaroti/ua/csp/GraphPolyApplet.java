@@ -355,7 +355,7 @@ public class GraphPolyApplet extends Applet
 
 			if( s.isEmpty() )
 				;
-			if( s.startsWith("value ") )
+			else if( s.startsWith("value ") )
 			{
 				tok.nextToken();
 				
@@ -527,6 +527,78 @@ public class GraphPolyApplet extends Applet
 							solver.addConstraint(startVar, neighborVar, graph);
 						}
 					}
+				}
+			}
+			else if( s.startsWith("cyclic") )
+			{
+				int[][] equality = new int[size][];
+				for (int i = 0; i < size; ++i) {
+					equality[i] = new int[] { i, i };
+				}
+
+				int[] A = new int[arity];
+				outer: for(;;) {
+					// shift array A to the left and store in B
+					int[] B = new int[arity];
+					System.arraycopy(A, 1, B, 0, arity - 1);
+					B[arity - 1] = A[0];
+
+					// if not a constant tuple
+					if (!Arrays.equals(A, B)) {
+						int v = solver.getVariable(writeTuple(A));
+						int w = solver.getVariable(writeTuple(B));
+						solver.addConstraint(v, w, equality);
+					}
+					
+					// cycle through all tuples
+					for (int i = 0; i < A.length; ++i) {
+						if (++A[i] < size)
+							continue outer;
+						A[i] = 0;
+					}
+					
+					break;
+				}
+			}
+			else if( s.startsWith("symmetric") )
+			{
+				int[][] equality = new int[size][];
+				for (int i = 0; i < size; ++i) {
+					equality[i] = new int[] { i, i };
+				}
+
+				int[] A = new int[arity];
+				outer: for(;;) {
+					// shift array A to the left and store in B
+					int[] B = new int[arity];
+					System.arraycopy(A, 1, B, 0, arity - 1);
+					B[arity - 1] = A[0];
+
+					// if not a constant tuple
+					if (!Arrays.equals(A, B)) {
+						int v = solver.getVariable(writeTuple(A));
+						int w = solver.getVariable(writeTuple(B));
+						solver.addConstraint(v, w, equality);
+						
+						// swap the first two entries of A and copy all to C if different
+						if (A[0] != A[1]) {
+				            int[] C = new int[arity];
+		                    System.arraycopy(A, 2, C, 2, arity - 2);
+		                    C[0] = A[1];
+		                    C[1] = A[0];
+		                    int u = solver.getVariable(writeTuple(C));
+		                    solver.addConstraint(v, u, equality);
+		    			}
+					}
+					
+					// cycle through all tuples
+					for (int i = 0; i < A.length; ++i) {
+						if (++A[i] < size)
+							continue outer;
+						A[i] = 0;
+					}
+					
+					break;
 				}
 			}
 			else if( s.startsWith("#") )
