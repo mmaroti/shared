@@ -35,7 +35,7 @@ public class ComplexAlgebra implements Algebra
 	protected Object fullSet;
 	public Object getFullSet() { return fullSet; }
 
-	protected Memoize subsets = new Memoize(Unifiers.identityArray);
+	protected Memoizer subsets = new Memoizer(Unifiers.identityArray);
 	protected Cache unionCache = new Cache(Unifiers.identityArray);
 
 	public Object union(Object a, Object b)

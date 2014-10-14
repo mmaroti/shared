@@ -24,13 +24,13 @@ package org.mmaroti.ua.util;
  * from the object identity (== operator) and the standard
  * object equality (Object.equals). 
  */
-public interface Unifier
+public interface Unifier<T>
 {
 	/**
 	 * Implementors must return a hash code for the provided object.
 	 * The hash code of equivalent objects must be the same.  
 	 */
-	public int hashCode(Object object);
+	public int hashCode(T object);
 
 	/**
 	 * Returns true if the two objects are equivalent.
@@ -41,12 +41,12 @@ public interface Unifier
 	 * @param b The second object
 	 * @return true if the two objects are equivalent.
 	 */
-	public boolean equals(Object a, Object b);
+	public boolean equals(T a, T b);
 	
 	/**
 	 * Must return an equal copy of the original one.
 	 * @param a the original object
 	 * @return a newly created object that is equal to the original
 	 */
-	public Object clone(Object a);
+	public T clone(T a);
 }
