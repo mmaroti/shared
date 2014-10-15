@@ -21,8 +21,6 @@ package org.mmaroti.ua.util;
 import java.lang.ref.*;
 import java.util.HashMap;
 
-import mmaroti.ua.util.WeakHashSet.Key;
-
 /**
  * Canonical sets can be used to keep and find canonical forms of immutable
  * objects. The use of canonical objects are especially useful for deeply
@@ -36,20 +34,25 @@ public final class Memoizer<T> {
 	 * We wrap the canonical objects in week references, and store these week
 	 * references in a HashMap.
 	 */
-	protected final class Entry extends WeakReference<T> {
+	private final class Entry extends WeakReference<T> {
 		/**
 		 * We need to store the hashCode in case the underlying object is
 		 * already freed.
 		 */
-		protected int hashCode;
+		int hashCode;
+
+		private Entry(T value) {
+			super(value, queue);
+			hashCode = comparator.hashCode(value);
+		}
 
 		public int hashCode() {
 			return hashCode;
 		}
 
 		@SuppressWarnings("unchecked")
-		public boolean equals(Object o) {
-			Entry other = (Entry) o;
+		public boolean equals(Object obj) {
+			Entry other = (Entry) obj;
 			if (hashCode != other.hashCode)
 				return false;
 
@@ -59,21 +62,16 @@ public final class Memoizer<T> {
 
 			return comparator.equals(this.get(), other.get());
 		}
-
-		public Entry(T referent) {
-			super(referent, queue);
-			hashCode = comparator.hashCode(referent);
-		}
 	}
 
 	/**
 	 * Removes all entries from the map whose corresponding week references have
 	 * been freed.
 	 */
-	protected void removeGarbage() {
-		Reference<? extends T> a;
-		while ((a = queue.poll()) != null)
-			map.remove(a);
+	private void removeGarbage() {
+		Reference<? extends T> ref;
+		while ((ref = queue.poll()) != null)
+			map.remove(ref);
 	}
 
 	/**
@@ -90,42 +88,40 @@ public final class Memoizer<T> {
 	 * canonical form we want to find.
 	 */
 	protected final class Needle {
-		public T sample;
+		public T value;
 
 		public int hashCode() {
-			return comparator.hashCode(sample);
+			return comparator.hashCode(value);
 		}
 
+		@SuppressWarnings("unchecked")
 		public boolean equals(Object o) {
-			o = ((Entry) o).get();
+			T val = ((Entry) o).get();
 
 			// has been garbage collected
-			if (o == null)
+			if (val == null)
 				return false;
 
-			return comparator.equals(sample, o);
-		}
-
-		public Object cloneSample() {
-			return comparator.clone(sample);
+			return comparator.equals(value, val);
 		}
 	}
 
-	protected HashMap<Entry, Entry> map = new HashMap<Entry, Entry>();
-	protected ReferenceQueue<T> queue = new ReferenceQueue<T>();
-	protected Unifier<T> comparator;
-	protected Needle needle = new Needle();
+	protected final HashMap<Entry, Entry> map = new HashMap<Entry, Entry>();
+	protected final ReferenceQueue<T> queue = new ReferenceQueue<T>();
+	protected final Comparator<T> comparator;
+	protected final Needle needle = new Needle();
 
 	/**
 	 * Returns true if the object is already canonicalized, false otherwise.
 	 */
-	public boolean contains(Object object) {
+	public boolean contains(T val) {
 		removeGarbage();
 
-		needle.sample = object;
+		needle.value = val;
 		Entry entry = (Entry) map.get(needle);
+		needle.value = null;
 
-		return entry != null && (object = entry.get()) != null;
+		return entry != null && (val = entry.get()) != null;
 	}
 
 	/**
@@ -133,23 +129,26 @@ public final class Memoizer<T> {
 	 * contain an object equivalent to the sample, then this sample will be
 	 * cloned and become the canonical form to be returned.
 	 * 
-	 * @param sample
+	 * @param val
 	 *            The sample object whose canonical form we want.
 	 * @return The canonical form of the sample object.
 	 */
-	public Object memoize(Object sample) {
+	public T memoize(T val) {
 		removeGarbage();
 
-		needle.sample = sample;
-		Entry entry = (Entry) map.get(needle);
+		needle.value = val;
+		Entry entry = map.get(needle);
+		needle.value = null;
 
-		if (entry != null && (sample = entry.get()) != null)
-			return sample;
+		T val2;
+		if (entry != null && (val2 = entry.get()) != null)
+			return val2;
 
-		sample = needle.cloneSample();
-		entry = new Entry(sample, this);
+		val2 = comparator.clone(val);
+		entry = new Entry(val2);
 		map.put(entry, entry);
-		return sample;
+
+		return val2;
 	}
 
 	/**
@@ -160,6 +159,7 @@ public final class Memoizer<T> {
 	 */
 	public int size() {
 		removeGarbage();
+
 		return map.size();
 	}
 
@@ -171,8 +171,7 @@ public final class Memoizer<T> {
 	 *            The comparator object that is consulted when two objects need
 	 *            to be compared.
 	 */
-	public Memoizer(Unifier comparator) {
+	public Memoizer(Comparator<T> comparator) {
 		this.comparator = comparator;
-		needle.comparator = comparator;
 	}
 }

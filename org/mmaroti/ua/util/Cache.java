@@ -94,7 +94,7 @@ public final class Cache
 	protected static final class Seeker
 	{
 		public Object sample;
-		public Unifier comparator;
+		public Comparator comparator;
 		
 		public int hashCode()
 		{
@@ -115,7 +115,7 @@ public final class Cache
 
 	protected HashMap<Entry, Object> map = new HashMap<Entry, Object>();
 	protected ReferenceQueue<Object> queue = new ReferenceQueue<Object>();
-	protected Unifier comparator;
+	protected Comparator comparator;
 	protected Seeker seeker = new Seeker();
 
 	/**
@@ -172,7 +172,7 @@ public final class Cache
 	 * @param comparator The comparator object that is consulted
 	 * 		when two objects need to be compared.
 	 */
-	public Cache(Unifier comparator)
+	public Cache(Comparator comparator)
 	{
 		this.comparator = comparator;
 		seeker.comparator = comparator;
