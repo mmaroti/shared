@@ -19,12 +19,13 @@
 package org.mmaroti.uasat;
 
 public class BaseAlgebra {
-	protected final Solver solver;
+	protected final SatSolver solver;
 	protected final String name;
 	protected final Operation[] operations;
 	protected final Relation[] relations;
 
-	public BaseAlgebra(Solver solver, String name, Signature signature, int size) {
+	public BaseAlgebra(SatSolver solver, String name, Signature signature,
+			int size) {
 		if (size < 0)
 			throw new IllegalArgumentException();
 
@@ -60,7 +61,7 @@ public class BaseAlgebra {
 			result *= base;
 			if (result > Integer.MAX_VALUE || result < Integer.MIN_VALUE)
 				throw new IllegalArgumentException(
-						"the power is too big (does not fit in an Integer)");
+						"the power is too big (does not fit in an integer)");
 		}
 
 		return (int) result;
@@ -76,10 +77,10 @@ public class BaseAlgebra {
 	}
 
 	public class Relation {
-		protected final Solver.Literal[] literals;
+		protected final SatSolver.Literal[] literals;
 
 		Relation(Symbol symbol, int size) {
-			literals = new Solver.Literal[power(size, symbol.getArity())];
+			literals = new SatSolver.Literal[power(size, symbol.getArity())];
 
 			int[] arg = new int[symbol.getArity()];
 			int pos = 0;

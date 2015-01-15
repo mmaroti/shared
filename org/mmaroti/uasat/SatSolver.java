@@ -21,55 +21,19 @@ package org.mmaroti.uasat;
 import java.io.*;
 import java.util.*;
 
-public class Solver {
+public class SatSolver {
 	private static final boolean DEBUG = false;
 
 	protected List<Literal> literals = new ArrayList<Literal>();
 	protected List<int[]> clauses = new ArrayList<int[]>();
 
-	public static abstract class Bool {
-		public abstract int[][] getClauses();
-	}
-
-	public static class Literal extends Bool {
+	public static class Literal {
 		public final int id;
 		public final String name;
 
 		Literal(int id, String name) {
 			this.id = id;
 			this.name = name;
-		}
-
-		public int[][] getClauses() {
-			return new int[][] { new int[] { id + 1 } };
-		}
-	}
-
-	public static class Not extends Bool {
-		public final Bool a;
-
-		Not(Bool a) {
-			this.a = a;
-		}
-	}
-
-	public static class And extends Bool {
-		public final Bool a;
-		public final Bool b;
-
-		And(Bool a, Bool b) {
-			this.a = a;
-			this.b = b;
-		}
-	}
-
-	public static class Or extends Bool {
-		public final Bool a;
-		public final Bool b;
-
-		Or(Bool a, Bool b) {
-			this.a = a;
-			this.b = b;
 		}
 	}
 
@@ -84,6 +48,7 @@ public class Solver {
 
 		Literal lit = new Literal(literals.size() + 1, name);
 		literals.add(lit);
+
 		return lit;
 	}
 
@@ -96,8 +61,8 @@ public class Solver {
 				assert (-size <= id && id != 0 && id <= size);
 			}
 
-			for (int[] cla : clauses) {
-				if (cla == clause)
+			for (int[] c : clauses) {
+				if (c == clause)
 					throw new IllegalArgumentException("Clause array is reused");
 			}
 		}
@@ -108,18 +73,6 @@ public class Solver {
 
 			for (int i = 1; i < clause.length; ++i)
 				assert (clause[i - 1] < clause[i]);
-		}
-
-		clauses.add(clause);
-	}
-
-	public void addClause(boolean[] solution) {
-		assert (solution.length == literals.size());
-
-		int[] clause = new int[literals.size()];
-		for (int i = 0; i < solution.length; ++i) {
-			int id = i + 1;
-			clause[i] = solution[i] ? -id : id;
 		}
 
 		clauses.add(clause);
