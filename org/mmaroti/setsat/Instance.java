@@ -24,8 +24,12 @@ import java.util.*;
 public final class Instance {
 	private int variables = 0;
 
+	private HashSet<Integer> missing = new HashSet<Integer>();
+
 	public int newvar() {
-		return ++variables;
+		int lit = ++variables;
+		missing.add(lit);
+		return lit;
 	}
 
 	public static int exclude(int var, boolean[] solution) {
@@ -100,6 +104,9 @@ public final class Instance {
 				arg2 = t;
 			}
 
+			missing.remove(Math.abs(arg1));
+			missing.remove(Math.abs(arg2));
+
 			IntPair arg = new IntPair(arg1, arg2);
 			Integer res = ormap.get(arg);
 			if (res != null)
@@ -155,6 +162,9 @@ public final class Instance {
 				arg2 = t;
 			}
 
+			missing.remove(arg1);
+			missing.remove(arg2);
+
 			IntPair arg = new IntPair(arg1, arg2);
 			Integer res = eqmap.get(arg);
 			if (res != null)
@@ -172,16 +182,17 @@ public final class Instance {
 		return -eq(arg1, arg2);
 	}
 
-	private HashSet<Integer> requs = new HashSet<Integer>();
+	private HashSet<Integer> trueset = new HashSet<Integer>();
 
 	public void ensure(int lit) {
 		if (lit != TRUE) {
 			if (lit == FALSE) {
 				lit = ++variables;
-				requs.add(-lit);
-			}
+				trueset.add(-lit);
+			} else
+				missing.remove(Math.abs(lit));
 
-			requs.add(lit);
+			trueset.add(lit);
 		}
 	}
 
@@ -190,14 +201,22 @@ public final class Instance {
 	}
 
 	public void printDimacs(PrintStream stream) {
-		int clauses = requs.size();
+		int clauses = trueset.size();
+		clauses += missing.size();
 		clauses += eqmap.size() * 4;
 		clauses += ormap.size() * 3;
 
+		if (clauses <= 0)
+			throw new IllegalArgumentException();
+
 		stream.println("p cnf " + variables + " " + clauses);
 
-		for (Integer a : requs) {
+		for (Integer a : trueset) {
 			stream.println(a + " 0");
+		}
+
+		for (Integer a : missing) {
+			stream.println(a + " " + (-a) + " 0");
 		}
 
 		for (Map.Entry<IntPair, Integer> entry : eqmap.entrySet()) {

@@ -33,7 +33,7 @@ public abstract class Set<A> {
 
 	public abstract String show(A elem);
 
-	public Collection<A> solve(Solver solver) throws IOException {
+	public Collection<A> solveAll(Solver solver) throws IOException {
 		ArrayList<A> sols = new ArrayList<A>();
 
 		Instance instance = new Instance();
@@ -47,6 +47,17 @@ public abstract class Set<A> {
 			sols.add(decode(elem, solution));
 			instance.ensure(exclude(instance, elem, solution));
 		}
+	}
+
+	public A solveOne(Solver solver) throws IOException {
+		Instance instance = new Instance();
+		A elem = generate(instance);
+
+		boolean[] solution = solver.solve(instance);
+		if (solution == null)
+			return null;
+
+		return decode(elem, solution);
 	}
 
 	public abstract A generate(Instance instance);

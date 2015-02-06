@@ -18,20 +18,36 @@
 
 package org.mmaroti.setsat;
 
-import java.io.IOException;
+import java.util.*;
+import java.io.*;
 
 public class Test {
 	public static void main(String[] args) throws IOException {
-		SubSet<Pair<int[], Integer>> set = new SubSet<Pair<int[], Integer>>(
-				new ProdSet<int[], Integer>(new SmallSet(4), BoolSet.INSTANCE)) {
+		/*
+		 * SubSet<Pair<int[], Integer>> set = new SubSet<Pair<int[], Integer>>(
+		 * new ProdSet<int[], Integer>(new SmallSet(4), BoolSet.INSTANCE)) {
+		 * 
+		 * @Override public int filter(Instance instance, Pair<int[], Integer>
+		 * elem) { return instance.or(elem.a[0], elem.b); } };
+		 */
+
+		SubSet<ArrayList<Integer>> set = new SubSet<ArrayList<Integer>>(
+				new PowerSet<Integer, int[]>(BoolSet.INSTANCE, new SmallSet(3))) {
+
 			@Override
-			public int filter(Instance instance, Pair<int[], Integer> elem) {
-				return instance.or(elem.a[0], elem.b);
+			public int filter(Instance instance, ArrayList<Integer> elem) {
+				return instance.add(instance.leq(elem.get(0), elem.get(1)),
+						elem.get(2));
 			}
 		};
 
 		set.print(set.elements());
 		System.out.println();
-		set.print(set.solve(new MiniSAT()));
+
+		// Instance instance = new Instance();
+		// set.generate(instance);
+		// instance.printDimacs(System.out);
+
+		set.print(set.solveAll(new MiniSAT()));
 	}
 }

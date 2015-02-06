@@ -21,7 +21,6 @@ package org.mmaroti.setsat;
 import java.util.*;
 
 public class ProdSet<A, B> extends Set<Pair<A, B>> {
-
 	public final Set<A> seta;
 	public final Set<B> setb;
 
