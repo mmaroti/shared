@@ -20,11 +20,11 @@ package org.mmaroti.setsat;
 
 import java.util.*;
 
-public class ProdSet<A, B> extends Set<Pair<A, B>> {
+public class ProductSet<A, B> extends Set<Pair<A, B>> {
 	public final Set<A> seta;
 	public final Set<B> setb;
 
-	public ProdSet(Set<A> seta, Set<B> setb) {
+	public ProductSet(Set<A> seta, Set<B> setb) {
 		this.seta = seta;
 		this.setb = setb;
 	}

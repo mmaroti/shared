@@ -73,6 +73,27 @@ public class SmallSet extends Set<int[]> {
 		return t;
 	}
 
+	public int[] constant(int a) {
+		return elems.get(a);
+	}
+
+	public int[] bitCount(Instance instance, ArrayList<Integer> bits) {
+		int[] count = new int[size - 1];
+
+		for (int i = 0; i < count.length; i++)
+			count[i] = Instance.FALSE;
+
+		for (int b : bits) {
+			for (int i = 0; i < count.length; i++) {
+				int c = count[i];
+				count[i] = instance.or(c, b);
+				b = instance.and(c, b);
+			}
+		}
+
+		return count;
+	}
+
 	@Override
 	public String show(int[] elem) {
 		assert elem.length == size - 1;

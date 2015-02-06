@@ -31,13 +31,22 @@ public class Test {
 		 * elem) { return instance.or(elem.a[0], elem.b); } };
 		 */
 
-		SubSet<ArrayList<Integer>> set = new SubSet<ArrayList<Integer>>(
-				new PowerSet<Integer, int[]>(BoolSet.INSTANCE, new SmallSet(3))) {
+		/*
+		 * SubSet<ArrayList<Integer>> set = new SubSet<ArrayList<Integer>>( new
+		 * PowerSet<Integer, int[]>(BoolSet.INSTANCE, new SmallSet(3))) {
+		 * 
+		 * @Override public int filter(Instance instance, ArrayList<Integer>
+		 * elem) { return instance.add(instance.leq(elem.get(0), elem.get(1)),
+		 * elem.get(2)); } };
+		 */
 
+		final SmallSet dom = new SmallSet(6);
+		SubSet<ArrayList<Integer>> set = new SubSet<ArrayList<Integer>>(
+				new PowerSet<Integer, int[]>(BoolSet.INSTANCE, dom)) {
 			@Override
 			public int filter(Instance instance, ArrayList<Integer> elem) {
-				return instance.add(instance.leq(elem.get(0), elem.get(1)),
-						elem.get(2));
+				return dom.eq(instance, dom.constant(1),
+						dom.bitCount(instance, elem));
 			}
 		};
 
