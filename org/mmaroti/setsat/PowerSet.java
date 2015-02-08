@@ -119,4 +119,15 @@ public class PowerSet<A, B> extends Set<ArrayList<A>> {
 
 		return t;
 	}
+
+	@Override
+	public int member(Instance instance, ArrayList<A> arg) {
+		assert arg.size() == expElems.size();
+
+		int t = Instance.TRUE;
+		for (A a : arg)
+			t = instance.and(t, base.member(instance, a));
+
+		return t;
+	}
 }

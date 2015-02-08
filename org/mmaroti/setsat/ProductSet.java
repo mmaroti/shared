@@ -72,4 +72,10 @@ public class ProductSet<A, B> extends Set<Pair<A, B>> {
 		B b = setb.decode(elem.b, solution);
 		return new Pair<A, B>(a, b);
 	}
+
+	@Override
+	public int member(Instance instance, Pair<A, B> arg) {
+		return instance.and(seta.member(instance, arg.a),
+				setb.member(instance, arg.b));
+	}
 }

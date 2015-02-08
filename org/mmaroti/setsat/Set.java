@@ -26,6 +26,8 @@ public abstract class Set<A> {
 
 	public abstract int eq(Instance instance, A arg1, A arg2);
 
+	public abstract int member(Instance instance, A arg);
+
 	public void print(Collection<A> elems) {
 		for (A elem : elems)
 			System.out.println(show(elem));

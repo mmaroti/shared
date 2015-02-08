@@ -68,10 +68,19 @@ public final class Instance {
 	public static final int TRUE = Integer.MAX_VALUE;
 	public static final int FALSE = -Integer.MAX_VALUE;
 
-	public int lift(boolean arg) {
+	public static int lift(boolean arg) {
 		return arg ? TRUE : FALSE;
 	}
 
+	public static boolean lower(int arg) {
+		if (arg == TRUE)
+			return true;
+		else if (arg == FALSE)
+			return false;
+		else
+			throw new IllegalArgumentException();
+	}
+	
 	public int not(int arg) {
 		assert arg != 0
 				&& (Math.abs(arg) <= variables || Math.abs(arg) == TRUE);
@@ -196,16 +205,20 @@ public final class Instance {
 		}
 	}
 
-	public int getVariables() {
+	public int getVaribleCount() {
 		return variables;
 	}
 
-	public void printDimacs(PrintStream stream) {
+	public int getClauseCount() {
 		int clauses = trueset.size();
 		clauses += missing.size();
 		clauses += eqmap.size() * 4;
 		clauses += ormap.size() * 3;
-
+		return clauses;
+	}
+	
+	public void printDimacs(PrintStream stream) {
+		int clauses = getClauseCount();
 		if (clauses <= 0)
 			throw new IllegalArgumentException();
 

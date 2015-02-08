@@ -59,13 +59,53 @@ public class Kneser {
 		return subset;
 	}
 
+	public static int isDisjunct(Instance instance, ArrayList<Integer> elem1,
+			ArrayList<Integer> elem2) {
+		assert elem1.size() == elem2.size();
+
+		int t = Instance.TRUE;
+		for (int i = 0; i < elem1.size(); i++)
+			t = instance.and(t,
+					instance.not(instance.and(elem1.get(i), elem2.get(i))));
+
+		return t;
+	}
+
+	public static Set<ArrayList<ArrayList<Integer>>> homomorphisms(
+			Set<ArrayList<Integer>> set1, Set<ArrayList<Integer>> set2) {
+
+		Set<ArrayList<ArrayList<Integer>>> hom = new PowerSet<ArrayList<Integer>, ArrayList<Integer>>(
+				set1, set2);
+
+		ArrayList<ArrayList<Integer>> vertices = new ArrayList<ArrayList<Integer>>(
+				set2.elements());
+		ArrayList<Pair<Integer, Integer>> edges = new ArrayList<Pair<Integer, Integer>>();
+		for (int i = 0; i < vertices.size(); i++)
+			for (int j = 0; j < vertices.size(); j++) {
+				if (Instance.lower(isDisjunct(Instance.BOOL, vertices.get(i),
+						vertices.get(j))))
+					edges.add(new Pair<Integer, Integer>(i, j));
+			}
+
+		hom = new SubSet<ArrayList<ArrayList<Integer>>>(hom) {
+			@Override
+			public int filter(Instance instance,
+					ArrayList<ArrayList<Integer>> elem) {
+				// TODO Auto-generated method stub
+				return 0;
+			}
+		};
+
+		return hom;
+	}
+
 	public static void main(String[] args) throws IOException {
 		Solver solver = new MiniSAT();
 		solver.debugging = false;
 
 		Set<ArrayList<Integer>> set = kneser(5, 2, 2);
 
-		//set.print(set.elements());
+		// set.print(set.elements());
 		System.out.println(set.elements().size());
 		System.out.println(set.solveAll(solver).size());
 	}

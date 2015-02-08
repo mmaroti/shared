@@ -63,6 +63,17 @@ public class SmallSet extends Set<int[]> {
 	}
 
 	@Override
+	public int member(Instance instance, int[] arg) {
+		assert arg.length == size - 1;
+
+		int t = Instance.TRUE;
+		for (int i = 0; i < arg.length - 1; i++)
+			t = instance.and(t, instance.leq(arg[i + 1], arg[i]));
+
+		return t;
+	}
+
+	@Override
 	public int eq(Instance instance, int[] arg1, int[] arg2) {
 		assert arg1.length == arg2.length;
 

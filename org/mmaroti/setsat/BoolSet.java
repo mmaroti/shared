@@ -64,4 +64,9 @@ public class BoolSet extends Set<Integer> {
 	public Integer decode(Integer elem, boolean[] solution) {
 		return Instance.decode(elem, solution);
 	}
+
+	@Override
+	public int member(Instance instance, Integer arg) {
+		return Instance.TRUE;
+	}
 }

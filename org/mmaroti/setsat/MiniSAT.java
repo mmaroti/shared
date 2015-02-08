@@ -57,7 +57,9 @@ public class MiniSAT extends Solver {
 			args.add(output.getAbsolutePath());
 
 			if (debugging)
-				System.err.print("Running minisat ... ");
+				System.err.print("Running minisat with "
+						+ instance.getVaribleCount() + " variables and "
+						+ instance.getClauseCount() + " clauses ... ");
 			long time = System.currentTimeMillis();
 
 			Process proc = Runtime.getRuntime().exec(
@@ -99,11 +101,11 @@ public class MiniSAT extends Solver {
 			assert line != null;
 
 			String[] sol = line.split("\\s+");
-			if (sol.length != instance.getVariables() + 1
+			if (sol.length != instance.getVaribleCount() + 1
 					|| !sol[sol.length - 1].equals("0"))
 				throw new IOException("Minisat produced unexpected output");
 
-			boolean[] solution = new boolean[instance.getVariables()];
+			boolean[] solution = new boolean[instance.getVaribleCount()];
 
 			for (int i = 0; i < sol.length; ++i) {
 				int n = Integer.parseInt(sol[i]);
