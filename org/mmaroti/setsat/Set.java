@@ -28,6 +28,8 @@ public abstract class Set<A> {
 
 	public abstract int member(Instance instance, A arg);
 
+	public abstract A generate(Instance instance);
+
 	public void print(Collection<A> elems) {
 		for (A elem : elems)
 			System.out.println(show(elem));
@@ -61,8 +63,6 @@ public abstract class Set<A> {
 
 		return decode(elem, solution);
 	}
-
-	public abstract A generate(Instance instance);
 
 	public abstract A decode(A elem, boolean[] solution);
 

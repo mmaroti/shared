@@ -66,6 +66,11 @@ public abstract class SubSet<A> extends Set<A> {
 	}
 
 	@Override
+	public int member(Instance instance, A arg) {
+		return instance.and(base.member(instance, arg), filter(instance, arg));
+	}
+
+	@Override
 	public A decode(A elem, boolean[] solution) {
 		return base.decode(elem, solution);
 	}
@@ -73,10 +78,5 @@ public abstract class SubSet<A> extends Set<A> {
 	@Override
 	public int exclude(Instance instance, A elem, boolean[] solution) {
 		return base.exclude(instance, elem, solution);
-	}
-
-	@Override
-	public int member(Instance instance, A arg) {
-		return instance.and(base.member(instance, arg), filter(instance, arg));
 	}
 }
