@@ -72,10 +72,8 @@ public abstract class BoolTerm {
 			int lit = instance.getLiteral(this);
 			if (lit != 0)
 				return solution[lit];
-			else {
-				// throw new IllegalArgumentException("unsolved variable");
-				return false;
-			}
+			else
+				throw new IllegalArgumentException("unsolved variable");
 		}
 	}
 
