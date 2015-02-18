@@ -16,9 +16,8 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-package org.mmaroti.setsat2;
+package org.mmaroti.satset;
 
-import java.math.BigInteger;
 import java.util.*;
 
 public abstract class Matrix<ELEM> {
@@ -33,27 +32,22 @@ public abstract class Matrix<ELEM> {
 
 	public abstract ELEM get(int[] index);
 
-	public BigInteger getSize() {
+	public int getSize() {
 		return getSize(shape);
 	}
 
-	public static BigInteger getSize(int[] shape) {
-		BigInteger a = BigInteger.ONE;
+	public static int getSize(int[] shape) {
+		long a = 1;
 
-		for (int i = 0; i < shape.length; i++)
-			a = a.multiply(BigInteger.valueOf(shape[i]));
+		for (int i = 0; i < shape.length; i++) {
+			assert shape[i] >= 0;
+			a *= shape[i];
 
-		return a;
-	}
+			if (a > Integer.MAX_VALUE)
+				throw new IllegalArgumentException();
+		}
 
-	public static int getIntSize(int[] shape) {
-		BigInteger size = getSize(shape);
-		int intSize = size.intValue();
-
-		if (!size.equals(BigInteger.valueOf(intSize)))
-			throw new IllegalArgumentException();
-
-		return intSize;
+		return (int) a;
 	}
 
 	public boolean isEmpty() {
@@ -68,13 +62,14 @@ public abstract class Matrix<ELEM> {
 		if (shape.length == 0)
 			return get(shape).toString();
 		else if (shape.length == 1) {
-			String s = "";
+			String s = "[";
 			int[] index = new int[1];
 			for (index[0] = 0; index[0] < shape[0]; index[0]++) {
 				if (index[0] != 0)
 					s += " ";
 				s += get(index).toString();
 			}
+			s += "]";
 			return s;
 		} else
 			return null;
@@ -126,6 +121,28 @@ public abstract class Matrix<ELEM> {
 		};
 	}
 
+	public Matrix<ELEM> row(int row) {
+		assert shape.length >= 1 && 0 <= row && row < shape[0];
+
+		int[] shape2 = new int[shape.length - 1];
+		System.arraycopy(shape, 1, shape2, 0, shape2.length);
+
+		final int[] index1 = new int[shape.length];
+		index1[0] = row;
+
+		final Matrix<ELEM> that = this;
+
+		return new Matrix<ELEM>(shape2) {
+			@Override
+			public ELEM get(int[] index) {
+				assert index.length + 1 == index1.length;
+
+				System.arraycopy(index, 0, index1, 1, index.length);
+				return that.get(index1);
+			}
+		};
+	}
+
 	public static Matrix<Integer> range(final int start, int end) {
 		if (end < start)
 			throw new IllegalArgumentException();
@@ -170,7 +187,7 @@ public abstract class Matrix<ELEM> {
 	}
 
 	public static <ELEM> Matrix<ELEM> matrix(int[] shape, final List<ELEM> elems) {
-		if (getIntSize(shape) != elems.size())
+		if (getSize(shape) != elems.size())
 			throw new IllegalArgumentException();
 
 		return new Matrix<ELEM>(shape) {
@@ -182,7 +199,7 @@ public abstract class Matrix<ELEM> {
 	}
 
 	public static <ELEM> Matrix<ELEM> matrix(int[] shape, final ELEM[] elems) {
-		if (getIntSize(shape) != elems.length)
+		if (getSize(shape) != elems.length)
 			throw new IllegalArgumentException();
 
 		return new Matrix<ELEM>(shape) {
@@ -194,7 +211,7 @@ public abstract class Matrix<ELEM> {
 	}
 
 	public static Matrix<Integer> matrix(int[] shape, final int[] elems) {
-		if (getIntSize(shape) != elems.length)
+		if (getSize(shape) != elems.length)
 			throw new IllegalArgumentException();
 
 		return new Matrix<Integer>(shape) {
@@ -206,12 +223,24 @@ public abstract class Matrix<ELEM> {
 	}
 
 	public static Matrix<Boolean> matrix(int[] shape, final boolean[] elems) {
-		if (getIntSize(shape) != elems.length)
+		if (getSize(shape) != elems.length)
 			throw new IllegalArgumentException();
 
 		return new Matrix<Boolean>(shape) {
 			@Override
 			public Boolean get(int[] index) {
+				return elems[getPosition(index)];
+			}
+		};
+	}
+
+	public static Matrix<BoolTerm> matrix(int[] shape, final BoolTerm[] elems) {
+		if (getSize(shape) != elems.length)
+			throw new IllegalArgumentException();
+
+		return new Matrix<BoolTerm>(shape) {
+			@Override
+			public BoolTerm get(int[] index) {
 				return elems[getPosition(index)];
 			}
 		};
@@ -236,7 +265,7 @@ public abstract class Matrix<ELEM> {
 	}
 
 	public static <ARG, RET> Matrix<RET> apply(
-			final Matrix<Func<ARG, RET>> func, final Matrix<ARG> arg) {
+			final Matrix<Func1<ARG, RET>> func, final Matrix<ARG> arg) {
 
 		final int[] idx = new int[Math.min(func.shape.length, arg.shape.length)];
 
@@ -250,7 +279,7 @@ public abstract class Matrix<ELEM> {
 				public RET get(int[] index) {
 					System.arraycopy(index, 0, idx, 0, idx.length);
 
-					return func.get(idx).apply(arg.get(index));
+					return func.get(idx).apply1(arg.get(index));
 				}
 			};
 		} else {
@@ -259,85 +288,19 @@ public abstract class Matrix<ELEM> {
 				public RET get(int[] index) {
 					System.arraycopy(index, 0, idx, 0, idx.length);
 
-					return func.get(index).apply(arg.get(idx));
+					return func.get(index).apply1(arg.get(idx));
 				}
 			};
 		}
 	}
 
-	public static abstract class Func<ARG, RET> {
-		public abstract RET apply(ARG arg);
-	}
-
-	public static abstract class Func2<ARG1, ARG2, RET> extends
-			Func<ARG1, Func<ARG2, RET>> {
-
-		public abstract RET apply2(ARG1 arg1, ARG2 arg2);
-
-		@Override
-		public Func<ARG2, RET> apply(final ARG1 arg1) {
-			return new Func<ARG2, RET>() {
-				@Override
-				public RET apply(ARG2 arg2) {
-					return apply2(arg1, arg2);
-				}
-			};
-		}
-	}
-
-	public static Func<Boolean, Boolean> NOT = new Func<Boolean, Boolean>() {
-		@Override
-		public Boolean apply(Boolean arg) {
-			return !arg;
-		}
-	};
-
-	public static Func<Boolean, Func<Boolean, Boolean>> AND = new Func2<Boolean, Boolean, Boolean>() {
-		@Override
-		public Boolean apply2(Boolean arg1, Boolean arg2) {
-			return arg1 && arg2;
-		}
-	};
-
-	public static Func<Boolean, Func<Boolean, Boolean>> OR = new Func2<Boolean, Boolean, Boolean>() {
-		@Override
-		public Boolean apply2(Boolean arg1, Boolean arg2) {
-			return arg1 || arg2;
-		}
-	};
-
-	public static Func<Integer, Integer> NEG = new Func<Integer, Integer>() {
-		@Override
-		public Integer apply(Integer arg) {
-			return -arg;
-		}
-	};
-
-	public static Func<Integer, Func<Integer, Integer>> ADD = new Func2<Integer, Integer, Integer>() {
-		@Override
-		public Integer apply2(Integer arg1, Integer arg2) {
-			return arg1 + arg2;
-		}
-	};
-
-	public static Func<Integer, Func<Integer, Integer>> MUL = new Func2<Integer, Integer, Integer>() {
-		@Override
-		public Integer apply2(Integer arg1, Integer arg2) {
-			return arg1 * arg2;
-		}
-	};
-
-	public static <ELEM> Func<ELEM, Func<ELEM, Boolean>> EQU() {
-		return new Func2<ELEM, ELEM, Boolean>() {
+	public static <ARG, RET> Matrix<RET> apply(final Func1<ARG, RET> func,
+			final Matrix<ARG> arg) {
+		return new Matrix<RET>(arg.shape) {
 			@Override
-			public Boolean apply2(ELEM arg1, ELEM arg2) {
-				return arg1.equals(arg2);
+			public RET get(int[] index) {
+				return func.apply1(arg.get(index));
 			}
 		};
-	}
-
-	public static void main(String[] args) {
-		Matrix<Integer> a = apply(apply(scalar(MUL), range(5)), range(5));
-		System.out.println(a);
 	}
 }

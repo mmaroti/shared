@@ -16,12 +16,29 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-package org.mmaroti.setsat2;
+package org.mmaroti.satset;
 
-import java.io.IOException;
+import java.io.*;
+import java.util.*;
 
 public abstract class Solver {
 	public boolean debugging = false;
 
-	public abstract boolean[] solve(Instance instance) throws IOException;
+	// variable indices in clauses and solution start at 1
+	public abstract boolean[] solve(int variables, List<int[]> clauses)
+			throws IOException;
+
+	public static void dimacs(int variables, List<int[]> clauses,
+			PrintStream stream) {
+		stream.println("p cnf " + variables + " " + clauses.size());
+		for (int[] clause : clauses) {
+			for (int i : clause) {
+				assert i != 0 && Math.abs(i) <= variables;
+
+				stream.print(i);
+				stream.print(' ');
+			}
+			stream.println('0');
+		}
+	}
 }

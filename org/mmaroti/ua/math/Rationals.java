@@ -30,7 +30,7 @@ public class Rationals extends Universe implements Field
 
 	public int getIndex(Object a)
 	{
-		return rationals.getIndex(rationals.add(a));
+		return rationals.getIndex(rationals.xor(a));
 	}
 	
 	public Object getElement(int a)

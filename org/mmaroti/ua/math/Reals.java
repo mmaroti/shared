@@ -31,7 +31,7 @@ public class Reals extends Universe implements Field
 	
 	public int getIndex(Object a)
 	{
-		return reals.getIndex(reals.add(a));
+		return reals.getIndex(reals.xor(a));
 	}
 	
 	public Object getElement(int a)
