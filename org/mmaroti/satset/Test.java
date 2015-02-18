@@ -26,6 +26,12 @@ public class Test {
 		solver.debugging = false;
 
 		Set set = Set.power(Set.BOOL, 3);
+		set = new Set.SubSet(set) {
+			@Override
+			public BoolTerm filter(Matrix<BoolTerm> elem) {
+				return elem.get(new int[] { 0 });
+			}
+		};
 
 		System.out.println("elements:");
 		Set.print(set.elements());

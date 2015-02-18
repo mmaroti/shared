@@ -182,6 +182,35 @@ public abstract class Set {
 		};
 	}
 
+	public abstract static class SubSet extends Set {
+		public final Set base;
+
+		public SubSet(Set base) {
+			super(base.shape);
+			this.base = base;
+		}
+
+		public abstract BoolTerm filter(Matrix<BoolTerm> elem);
+
+		@Override
+		public List<Matrix<Boolean>> elements() {
+			List<Matrix<Boolean>> elems = base.elements();
+			List<Matrix<Boolean>> list = new ArrayList<Matrix<Boolean>>();
+
+			for (Matrix<Boolean> elem : elems) {
+				if (filter(Matrix.apply(Func1.BOOLTERM_LIFT, elem)).lower())
+					list.add(elem);
+			}
+
+			return list;
+		}
+
+		@Override
+		public BoolTerm member(Matrix<BoolTerm> elem) {
+			return base.member(elem).and(filter(elem));
+		}
+	}
+
 	public static void print(Matrix<Boolean> matrix) {
 		System.out.println(Matrix.apply(Func1.BOOLEAN_INT, matrix));
 	}

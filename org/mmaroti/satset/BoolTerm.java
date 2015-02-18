@@ -112,6 +112,15 @@ public abstract class BoolTerm {
 		return bool ? TRUE : FALSE;
 	}
 
+	public boolean lower() {
+		if (this == TRUE)
+			return true;
+		else if (this == FALSE)
+			return false;
+		else
+			throw new IllegalArgumentException();
+	}
+
 	public abstract BoolTerm not();
 
 	private static class BoolNot extends BoolTerm {
