@@ -19,24 +19,26 @@
 package org.mmaroti.sat;
 
 import java.io.*;
+import java.util.*;
 
 public class Test {
 	public static void main(String[] args) throws IOException {
 		Solver solver = new MiniSAT();
 		solver.debugging = false;
 
-		Set set = Set.power(Set.BOOL, 3);
+		Set set = Set.power(Set.BOOL, 10);
 		set = new Set.SubSet(set) {
 			@Override
 			public BoolTerm filter(Matrix<BoolTerm> elem) {
-				return elem.get(new int[] { 0 });
+				return Matrix.equals(Matrix.count(elem), Matrix.constant(10, 5));
 			}
 		};
 
-		System.out.println("elements:");
-		Set.print(set.elements());
+//		System.out.println("elements:");
+//		Set.print(set.elements());
 
 		System.out.println("solve:");
-		Set.print(set.solve(solver));
+		List<Matrix<Boolean>> solutions = set.solve(solver);
+		System.out.println(solutions.size());
 	}
 }

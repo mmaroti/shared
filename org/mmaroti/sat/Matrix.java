@@ -22,19 +22,17 @@ import java.util.*;
 
 public abstract class Matrix<ELEM> {
 	public final int[] shape;
+	public final int size;
 
 	public Matrix(int[] shape) {
 		if (shape == null)
 			throw new IllegalArgumentException();
 
 		this.shape = shape;
+		this.size = getSize(shape);
 	}
 
 	public abstract ELEM get(int[] index);
-
-	public int getSize() {
-		return getSize(shape);
-	}
 
 	public static int getSize(int[] shape) {
 		long a = 1;
@@ -48,14 +46,6 @@ public abstract class Matrix<ELEM> {
 		}
 
 		return (int) a;
-	}
-
-	public boolean isEmpty() {
-		for (int i = 0; i < shape.length; i++)
-			if (shape[i] == 0)
-				return true;
-
-		return false;
 	}
 
 	public String toString() {
@@ -101,6 +91,9 @@ public abstract class Matrix<ELEM> {
 
 	public static <ELEM> Matrix<ELEM> collect(final List<Matrix<ELEM>> rows,
 			int[] rowShape) {
+		if (rowShape == null)
+			rowShape = rows.get(0).shape;
+
 		for (Matrix<ELEM> elem : rows)
 			assert Arrays.equals(elem.shape, rowShape);
 
@@ -176,6 +169,18 @@ public abstract class Matrix<ELEM> {
 		return pos;
 	}
 
+	public void getIndex(int position, int[] index) {
+		assert 0 <= position && shape.length == index.length;
+
+		int i = index.length;
+		while (--i >= 0) {
+			index[i] = position % shape[i];
+			position /= shape[i];
+		}
+
+		assert (position == 0);
+	}
+
 	public boolean nextIndex(int[] index) {
 		assert index.length == shape.length;
 
@@ -249,7 +254,7 @@ public abstract class Matrix<ELEM> {
 	public List<ELEM> toList() {
 		List<ELEM> list = new ArrayList<ELEM>();
 
-		if (isEmpty())
+		if (size == 0)
 			return list;
 
 		int[] index = new int[shape.length];
@@ -264,9 +269,24 @@ public abstract class Matrix<ELEM> {
 		return matrix(matrix.shape, matrix.toList());
 	}
 
+	public static <ELEM> Matrix<ELEM> reshape(final Matrix<ELEM> matrix,
+			int[] shape) {
+		if (matrix.size != getSize(shape))
+			throw new IllegalArgumentException();
+
+		final int[] index2 = new int[matrix.shape.length];
+
+		return new Matrix<ELEM>(shape) {
+			@Override
+			public ELEM get(int[] index) {
+				matrix.getIndex(getPosition(index), index2);
+				return matrix.get(index2);
+			}
+		};
+	}
+
 	public static <ARG, RET> Matrix<RET> apply(
 			final Matrix<Func1<ARG, RET>> func, final Matrix<ARG> arg) {
-
 		final int[] idx = new int[Math.min(func.shape.length, arg.shape.length)];
 
 		for (int i = 0; i < idx.length; i++)
@@ -302,5 +322,50 @@ public abstract class Matrix<ELEM> {
 				return func.apply1(arg.get(index));
 			}
 		};
+	}
+
+	public static Matrix<BoolTerm> constant(int size, final int value) {
+		if (value < 0 || value > size)
+			throw new IllegalArgumentException();
+
+		return new Matrix<BoolTerm>(new int[] { size }) {
+			@Override
+			public BoolTerm get(int[] index) {
+				assert index.length == 1;
+				return BoolTerm.lift(index[0] < value);
+			}
+		};
+	}
+
+	// TODO: we should use Batcher odd-even mergesort 
+	public static Matrix<BoolTerm> count(Matrix<BoolTerm> matrix) {
+		List<BoolTerm> list = matrix.toList();
+
+		for (int i = 0; i < list.size(); i++) {
+			for (int j = i % 2; j + 1 < list.size(); j += 2) {
+				BoolTerm a = list.get(j);
+				BoolTerm b = list.get(j + 1);
+				list.set(j, a.or(b));
+				list.set(j + 1, a.and(b));
+			}
+		}
+
+		return Matrix.matrix(new int[] { list.size() }, list);
+	}
+
+	public static BoolTerm equals(Matrix<BoolTerm> first,
+			Matrix<BoolTerm> second) {
+		if (!Arrays.equals(first.shape, second.shape))
+			throw new IllegalArgumentException();
+
+		BoolTerm term = BoolTerm.TRUE;
+		if (first.size != 0) {
+			int[] index = new int[first.shape.length];
+			do {
+				term = term.and(first.get(index).equ(second.get(index)));
+			} while (first.nextIndex(index));
+		}
+
+		return term;
 	}
 }
