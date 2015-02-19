@@ -16,7 +16,7 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-package org.mmaroti.satset;
+package org.mmaroti.sat;
 
 public abstract class Func2<ARG1, ARG2, RET> extends
 		Func1<ARG1, Func1<ARG2, RET>> {
