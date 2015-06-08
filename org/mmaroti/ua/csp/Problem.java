@@ -122,7 +122,7 @@ public class Problem
 			throw new IllegalArgumentException("Duplicated variable");
 		
 		variables = append(variables, new Variable(name));
-		values = append(values, (1<<size)-1);
+		values = append(values, size < 32 ? (1<<size)-1 : -1);
 	}
 
 	/**
@@ -131,6 +131,9 @@ public class Problem
 	 */
 	public void addConstraint(String[] names, Relation relation)
 	{
+		if( names.length != relation.arity )
+			throw new IllegalArgumentException("Incorrect arity");
+
 		if( relation.arity > input.length )
 		{
 			input = new int[relation.arity];
