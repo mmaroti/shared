@@ -60,7 +60,7 @@ public class CsvFile {
 				if (s.contains("\"") || s.contains("\n"))
 					throw new IllegalStateException(
 							"Fields cannot contain quote and newline characters");
-				
+
 				record[i] = s;
 			}
 
@@ -146,9 +146,42 @@ public class CsvFile {
 		}
 	}
 
+	public int getColumnId(String column) {
+		for (int i = 0; i < header.length; i++)
+			if (header[i].equals(column))
+				return i;
+
+		throw new IllegalArgumentException("Column not found: " + column);
+	}
+
+	public void replace(String column, String old, String value) {
+		int id = getColumnId(column);
+		for (String[] record : records)
+			record[id] = record[id].replace(old, value);
+	}
+
+	public void replace(String old, String value) {
+		for (int id = 0; id < header.length; id++)
+			for (String[] record : records)
+				record[id] = record[id].replace(old, value);
+	}
+
 	public static void main(String[] args) throws IOException {
 		CsvFile file = new CsvFile();
-		file.read(';', "/home/mmaroti/gtk.csv");
-		file.write(',', "/home/mmaroti/haha.csv");
+		file.read(';', "/home/mmaroti/shared/gtk.csv");
+		file.replace(",", ".");
+
+		for (int i = 1; i <= 32; i++) {
+			if (i == 15)
+				continue;
+			file.replace("S" + i, "0", "");
+		}
+		
+		file.replace("A5", "Nem tudom", "");
+		file.replace("A7", "Nem tudom", "");
+		file.replace("A9", "Nem tudom", "");
+		file.replace("A19", "Nem tudom", "");
+
+		file.write(',', "/home/mmaroti/shared/gtk3.csv");
 	}
 }
