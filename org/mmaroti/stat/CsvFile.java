@@ -154,34 +154,120 @@ public class CsvFile {
 		throw new IllegalArgumentException("Column not found: " + column);
 	}
 
-	public void replace(String column, String old, String value) {
+	public void replaceValue(String column, String oldval, String newval) {
 		int id = getColumnId(column);
 		for (String[] record : records)
-			record[id] = record[id].replace(old, value);
+			record[id] = record[id].replace(oldval, newval);
 	}
 
-	public void replace(String old, String value) {
+	public void replaceValue(String oldval, String newval) {
 		for (int id = 0; id < header.length; id++)
 			for (String[] record : records)
-				record[id] = record[id].replace(old, value);
+				record[id] = record[id].replace(oldval, newval);
+	}
+
+	public static String[] append(String[] array, String value) {
+		String[] a = new String[array.length + 1];
+		System.arraycopy(array, 0, a, 0, array.length);
+		a[array.length] = value;
+		return a;
+	}
+
+	public static String[] insert(String[] array, int pos, String value) {
+		String[] a = new String[array.length + 1];
+		System.arraycopy(array, 0, a, 0, pos);
+		System.arraycopy(array, pos, a, pos + 1, array.length - pos);
+		a[pos] = value;
+		return a;
+	}
+
+	public static String[] remove(String[] array, int pos) {
+		assert (array.length > 0);
+
+		String[] a = new String[array.length - 1];
+		System.arraycopy(array, 0, a, 0, pos);
+		System.arraycopy(array, pos + 1, a, pos, array.length - pos - 1);
+		return a;
+	}
+
+	public void splitColumn(String column, String newcol, String oldval) {
+		int id = getColumnId(column);
+		header = insert(header, id + 1, newcol);
+
+		for (int i = 0; i < records.size(); i++) {
+			String[] r = records.get(i);
+			r = insert(r, id + 1, "");
+
+			if (r[id].equals(oldval)) {
+				r[id] = "0";
+				r[id + 1] = "1";
+			} else if (r[id].length() > 0)
+				r[id + 1] = "0";
+
+			records.set(i, r);
+		}
+	}
+
+	public void removeColumn(String column) {
+		int id = getColumnId(column);
+
+		header = remove(header, id);
+		for (int i = 0; i < records.size(); i++) {
+			String[] r = records.get(i);
+			r = remove(r, id);
+			records.set(i, r);
+		}
 	}
 
 	public static void main(String[] args) throws IOException {
 		CsvFile file = new CsvFile();
 		file.read(';', "/home/mmaroti/shared/gtk.csv");
-		file.replace(",", ".");
+		file.replaceValue(",", ".");
 
 		for (int i = 1; i <= 32; i++) {
 			if (i == 15)
 				continue;
-			file.replace("S" + i, "0", "");
+
+			// file.replace("S" + i, "0", "");
+			file.splitColumn("S" + i, "S" + i + "n", "0");
 		}
 		
-		file.replace("A5", "Nem tudom", "");
-		file.replace("A7", "Nem tudom", "");
-		file.replace("A9", "Nem tudom", "");
-		file.replace("A19", "Nem tudom", "");
+		file.removeColumn("﻿Ssz");
+		file.removeColumn("részsúly");
+		file.removeColumn("TEAOR_2");
+		file.removeColumn("P5");
+		file.removeColumn("P9");
+		file.removeColumn("P12");
+		file.removeColumn("Emailcím");
+		file.removeColumn("megye2");
+		file.removeColumn("létszám_kat2");
+		file.removeColumn("kor");
+		file.removeColumn("vállalk_piaca");
+		file.removeColumn("növ_célok");
+		file.removeColumn("tervez_merőfelv");
+		file.removeColumn("tervez_elbocsátást");
+		file.removeColumn("van_tartósan_betöltetlen");
+		file.removeColumn("családi_váll");
+		file.removeColumn("legmag_isk_végz");
+		file.removeColumn("hallotte_szegeden_megepülő_eli");
+		file.removeColumn("lesze_hatása_vállalkozására");
+		file.removeColumn("egy_millió_befektetése");
+		file.removeColumn("megtakarításai_mennyit_tud_vásárolni");
+		file.removeColumn("család_felhazsnálná_vállalkozás_vagyonát");
+		file.removeColumn("mikor__kezdene_új_beruházásba");
+		file.removeColumn("honnan_értesül_pályázati_lehetőségekről");
+		file.removeColumn("P9_egyéb");
+		file.removeColumn("P9egyéb_név");
+		file.removeColumn("P12_egyéb");
+		file.removeColumn("P_12egyébnév");
+		file.removeColumn("P_5egyéb");
+		file.removeColumn("P5_egyéb_név");
+		file.removeColumn("súly_azegészhez");
+		file.removeColumn("korcsop");
 
+		file.replaceValue("P10", "", "x");
+		
 		file.write(',', "/home/mmaroti/shared/gtk3.csv");
+
 	}
 }
