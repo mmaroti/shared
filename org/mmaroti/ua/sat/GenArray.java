@@ -20,7 +20,7 @@ package org.mmaroti.ua.sat;
 
 import java.util.*;
 
-public class ObjArray<ELEM> {
+public class GenArray<ELEM> {
 	private final int[] shape;
 	private final int[] steps;
 	private final int offset;
@@ -44,7 +44,7 @@ public class ObjArray<ELEM> {
 		return elems[pos];
 	}
 
-	private ObjArray(final int[] shape, final int[] steps, final int offset,
+	private GenArray(final int[] shape, final int[] steps, final int offset,
 			final ELEM[] elems) {
 		assert shape.length == steps.length;
 
@@ -58,7 +58,7 @@ public class ObjArray<ELEM> {
 		public ELEM elem(final int[] index);
 	}
 
-	public static <ELEM> ObjArray<ELEM> generate(final int[] shape,
+	public static <ELEM> GenArray<ELEM> generate(final int[] shape,
 			final Gen<ELEM> gen) {
 		int[] steps = new int[shape.length];
 
@@ -82,19 +82,19 @@ public class ObjArray<ELEM> {
 				index[i] = 0;
 		}
 
-		return new ObjArray<ELEM>(shape, steps, 0, elems);
+		return new GenArray<ELEM>(shape, steps, 0, elems);
 	}
 
-	public static <ELEM> ObjArray<ELEM> constant(final int[] shape,
+	public static <ELEM> GenArray<ELEM> constant(final int[] shape,
 			final ELEM elem) {
 		@SuppressWarnings("unchecked")
 		ELEM[] elems = (ELEM[]) new Object[1];
 		elems[0] = elem;
 
-		return new ObjArray<ELEM>(shape, new int[shape.length], 0, elems);
+		return new GenArray<ELEM>(shape, new int[shape.length], 0, elems);
 	}
 
-	public static <ELEM> ObjArray<ELEM> vector(final Collection<ELEM> elems) {
+	public static <ELEM> GenArray<ELEM> vector(final Collection<ELEM> elems) {
 		int size = elems.size();
 
 		@SuppressWarnings("unchecked")
@@ -104,10 +104,10 @@ public class ObjArray<ELEM> {
 		for (ELEM elem : elems)
 			es[pos++] = elem;
 
-		return new ObjArray<ELEM>(new int[] { size }, new int[] { 1 }, 0, es);
+		return new GenArray<ELEM>(new int[] { size }, new int[] { 1 }, 0, es);
 	}
 
-	public static <ELEM> ObjArray<ELEM> matrix(final int[] shape,
+	public static <ELEM> GenArray<ELEM> matrix(final int[] shape,
 			final Collection<ELEM> elems) {
 		int[] steps = new int[shape.length];
 
@@ -126,10 +126,10 @@ public class ObjArray<ELEM> {
 		for (ELEM elem : elems)
 			es[pos++] = elem;
 
-		return new ObjArray<ELEM>(shape, steps, 0, es);
+		return new GenArray<ELEM>(shape, steps, 0, es);
 	}
 
-	public ObjArray<ELEM> reshape(int[] shape2, int[] map) {
+	public GenArray<ELEM> reshape(int[] shape2, int[] map) {
 		assert shape2.length == map.length;
 
 		int[] steps2 = new int[shape2.length];
@@ -144,7 +144,46 @@ public class ObjArray<ELEM> {
 			}
 		}
 
-		return new ObjArray<ELEM>(shape2, steps2, offset, elems);
+		return new GenArray<ELEM>(shape2, steps2, offset, elems);
+	}
+
+	public interface Fun<ELEM, ELEM2> {
+		public ELEM2 map(ELEM elem);
+	}
+
+	public <ELEM2> GenArray<ELEM2> map(Fun<ELEM, ELEM2> fun) {
+		int[] steps2 = new int[shape.length];
+
+		int size = 1;
+		for (int i = 0; i < shape.length; i++) {
+			assert 0 <= shape[i];
+			steps2[i] = size;
+			size *= shape[i];
+		}
+
+		@SuppressWarnings("unchecked")
+		ELEM2[] elems2 = (ELEM2[]) new Object[size];
+
+		int[] index = new int[shape.length];
+		int pos1 = offset;
+		int pos2 = 0;
+		while (pos2 < size) {
+			elems2[pos2] = fun.map(elems[pos1]);
+			pos2 += 1;
+
+			for (int i = 0; i < index.length; i++) {
+				pos1 += steps[i];
+				index[i] += 1;
+
+				if (index[i] == shape[i]) {
+					pos1 -= shape[i] * steps[i];
+					index[i] = 0;
+				} else
+					break;
+			}
+		}
+
+		return new GenArray<ELEM2>(shape, steps2, 0, elems2);
 	}
 
 	public String toString() {
@@ -174,7 +213,7 @@ public class ObjArray<ELEM> {
 	}
 
 	public static void main(String[] args) {
-		ObjArray<Integer> array = ObjArray.generate(new int[] { 3, 3 },
+		GenArray<Integer> array = GenArray.generate(new int[] { 3, 3 },
 				new Gen<Integer>() {
 					@Override
 					public Integer elem(int[] index) {
@@ -183,7 +222,7 @@ public class ObjArray<ELEM> {
 				});
 		System.out.println(array);
 
-		array = ObjArray.constant(new int[] { 2, 3 }, 0);
+		array = GenArray.constant(new int[] { 2, 3 }, 0);
 		System.out.println(array);
 	}
 }
