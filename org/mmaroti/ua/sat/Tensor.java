@@ -75,6 +75,11 @@ public class Tensor<ELEM> implements Iterable<ELEM> {
 		return elems[pos];
 	}
 
+	public ELEM get() {
+		assert elems.length == 1;
+		return elems[0];
+	}
+
 	@SuppressWarnings("unchecked")
 	private Tensor(final int[] shape) {
 		this.shape = shape;
@@ -91,7 +96,7 @@ public class Tensor<ELEM> implements Iterable<ELEM> {
 	}
 
 	public static <ELEM> Tensor<ELEM> generate(final int[] shape,
-			final Func<ELEM, int[]> func) {
+			final Func1<ELEM, int[]> func) {
 		Tensor<ELEM> tensor = new Tensor<ELEM>(shape);
 
 		int[] index = new int[shape.length];
@@ -111,7 +116,7 @@ public class Tensor<ELEM> implements Iterable<ELEM> {
 	}
 
 	public static <ELEM> Tensor<ELEM> generate(int dim,
-			final Func<ELEM, Integer> func) {
+			final Func1<ELEM, Integer> func) {
 		Tensor<ELEM> tensor = new Tensor<ELEM>(new int[] { dim });
 
 		for (int i = 0; i < dim; i++)
@@ -174,7 +179,7 @@ public class Tensor<ELEM> implements Iterable<ELEM> {
 		assert arg.getOrder() == map.length;
 		final int[] index = new int[map.length];
 
-		return Tensor.generate(shape, new Func<ELEM, int[]>() {
+		return Tensor.generate(shape, new Func1<ELEM, int[]>() {
 			@Override
 			public ELEM call(int[] elem) {
 				for (int i = 0; i < index.length; i++)
@@ -184,7 +189,7 @@ public class Tensor<ELEM> implements Iterable<ELEM> {
 		});
 	}
 
-	public static <ELEM, ELEM1> Tensor<ELEM> map(Func<ELEM, ELEM1> func,
+	public static <ELEM, ELEM1> Tensor<ELEM> map(Func1<ELEM, ELEM1> func,
 			Tensor<ELEM1> arg) {
 		Tensor<ELEM> tensor = new Tensor<ELEM>(arg.shape);
 
@@ -230,7 +235,7 @@ public class Tensor<ELEM> implements Iterable<ELEM> {
 	}
 
 	public static <ELEM1, ELEM2> Tensor<ELEM2> collapse(Tensor<ELEM1> arg,
-			int proj, Func<ELEM2, Iterable<ELEM1>> func) {
+			int proj, Func1<ELEM2, Iterable<ELEM1>> func) {
 
 		int[] shape1 = new int[proj];
 		System.arraycopy(arg.shape, 0, shape1, 0, proj);
@@ -269,8 +274,8 @@ public class Tensor<ELEM> implements Iterable<ELEM> {
 	}
 
 	@SafeVarargs
-	public static <ELEM> Tensor<ELEM> reduce(Func<ELEM, Iterable<ELEM>> prod,
-			Func<ELEM, Iterable<ELEM>> sum, String names, Named<ELEM>... parts) {
+	public static <ELEM> Tensor<ELEM> reduce(Func1<ELEM, Iterable<ELEM>> prod,
+			Func1<ELEM, Iterable<ELEM>> sum, String names, Named<ELEM>... parts) {
 		assert parts.length > 0;
 
 		TreeMap<Character, Integer> dims = new TreeMap<Character, Integer>();
@@ -340,7 +345,7 @@ public class Tensor<ELEM> implements Iterable<ELEM> {
 				Arrays.asList(0, 1, 0, 1, 0, 0, 0, 0, 1));
 		System.out.println(m2);
 
-		Tensor<Integer> m3 = Tensor.reduce(Func.INT_PROD, Func.INT_SUM, "ac",
+		Tensor<Integer> m3 = Tensor.reduce(Func1.INT_PROD, Func1.INT_SUM, "ac",
 				m1.named("ab"), m2.named("bc"));
 		System.out.println(m3);
 
@@ -350,7 +355,7 @@ public class Tensor<ELEM> implements Iterable<ELEM> {
 		m2 = Tensor.vector(Arrays.asList(10, 20));
 		System.out.println(m2);
 
-		m3 = Tensor.reduce(Func.INT_PROD, Func.INT_SUM, "ab", m1.named("a"),
+		m3 = Tensor.reduce(Func1.INT_PROD, Func1.INT_SUM, "ab", m1.named("a"),
 				m2.named("b"));
 		System.out.println(m3);
 	}

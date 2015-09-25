@@ -21,10 +21,10 @@ package org.mmaroti.ua.sat;
 public abstract class Func2<ELEM, ELEM1, ELEM2> {
 	public abstract ELEM call(ELEM1 elem1, ELEM2 elem2);
 
-	public <ELEM3> Func<ELEM, ELEM3> combine(final Func<ELEM1, ELEM3> fun1,
-			final Func<ELEM2, ELEM3> fun2) {
+	public <ELEM3> Func1<ELEM, ELEM3> combine(final Func1<ELEM1, ELEM3> fun1,
+			final Func1<ELEM2, ELEM3> fun2) {
 		final Func2<ELEM, ELEM1, ELEM2> me = this;
-		return new Func<ELEM, ELEM3>() {
+		return new Func1<ELEM, ELEM3>() {
 			@Override
 			public ELEM call(ELEM3 elem3) {
 				return me.call(fun1.call(elem3), fun2.call(elem3));

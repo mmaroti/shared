@@ -18,12 +18,12 @@
 
 package org.mmaroti.ua.sat;
 
-public abstract class Func<ELEM, ELEM1> {
+public abstract class Func1<ELEM, ELEM1> {
 	public abstract ELEM call(ELEM1 elem);
 
-	public <ELEM2> Func<ELEM, ELEM2> combine(final Func<ELEM1, ELEM2> fun) {
-		final Func<ELEM, ELEM1> me = this;
-		return new Func<ELEM, ELEM2>() {
+	public <ELEM2> Func1<ELEM, ELEM2> combine(final Func1<ELEM1, ELEM2> fun) {
+		final Func1<ELEM, ELEM1> me = this;
+		return new Func1<ELEM, ELEM2>() {
 			@Override
 			public ELEM call(ELEM2 elem) {
 				return me.call(fun.call(elem));
@@ -33,7 +33,7 @@ public abstract class Func<ELEM, ELEM1> {
 
 	public <ELEM2, ELEM3> Func2<ELEM, ELEM2, ELEM3> combine(
 			final Func2<ELEM1, ELEM2, ELEM3> fun) {
-		final Func<ELEM, ELEM1> me = this;
+		final Func1<ELEM, ELEM1> me = this;
 		return new Func2<ELEM, ELEM2, ELEM3>() {
 			@Override
 			public ELEM call(ELEM2 elem2, ELEM3 elem3) {
@@ -42,8 +42,8 @@ public abstract class Func<ELEM, ELEM1> {
 		};
 	}
 
-	public static <ELEM, ELEM1> Func<ELEM, ELEM1> constant(final ELEM elem) {
-		return new Func<ELEM, ELEM1>() {
+	public static <ELEM, ELEM1> Func1<ELEM, ELEM1> constant(final ELEM elem) {
+		return new Func1<ELEM, ELEM1>() {
 			@Override
 			public ELEM call(ELEM1 a) {
 				return elem;
@@ -51,9 +51,9 @@ public abstract class Func<ELEM, ELEM1> {
 		};
 	}
 
-	public static <ELEM> Func<ELEM, Iterable<ELEM>> reducer(final ELEM unit,
+	public static <ELEM> Func1<ELEM, Iterable<ELEM>> reducer(final ELEM unit,
 			final Func2<ELEM, ELEM, ELEM> prod) {
-		return new Func<ELEM, Iterable<ELEM>>() {
+		return new Func1<ELEM, Iterable<ELEM>>() {
 			@Override
 			public ELEM call(Iterable<ELEM> elems) {
 				ELEM value = unit;
@@ -65,7 +65,7 @@ public abstract class Func<ELEM, ELEM1> {
 	}
 
 	@SuppressWarnings("rawtypes")
-	public final static Func OBJ_ID = new Func() {
+	public final static Func1 OBJ_ID = new Func1() {
 		@Override
 		public Object call(Object elem) {
 			return elem;
@@ -73,36 +73,36 @@ public abstract class Func<ELEM, ELEM1> {
 	};
 
 	@SuppressWarnings("unchecked")
-	public final static Func<Integer, Integer> INT_ID = OBJ_ID;
+	public final static Func1<Integer, Integer> INT_ID = OBJ_ID;
 
 	@SuppressWarnings("unchecked")
-	public final static Func<Boolean, Boolean> BOOL_ID = OBJ_ID;
+	public final static Func1<Boolean, Boolean> BOOL_ID = OBJ_ID;
 
 	@SuppressWarnings("unchecked")
-	public final static Func<Double, Double> REAL_ID = OBJ_ID;
+	public final static Func1<Double, Double> REAL_ID = OBJ_ID;
 
-	public final static Func<Integer, Integer> INT_NEG = new Func<Integer, Integer>() {
+	public final static Func1<Integer, Integer> INT_NEG = new Func1<Integer, Integer>() {
 		@Override
 		public Integer call(Integer elem) {
 			return -elem;
 		}
 	};
 
-	public final static Func<Boolean, Boolean> BOOL_NEG = new Func<Boolean, Boolean>() {
+	public final static Func1<Boolean, Boolean> BOOL_NEG = new Func1<Boolean, Boolean>() {
 		@Override
 		public Boolean call(Boolean elem) {
 			return !elem;
 		}
 	};
 
-	public final static Func<Double, Double> REAL_NEG = new Func<Double, Double>() {
+	public final static Func1<Double, Double> REAL_NEG = new Func1<Double, Double>() {
 		@Override
 		public Double call(Double elem) {
 			return -elem;
 		}
 	};
 
-	public final static Func<Integer, Iterable<Integer>> INT_SUM = new Func<Integer, Iterable<Integer>>() {
+	public final static Func1<Integer, Iterable<Integer>> INT_SUM = new Func1<Integer, Iterable<Integer>>() {
 		@Override
 		public Integer call(Iterable<Integer> elems) {
 			int sum = 0;
@@ -112,7 +112,7 @@ public abstract class Func<ELEM, ELEM1> {
 		}
 	};
 
-	public final static Func<Integer, Iterable<Integer>> INT_PROD = new Func<Integer, Iterable<Integer>>() {
+	public final static Func1<Integer, Iterable<Integer>> INT_PROD = new Func1<Integer, Iterable<Integer>>() {
 		@Override
 		public Integer call(Iterable<Integer> elems) {
 			int prod = 1;
@@ -122,7 +122,7 @@ public abstract class Func<ELEM, ELEM1> {
 		}
 	};
 
-	public final static Func<Double, Iterable<Double>> REAL_SUM = new Func<Double, Iterable<Double>>() {
+	public final static Func1<Double, Iterable<Double>> REAL_SUM = new Func1<Double, Iterable<Double>>() {
 		@Override
 		public Double call(Iterable<Double> elems) {
 			double sum = 0;
@@ -132,7 +132,7 @@ public abstract class Func<ELEM, ELEM1> {
 		}
 	};
 
-	public final static Func<Double, Iterable<Double>> REAL_PROD = new Func<Double, Iterable<Double>>() {
+	public final static Func1<Double, Iterable<Double>> REAL_PROD = new Func1<Double, Iterable<Double>>() {
 		@Override
 		public Double call(Iterable<Double> elems) {
 			double prod = 1.0;
@@ -142,7 +142,7 @@ public abstract class Func<ELEM, ELEM1> {
 		}
 	};
 
-	public final static Func<Boolean, Iterable<Boolean>> BOOL_SUM = new Func<Boolean, Iterable<Boolean>>() {
+	public final static Func1<Boolean, Iterable<Boolean>> BOOL_SUM = new Func1<Boolean, Iterable<Boolean>>() {
 		@Override
 		public Boolean call(Iterable<Boolean> elems) {
 			boolean sum = false;
@@ -152,7 +152,7 @@ public abstract class Func<ELEM, ELEM1> {
 		}
 	};
 
-	public final static Func<Boolean, Iterable<Boolean>> BOOL_ANY = new Func<Boolean, Iterable<Boolean>>() {
+	public final static Func1<Boolean, Iterable<Boolean>> BOOL_ANY = new Func1<Boolean, Iterable<Boolean>>() {
 		@Override
 		public Boolean call(Iterable<Boolean> elems) {
 			boolean any = false;
@@ -162,7 +162,7 @@ public abstract class Func<ELEM, ELEM1> {
 		}
 	};
 
-	public final static Func<Boolean, Iterable<Boolean>> BOOL_ALL = new Func<Boolean, Iterable<Boolean>>() {
+	public final static Func1<Boolean, Iterable<Boolean>> BOOL_ALL = new Func1<Boolean, Iterable<Boolean>>() {
 		@Override
 		public Boolean call(Iterable<Boolean> elems) {
 			boolean all = true;
@@ -172,7 +172,7 @@ public abstract class Func<ELEM, ELEM1> {
 		}
 	};
 
-	public final static Func<Boolean, Iterable<Boolean>> BOOL_ONE = new Func<Boolean, Iterable<Boolean>>() {
+	public final static Func1<Boolean, Iterable<Boolean>> BOOL_ONE = new Func1<Boolean, Iterable<Boolean>>() {
 		@Override
 		public Boolean call(Iterable<Boolean> elems) {
 			boolean one = false;
