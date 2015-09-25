@@ -28,7 +28,7 @@ public abstract class Problem {
 		this.shapes = shapes;
 	}
 
-	public abstract <BOOL> BOOL calc(Bool<BOOL> bool,
+	public abstract <BOOL> BOOL compute(Calculator<BOOL> calc,
 			Map<String, Tensor<BOOL>> tensors);
 
 	public static <BOOL> void print(Map<String, Tensor<BOOL>> tensors,
@@ -41,7 +41,7 @@ public abstract class Problem {
 	}
 
 	public boolean check(Map<String, Tensor<Boolean>> tensors) {
-		return calc(Bool.BOOLEAN, tensors);
+		return compute(Calculator.BOOLEAN, tensors);
 	}
 
 	public Map<String, Tensor<Boolean>> solveOne(SatSolver solver) {
@@ -51,7 +51,7 @@ public abstract class Problem {
 		for (String key : shapes.keySet())
 			tensors.put(key, builder.tensor(shapes.get(key)));
 
-		builder.ensure(calc(builder, tensors));
+		builder.ensure(compute(builder, tensors));
 		final boolean[] sol = solver.solve(builder.variables, builder.clauses);
 		if (sol == null)
 			return null;
@@ -72,18 +72,18 @@ public abstract class Problem {
 
 	public static void main(String[] args) {
 		Map<String, int[]> shapes = new HashMap<String, int[]>();
-		shapes.put("f", new int[] { 2, 2 });
+		shapes.put("f", new int[] { 10, 10 });
 
 		Problem problem = new Problem(shapes) {
 			@Override
-			public <BOOL> BOOL calc(Bool<BOOL> bool,
+			public <BOOL> BOOL compute(Calculator<BOOL> calc,
 					Map<String, Tensor<BOOL>> tensors) {
-				BOOL a = Tensor.collapse(tensors.get("f"), 2, bool.SUM).get();
-				BOOL b = Tensor.collapse(tensors.get("f"), 2, bool.ANY).get();
-				return bool.and(bool.not(a), b);
+				BOOL a = Tensor.collapse(tensors.get("f"), 2, calc.SUM).get();
+				BOOL b = Tensor.collapse(tensors.get("f"), 2, calc.ANY).get();
+				return calc.and(calc.not(a), b);
 			}
 		};
 
-		Problem.print(problem.solveOne(new MiniSat()), System.out);
+		System.out.println(problem.solveOne(new MiniSat()).size());
 	}
 }

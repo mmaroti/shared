@@ -20,7 +20,7 @@ package org.mmaroti.ua.sat;
 
 import java.util.*;
 
-public class SatBuilder extends Bool<Integer> {
+public class SatBuilder extends Calculator<Integer> {
 	int variables;
 	ArrayList<int[]> clauses = new ArrayList<int[]>();
 

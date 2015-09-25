@@ -18,7 +18,7 @@
 
 package org.mmaroti.ua.sat;
 
-public abstract class Bool<BOOL> {
+public abstract class Calculator<BOOL> {
 	public final BOOL FALSE;
 	public final BOOL TRUE;
 
@@ -55,7 +55,7 @@ public abstract class Bool<BOOL> {
 	public final Func1<BOOL, Iterable<BOOL>> ANY;
 	public final Func1<BOOL, Iterable<BOOL>> SUM;
 
-	public Bool(BOOL TRUE) {
+	public Calculator(BOOL TRUE) {
 		this.TRUE = TRUE;
 		FALSE = not(TRUE);
 
@@ -114,7 +114,7 @@ public abstract class Bool<BOOL> {
 		SUM = Func1.reducer(FALSE, ADD);
 	}
 
-	public static Bool<Boolean> BOOLEAN = new Bool<Boolean>(true) {
+	public static Calculator<Boolean> BOOLEAN = new Calculator<Boolean>(true) {
 		@Override
 		public Boolean not(Boolean b) {
 			return !b;
