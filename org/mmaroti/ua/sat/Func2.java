@@ -45,16 +45,22 @@ public abstract class Func2<ELEM, ELEM1, ELEM2> {
 		};
 	}
 
+	public static <ELEM, ELEM1, ELEM2> Func2<ELEM, ELEM1, ELEM2> constant(
+			final ELEM elem) {
+		return new Func2<ELEM, ELEM1, ELEM2>() {
+			@Override
+			public ELEM call(ELEM1 a1, ELEM2 a2) {
+				return elem;
+			}
+		};
+	}
+
 	@SuppressWarnings("rawtypes")
 	public final static Func2 OBJ_EQ = new Func2() {
 		@Override
 		public Boolean call(Object elem1, Object elem2) {
-			if (elem1 == elem2)
-				return Boolean.TRUE;
-			else if (elem1 == null || elem2 == null)
-				return Boolean.FALSE;
-			else
-				return elem1.equals(elem2);
+			assert elem1 != null && elem2 != null;
+			return elem1.equals(elem2);
 		}
 	};
 

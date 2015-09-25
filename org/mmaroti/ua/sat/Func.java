@@ -42,6 +42,28 @@ public abstract class Func<ELEM, ELEM1> {
 		};
 	}
 
+	public static <ELEM, ELEM1> Func<ELEM, ELEM1> constant(final ELEM elem) {
+		return new Func<ELEM, ELEM1>() {
+			@Override
+			public ELEM call(ELEM1 a) {
+				return elem;
+			}
+		};
+	}
+
+	public static <ELEM> Func<ELEM, Iterable<ELEM>> reducer(final ELEM unit,
+			final Func2<ELEM, ELEM, ELEM> prod) {
+		return new Func<ELEM, Iterable<ELEM>>() {
+			@Override
+			public ELEM call(Iterable<ELEM> elems) {
+				ELEM value = unit;
+				for (ELEM elem : elems)
+					value = prod.call(value, elem);
+				return value;
+			}
+		};
+	}
+
 	@SuppressWarnings("rawtypes")
 	public final static Func OBJ_ID = new Func() {
 		@Override
@@ -77,6 +99,92 @@ public abstract class Func<ELEM, ELEM1> {
 		@Override
 		public Double call(Double elem) {
 			return -elem;
+		}
+	};
+
+	public final static Func<Integer, Iterable<Integer>> INT_SUM = new Func<Integer, Iterable<Integer>>() {
+		@Override
+		public Integer call(Iterable<Integer> elems) {
+			int sum = 0;
+			for (Integer elem : elems)
+				sum += elem;
+			return sum;
+		}
+	};
+
+	public final static Func<Integer, Iterable<Integer>> INT_PROD = new Func<Integer, Iterable<Integer>>() {
+		@Override
+		public Integer call(Iterable<Integer> elems) {
+			int prod = 1;
+			for (Integer elem : elems)
+				prod *= elem;
+			return prod;
+		}
+	};
+
+	public final static Func<Double, Iterable<Double>> REAL_SUM = new Func<Double, Iterable<Double>>() {
+		@Override
+		public Double call(Iterable<Double> elems) {
+			double sum = 0;
+			for (Double elem : elems)
+				sum += elem;
+			return sum;
+		}
+	};
+
+	public final static Func<Double, Iterable<Double>> REAL_PROD = new Func<Double, Iterable<Double>>() {
+		@Override
+		public Double call(Iterable<Double> elems) {
+			double prod = 1.0;
+			for (Double elem : elems)
+				prod *= elem;
+			return prod;
+		}
+	};
+
+	public final static Func<Boolean, Iterable<Boolean>> BOOL_SUM = new Func<Boolean, Iterable<Boolean>>() {
+		@Override
+		public Boolean call(Iterable<Boolean> elems) {
+			boolean sum = false;
+			for (Boolean elem : elems)
+				sum ^= elem;
+			return sum;
+		}
+	};
+
+	public final static Func<Boolean, Iterable<Boolean>> BOOL_ANY = new Func<Boolean, Iterable<Boolean>>() {
+		@Override
+		public Boolean call(Iterable<Boolean> elems) {
+			boolean any = false;
+			for (Boolean elem : elems)
+				any |= elem;
+			return any;
+		}
+	};
+
+	public final static Func<Boolean, Iterable<Boolean>> BOOL_ALL = new Func<Boolean, Iterable<Boolean>>() {
+		@Override
+		public Boolean call(Iterable<Boolean> elems) {
+			boolean all = true;
+			for (Boolean elem : elems)
+				all &= elem;
+			return all;
+		}
+	};
+
+	public final static Func<Boolean, Iterable<Boolean>> BOOL_ONE = new Func<Boolean, Iterable<Boolean>>() {
+		@Override
+		public Boolean call(Iterable<Boolean> elems) {
+			boolean one = false;
+			for (Boolean elem : elems) {
+				if (elem) {
+					if (one)
+						return false;
+
+					one = true;
+				}
+			}
+			return one;
 		}
 	};
 }
