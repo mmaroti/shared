@@ -76,22 +76,12 @@ public abstract class Func1<ELEM, ELEM1> {
 	public final static Func1<Integer, Integer> INT_ID = OBJ_ID;
 
 	@SuppressWarnings("unchecked")
-	public final static Func1<Boolean, Boolean> BOOL_ID = OBJ_ID;
-
-	@SuppressWarnings("unchecked")
 	public final static Func1<Double, Double> REAL_ID = OBJ_ID;
 
 	public final static Func1<Integer, Integer> INT_NEG = new Func1<Integer, Integer>() {
 		@Override
 		public Integer call(Integer elem) {
 			return -elem;
-		}
-	};
-
-	public final static Func1<Boolean, Boolean> BOOL_NEG = new Func1<Boolean, Boolean>() {
-		@Override
-		public Boolean call(Boolean elem) {
-			return !elem;
 		}
 	};
 
@@ -139,52 +129,6 @@ public abstract class Func1<ELEM, ELEM1> {
 			for (Double elem : elems)
 				prod *= elem;
 			return prod;
-		}
-	};
-
-	public final static Func1<Boolean, Iterable<Boolean>> BOOL_SUM = new Func1<Boolean, Iterable<Boolean>>() {
-		@Override
-		public Boolean call(Iterable<Boolean> elems) {
-			boolean sum = false;
-			for (Boolean elem : elems)
-				sum ^= elem;
-			return sum;
-		}
-	};
-
-	public final static Func1<Boolean, Iterable<Boolean>> BOOL_ANY = new Func1<Boolean, Iterable<Boolean>>() {
-		@Override
-		public Boolean call(Iterable<Boolean> elems) {
-			boolean any = false;
-			for (Boolean elem : elems)
-				any |= elem;
-			return any;
-		}
-	};
-
-	public final static Func1<Boolean, Iterable<Boolean>> BOOL_ALL = new Func1<Boolean, Iterable<Boolean>>() {
-		@Override
-		public Boolean call(Iterable<Boolean> elems) {
-			boolean all = true;
-			for (Boolean elem : elems)
-				all &= elem;
-			return all;
-		}
-	};
-
-	public final static Func1<Boolean, Iterable<Boolean>> BOOL_ONE = new Func1<Boolean, Iterable<Boolean>>() {
-		@Override
-		public Boolean call(Iterable<Boolean> elems) {
-			boolean one = false;
-			for (Boolean elem : elems) {
-				if (elem) {
-					if (one)
-						return false;
-
-					one = true;
-				}
-			}
-			return one;
 		}
 	};
 }

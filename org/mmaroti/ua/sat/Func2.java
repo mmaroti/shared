@@ -68,9 +68,6 @@ public abstract class Func2<ELEM, ELEM1, ELEM2> {
 	public final static Func2<Boolean, Integer, Integer> INT_EQ = OBJ_EQ;
 
 	@SuppressWarnings("unchecked")
-	public final static Func2<Boolean, Boolean, Boolean> BOOL_EQ = OBJ_EQ;
-
-	@SuppressWarnings("unchecked")
 	public final static Func2<Boolean, Double, Double> REAL_EQ = OBJ_EQ;
 
 	@SuppressWarnings("rawtypes")
@@ -85,9 +82,6 @@ public abstract class Func2<ELEM, ELEM1, ELEM2> {
 	public final static Func2<Integer, Integer, Integer> INT_FST = OBJ_FST;
 
 	@SuppressWarnings("unchecked")
-	public final static Func2<Boolean, Boolean, Boolean> BOOL_FST = OBJ_FST;
-
-	@SuppressWarnings("unchecked")
 	public final static Func2<Double, Double, Double> REAL_FST = OBJ_FST;
 
 	@SuppressWarnings("rawtypes")
@@ -100,9 +94,6 @@ public abstract class Func2<ELEM, ELEM1, ELEM2> {
 
 	@SuppressWarnings("unchecked")
 	public final static Func2<Integer, Integer, Integer> INT_SND = OBJ_SND;
-
-	@SuppressWarnings("unchecked")
-	public final static Func2<Boolean, Boolean, Boolean> BOOL_SND = OBJ_SND;
 
 	@SuppressWarnings("unchecked")
 	public final static Func2<Double, Double, Double> REAL_SND = OBJ_SND;
@@ -127,35 +118,6 @@ public abstract class Func2<ELEM, ELEM1, ELEM2> {
 			return elem1.intValue() <= elem2.intValue();
 		}
 	};
-
-	public final static Func2<Boolean, Boolean, Boolean> BOOL_AND = new Func2<Boolean, Boolean, Boolean>() {
-		@Override
-		public Boolean call(Boolean elem1, Boolean elem2) {
-			return elem1 && elem2;
-		}
-	};
-
-	public final static Func2<Boolean, Boolean, Boolean> BOOL_OR = new Func2<Boolean, Boolean, Boolean>() {
-		@Override
-		public Boolean call(Boolean elem1, Boolean elem2) {
-			return elem1 || elem2;
-		}
-	};
-
-	public final static Func2<Boolean, Boolean, Boolean> BOOL_ADD = new Func2<Boolean, Boolean, Boolean>() {
-		@Override
-		public Boolean call(Boolean elem1, Boolean elem2) {
-			return elem1 ? !elem2 : elem2;
-		}
-	};
-
-	public final static Func2<Boolean, Boolean, Boolean> BOOL_IMP = new Func2<Boolean, Boolean, Boolean>() {
-		@Override
-		public Boolean call(Boolean elem1, Boolean elem2) {
-			return !elem1 || elem2;
-		}
-	};
-
 	public final static Func2<Double, Double, Double> REAL_ADD = new Func2<Double, Double, Double>() {
 		@Override
 		public Double call(Double elem1, Double elem2) {

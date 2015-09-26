@@ -18,7 +18,6 @@
 
 package org.mmaroti.ua.sat;
 
-import java.io.PrintStream;
 import java.util.*;
 
 public abstract class Problem {
@@ -28,31 +27,22 @@ public abstract class Problem {
 		this.shapes = shapes;
 	}
 
-	public abstract <BOOL> BOOL compute(Calculator<BOOL> calc,
+	public abstract <BOOL> BOOL compute(BoolAlg<BOOL> alg,
 			Map<String, Tensor<BOOL>> tensors);
 
-	public static <BOOL> void print(Map<String, Tensor<BOOL>> tensors,
-			PrintStream stream) {
-		if (!(tensors instanceof TreeMap))
-			tensors = new TreeMap<String, Tensor<BOOL>>(tensors);
-
-		for (String key : tensors.keySet())
-			stream.println(key + " = " + tensors.get(key));
-	}
-
 	public boolean check(Map<String, Tensor<Boolean>> tensors) {
-		return compute(Calculator.BOOLEAN, tensors);
+		return compute(BoolAlg.BOOLEAN, tensors);
 	}
 
 	public Map<String, Tensor<Boolean>> solveOne(SatSolver solver) {
-		SatBuilder builder = new SatBuilder();
+		solver.clear();
 
 		Map<String, Tensor<Integer>> tensors = new TreeMap<String, Tensor<Integer>>();
 		for (String key : shapes.keySet())
-			tensors.put(key, builder.tensor(shapes.get(key)));
+			tensors.put(key, solver.tensor(shapes.get(key)));
 
-		builder.ensure(compute(builder, tensors));
-		final boolean[] sol = solver.solve(builder.variables, builder.clauses);
+		solver.ensure(compute(solver, tensors));
+		final boolean[] sol = solver.solve();
 		if (sol == null)
 			return null;
 
@@ -70,20 +60,64 @@ public abstract class Problem {
 		return solution;
 	}
 
+	public List<Map<String, Tensor<Boolean>>> solveAll(SatSolver solver) {
+		solver.clear();
+
+		Map<String, Tensor<Integer>> tensors = new TreeMap<String, Tensor<Integer>>();
+		int vars = 0;
+
+		for (String key : shapes.keySet()) {
+			int[] shape = shapes.get(key);
+			vars += Tensor.getSize(shape);
+			tensors.put(key, solver.tensor(shape));
+		}
+
+		solver.ensure(compute(solver, tensors));
+
+		List<Map<String, Tensor<Boolean>>> solutions = new ArrayList<Map<String, Tensor<Boolean>>>();
+		for (;;) {
+			final boolean[] sol = solver.solve();
+			if (sol == null)
+				return solutions;
+
+			final int[] exclude = new int[vars];
+
+			Func1<Boolean, Integer> LOOKUP = new Func1<Boolean, Integer>() {
+				int index = 0;
+
+				@Override
+				public Boolean call(Integer elem) {
+					exclude[index++] = sol[elem] ? -elem : elem;
+					return sol[elem];
+				}
+			};
+
+			Map<String, Tensor<Boolean>> solution = new TreeMap<String, Tensor<Boolean>>();
+			for (String key : tensors.keySet())
+				solution.put(key, Tensor.map(LOOKUP, tensors.get(key)));
+
+			solutions.add(solution);
+			solver.ensure(exclude);
+		}
+	}
+
 	public static void main(String[] args) {
 		Map<String, int[]> shapes = new HashMap<String, int[]>();
-		shapes.put("f", new int[] { 10, 10 });
+		shapes.put("f", new int[] { 2, 2 });
 
 		Problem problem = new Problem(shapes) {
 			@Override
-			public <BOOL> BOOL compute(Calculator<BOOL> calc,
+			public <BOOL> BOOL compute(BoolAlg<BOOL> alg,
 					Map<String, Tensor<BOOL>> tensors) {
-				BOOL a = Tensor.collapse(tensors.get("f"), 2, calc.SUM).get();
-				BOOL b = Tensor.collapse(tensors.get("f"), 2, calc.ANY).get();
-				return calc.and(calc.not(a), b);
+				// BOOL a = Tensor.collapse(tensors.get("f"), 2, alg.SUM).get();
+				BOOL b = Tensor.collapse(tensors.get("f"), 2, alg.ONE).get();
+				return b;
 			}
 		};
 
-		System.out.println(problem.solveOne(new MiniSat()).size());
+		List<Map<String, Tensor<Boolean>>> solutions = problem
+				.solveAll(new MiniSat());
+		for (Map<String, Tensor<Boolean>> solution : solutions)
+			Tensor.print(solution, System.out);
 	}
 }

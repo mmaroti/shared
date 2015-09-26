@@ -34,7 +34,7 @@ public class MiniSat extends SatSolver {
 
 	protected static DecimalFormat TIME_FORMAT = new DecimalFormat("0.0");
 
-	public boolean[] solve(int variables, List<int[]> clauses) {
+	public boolean[] solve() {
 		File input = null;
 		PrintStream stream = null;
 
@@ -46,7 +46,7 @@ public class MiniSat extends SatSolver {
 			output = File.createTempFile("minisat_output_", ".tmp");
 
 			stream = new PrintStream(input);
-			dimacs(variables, clauses, stream);
+			dimacs(stream);
 			stream.close();
 			stream = null;
 

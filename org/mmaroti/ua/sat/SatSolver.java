@@ -21,14 +21,98 @@ package org.mmaroti.ua.sat;
 import java.io.*;
 import java.util.*;
 
-public abstract class SatSolver {
+public abstract class SatSolver extends BoolAlg<Integer> {
 	public boolean debugging = false;
 
-	// variable indices in clauses and solution start at 1
-	public abstract boolean[] solve(int variables, List<int[]> clauses);
+	protected int variables;
+	protected List<int[]> clauses = new ArrayList<int[]>();
 
-	public static void dimacs(int variables, List<int[]> clauses,
-			PrintStream stream) {
+	public void clear() {
+		variables = 1;
+		clauses.clear();
+		clauses.add(new int[] { 1 });
+	}
+
+	public final Integer variable() {
+		return ++variables;
+	}
+
+	private final Func1<Integer, int[]> GENERATOR = new Func1<Integer, int[]>() {
+		@Override
+		public Integer call(int[] elem) {
+			return variable();
+		}
+	};
+
+	public final Tensor<Integer> tensor(int... shape) {
+		return Tensor.generate(shape, GENERATOR);
+	}
+
+	public void ensure(int... clause) {
+		clauses.add(clause);
+	}
+
+	@Override
+	public Integer not(Integer b) {
+		return -b;
+	}
+
+	@Override
+	public Integer or(Integer elem1, Integer elem2) {
+		int a = elem1.intValue();
+		int b = elem2.intValue();
+
+		if (a == -1)
+			return b;
+		else if (a == 1)
+			return 1;
+		else if (b == -1)
+			return a;
+		else if (b == 1)
+			return 1;
+		else if (a == b)
+			return a;
+		else if (a == -b)
+			return 1;
+
+		int var = variable();
+		clauses.add(new int[] { -a, var });
+		clauses.add(new int[] { -b, var });
+		clauses.add(new int[] { a, b, -var });
+		return var;
+	}
+
+	@Override
+	public Integer add(Integer elem1, Integer elem2) {
+		int a = elem1.intValue();
+		int b = elem2.intValue();
+
+		if (a == 1)
+			return -b;
+		else if (a == -1)
+			return b;
+		else if (b == 1)
+			return -a;
+		else if (b == -1)
+			return a;
+
+		int var = variable();
+		clauses.add(new int[] { a, b, -var });
+		clauses.add(new int[] { a, -b, var });
+		clauses.add(new int[] { -a, b, var });
+		clauses.add(new int[] { -a, -b, -var });
+		return var;
+	}
+
+	public SatSolver() {
+		super(1);
+		clear();
+	}
+
+	// variable indices in clauses and solution start at 1
+	public abstract boolean[] solve();
+
+	public void dimacs(PrintStream stream) {
 		stream.println("p cnf " + variables + " " + clauses.size());
 		for (int[] clause : clauses) {
 			for (int i : clause) {

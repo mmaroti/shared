@@ -18,6 +18,7 @@
 
 package org.mmaroti.ua.sat;
 
+import java.io.PrintStream;
 import java.util.*;
 
 public class Tensor<ELEM> implements Iterable<ELEM> {
@@ -86,7 +87,7 @@ public class Tensor<ELEM> implements Iterable<ELEM> {
 		this.elems = (ELEM[]) new Object[getSize(shape)];
 	}
 
-	private static int getSize(int[] shape) {
+	public static int getSize(int[] shape) {
 		int size = 1;
 		for (int i = 0; i < shape.length; i++) {
 			assert 0 <= shape[i];
@@ -334,6 +335,39 @@ public class Tensor<ELEM> implements Iterable<ELEM> {
 		str.append("]");
 
 		return str.toString();
+	}
+
+	public static <ELEM> void print(Tensor<ELEM> tensor, PrintStream stream) {
+		if (tensor == null)
+			stream.println("Null");
+		else
+			stream.println(tensor);
+	}
+
+	public static <ELEM> void print(Map<String, Tensor<ELEM>> tensors,
+			PrintStream stream) {
+		if (tensors == null)
+			stream.println("Null");
+		else {
+			if (!(tensors instanceof TreeMap))
+				tensors = new TreeMap<String, Tensor<ELEM>>(tensors);
+
+			for (String key : tensors.keySet()) {
+				stream.print(key + " = ");
+				stream.println(tensors.get(key));
+			}
+		}
+	}
+
+	public static <ELEM> void print(List<Tensor<ELEM>> tensors,
+			PrintStream stream) {
+		if (tensors == null)
+			stream.println("Null");
+		else
+			for (int i = 0; i < tensors.size(); i++) {
+				stream.print(i + " = ");
+				stream.println(tensors.get(i));
+			}
 	}
 
 	public static void main(String[] args) {

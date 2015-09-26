@@ -18,30 +18,30 @@
 
 package org.mmaroti.ua.sat;
 
-public abstract class Calculator<BOOL> {
+public abstract class BoolAlg<BOOL> {
 	public final BOOL FALSE;
 	public final BOOL TRUE;
 
-	public abstract BOOL not(BOOL b);
+	public abstract BOOL not(BOOL elem);
 
-	public BOOL or(BOOL a, BOOL b) {
-		return not(and(not(a), not(b)));
+	public BOOL or(BOOL elem1, BOOL elem2) {
+		return not(and(not(elem1), not(elem2)));
 	}
 
-	public BOOL and(BOOL a, BOOL b) {
-		return not(or(not(a), not(b)));
+	public BOOL and(BOOL elem1, BOOL elem2) {
+		return not(or(not(elem1), not(elem2)));
 	}
 
-	public BOOL leq(BOOL a, BOOL b) {
-		return or(not(a), b);
+	public BOOL leq(BOOL elem1, BOOL elem2) {
+		return or(not(elem1), elem2);
 	}
 
-	public BOOL add(BOOL a, BOOL b) {
-		return not(eq(a, b));
+	public BOOL add(BOOL elem1, BOOL elem2) {
+		return not(eq(elem1, elem2));
 	}
 
-	public BOOL eq(BOOL a, BOOL b) {
-		return not(add(a, b));
+	public BOOL eq(BOOL elem1, BOOL elem2) {
+		return not(add(elem1, elem2));
 	}
 
 	public final Func1<BOOL, BOOL> NOT;
@@ -54,13 +54,14 @@ public abstract class Calculator<BOOL> {
 	public final Func1<BOOL, Iterable<BOOL>> ALL;
 	public final Func1<BOOL, Iterable<BOOL>> ANY;
 	public final Func1<BOOL, Iterable<BOOL>> SUM;
+	public final Func1<BOOL, Iterable<BOOL>> ONE;
 
-	public Calculator(BOOL TRUE) {
+	public BoolAlg(BOOL TRUE) {
 		this.TRUE = TRUE;
 		FALSE = not(TRUE);
 
 		assert TRUE != null && FALSE != null;
-		
+
 		NOT = new Func1<BOOL, BOOL>() {
 			@Override
 			public BOOL call(BOOL elem) {
@@ -112,22 +113,37 @@ public abstract class Calculator<BOOL> {
 		ALL = Func1.reducer(TRUE, AND);
 		ANY = Func1.reducer(FALSE, OR);
 		SUM = Func1.reducer(FALSE, ADD);
+
+		ONE = new Func1<BOOL, Iterable<BOOL>>() {
+			@Override
+			public BOOL call(Iterable<BOOL> elems) {
+				BOOL any = FALSE;
+				BOOL err = FALSE;
+
+				for (BOOL elem : elems) {
+					err = or(err, and(any, elem));
+					any = or(any, elem);
+				}
+
+				return and(any, not(err));
+			}
+		};
 	}
 
-	public static Calculator<Boolean> BOOLEAN = new Calculator<Boolean>(true) {
+	public static BoolAlg<Boolean> BOOLEAN = new BoolAlg<Boolean>(true) {
 		@Override
-		public Boolean not(Boolean b) {
-			return !b;
+		public Boolean not(Boolean elem) {
+			return !elem.booleanValue();
 		}
 
 		@Override
-		public Boolean or(Boolean a, Boolean b) {
-			return a || b;
+		public Boolean or(Boolean elem1, Boolean elem2) {
+			return elem1.booleanValue() || elem2.booleanValue();
 		}
 
 		@Override
-		public Boolean add(Boolean a, Boolean b) {
-			return a.booleanValue() != b.booleanValue();
+		public Boolean add(Boolean elem1, Boolean elem2) {
+			return elem1.booleanValue() != elem2.booleanValue();
 		}
 	};
 }
