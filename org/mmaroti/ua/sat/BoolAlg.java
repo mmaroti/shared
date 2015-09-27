@@ -22,6 +22,10 @@ public abstract class BoolAlg<BOOL> {
 	public final BOOL FALSE;
 	public final BOOL TRUE;
 
+	public BOOL lift(boolean elem) {
+		return elem ? TRUE : FALSE;
+	}
+
 	public abstract BOOL not(BOOL elem);
 
 	public BOOL or(BOOL elem1, BOOL elem2) {

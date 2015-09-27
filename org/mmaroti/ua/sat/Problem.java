@@ -110,7 +110,7 @@ public abstract class Problem {
 			public <BOOL> BOOL compute(BoolAlg<BOOL> alg,
 					Map<String, Tensor<BOOL>> tensors) {
 				// BOOL a = Tensor.collapse(tensors.get("f"), 2, alg.SUM).get();
-				BOOL b = Tensor.collapse(tensors.get("f"), 2, alg.ONE).get();
+				BOOL b = Tensor.fold(tensors.get("f"), 2, alg.ONE).get();
 				return b;
 			}
 		};

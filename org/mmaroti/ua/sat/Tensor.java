@@ -33,6 +33,10 @@ public class Tensor<ELEM> implements Iterable<ELEM> {
 		return shape.length;
 	}
 
+	public int getDim(int index) {
+		return shape[index];
+	}
+
 	private static class Iter<ELEM> implements Iterator<ELEM> {
 		private final ELEM[] elems;
 		private int index;
@@ -100,17 +104,19 @@ public class Tensor<ELEM> implements Iterable<ELEM> {
 			final Func1<ELEM, int[]> func) {
 		Tensor<ELEM> tensor = new Tensor<ELEM>(shape);
 
-		int[] index = new int[shape.length];
-		int pos = 0;
-		outer: for (;;) {
-			tensor.elems[pos++] = func.call(index);
-			for (int i = 0; i < index.length; i++) {
-				if (++index[i] >= shape[i])
-					index[i] = 0;
-				else
-					continue outer;
+		if (tensor.elems.length > 0) {
+			int[] index = new int[shape.length];
+			int pos = 0;
+			outer: for (;;) {
+				tensor.elems[pos++] = func.call(index);
+				for (int i = 0; i < index.length; i++) {
+					if (++index[i] >= shape[i])
+						index[i] = 0;
+					else
+						continue outer;
+				}
+				break;
 			}
-			break;
 		}
 
 		return tensor;
@@ -235,7 +241,7 @@ public class Tensor<ELEM> implements Iterable<ELEM> {
 		return tensor;
 	}
 
-	public static <ELEM1, ELEM2> Tensor<ELEM2> collapse(Tensor<ELEM1> arg,
+	public static <ELEM1, ELEM2> Tensor<ELEM2> fold(Tensor<ELEM1> arg,
 			int proj, Func1<ELEM2, Iterable<ELEM1>> func) {
 
 		int[] shape1 = new int[proj];
@@ -311,8 +317,8 @@ public class Tensor<ELEM> implements Iterable<ELEM> {
 		}
 
 		Tensor<ELEM> tensor = Tensor.stack(tensors);
-		tensor = Tensor.collapse(tensor, 1, prod);
-		tensor = Tensor.collapse(tensor, keys.size() - names.length(), sum);
+		tensor = Tensor.fold(tensor, 1, prod);
+		tensor = Tensor.fold(tensor, keys.size() - names.length(), sum);
 
 		return tensor;
 	};
