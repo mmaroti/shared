@@ -412,15 +412,10 @@ public class Tensor<ELEM> implements Iterable<ELEM> {
 		}
 	}
 
-	public static <ELEM> void print(List<Tensor<ELEM>> tensors,
+	public static <ELEM> void print(List<Map<String, Tensor<ELEM>>> list,
 			PrintStream stream) {
-		if (tensors == null)
-			stream.println("Null");
-		else
-			for (int i = 0; i < tensors.size(); i++) {
-				stream.print(i + " = ");
-				stream.println(tensors.get(i));
-			}
+		for (Map<String, Tensor<ELEM>> elem : list)
+			print(elem, stream);
 	}
 
 	public static void main(String[] args) {

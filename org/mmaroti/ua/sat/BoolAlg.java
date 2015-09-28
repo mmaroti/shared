@@ -18,6 +18,8 @@
 
 package org.mmaroti.ua.sat;
 
+import java.util.*;
+
 public abstract class BoolAlg<BOOL> {
 	public final BOOL FALSE;
 	public final BOOL TRUE;
@@ -60,8 +62,9 @@ public abstract class BoolAlg<BOOL> {
 	public final Func1<BOOL, Iterable<BOOL>> ANY;
 	public final Func1<BOOL, Iterable<BOOL>> SUM;
 	public final Func1<BOOL, Iterable<BOOL>> ONE;
+	public final Func1<BOOL, Iterable<BOOL>> EQS;
 
-	public BoolAlg(BOOL TRUE) {
+	public BoolAlg(final BOOL TRUE) {
 		this.TRUE = TRUE;
 		FALSE = not(TRUE);
 
@@ -138,6 +141,22 @@ public abstract class BoolAlg<BOOL> {
 				}
 
 				return and(any, not(err));
+			}
+		};
+
+		EQS = new Func1<BOOL, Iterable<BOOL>>() {
+			@Override
+			public BOOL call(Iterable<BOOL> elems) {
+				Iterator<BOOL> iter = elems.iterator();
+
+				assert iter.hasNext();
+				BOOL fst = iter.next();
+
+				BOOL res = TRUE;
+				while (iter.hasNext())
+					res = and(res, eq(fst, iter.next()));
+
+				return res;
 			}
 		};
 	}

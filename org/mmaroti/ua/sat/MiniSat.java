@@ -32,7 +32,7 @@ public class MiniSat extends SatSolver {
 		options.add(option);
 	}
 
-	protected static DecimalFormat TIME_FORMAT = new DecimalFormat("0.0");
+	protected static DecimalFormat TIME_FORMAT = new DecimalFormat("0.00");
 
 	public boolean[] solve() {
 		File input = null;
