@@ -23,8 +23,19 @@ import java.util.*;
 public abstract class Problem {
 	public final Map<String, int[]> shapes;
 
-	Problem(Map<String, int[]> shapes) {
+	public Problem(Map<String, int[]> shapes) {
 		this.shapes = shapes;
+	}
+
+	public Problem(String name, int[] shape) {
+		shapes = new TreeMap<String, int[]>();
+		shapes.put(name, shape);
+	}
+
+	public Problem(String name1, int[] shape1, String name2, int[] shape2) {
+		shapes = new TreeMap<String, int[]>();
+		shapes.put(name1, shape1);
+		shapes.put(name2, shape2);
 	}
 
 	public abstract <BOOL> BOOL compute(BoolAlg<BOOL> alg,

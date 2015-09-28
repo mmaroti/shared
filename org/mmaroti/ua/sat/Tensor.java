@@ -281,8 +281,9 @@ public class Tensor<ELEM> implements Iterable<ELEM> {
 	}
 
 	@SafeVarargs
-	public static <ELEM> Tensor<ELEM> reduce(Func1<ELEM, Iterable<ELEM>> prod,
-			Func1<ELEM, Iterable<ELEM>> sum, String names, Named<ELEM>... parts) {
+	public static <ELEM> Tensor<ELEM> reduce(Func1<ELEM, Iterable<ELEM>> sum,
+			String names, Func1<ELEM, Iterable<ELEM>> prod,
+			Named<ELEM>... parts) {
 		assert parts.length > 0;
 
 		TreeMap<Character, Integer> dims = new TreeMap<Character, Integer>();
@@ -318,6 +319,52 @@ public class Tensor<ELEM> implements Iterable<ELEM> {
 
 		Tensor<ELEM> tensor = Tensor.stack(tensors);
 		tensor = Tensor.fold(tensor, 1, prod);
+		tensor = Tensor.fold(tensor, keys.size() - names.length(), sum);
+
+		return tensor;
+	};
+
+	public static <ELEM, ELEM1, ELEM2> Tensor<ELEM> reduce(
+			Func1<ELEM, Iterable<ELEM>> sum, String names,
+			Func2<ELEM, ELEM1, ELEM2> prod, Named<ELEM1> part1,
+			Named<ELEM2> part2) {
+
+		TreeMap<Character, Integer> dims = new TreeMap<Character, Integer>();
+
+		for (int i = 0; i < part1.names.length(); i++) {
+			int dim = part1.tensor.shape[i];
+			Integer d = dims.put(part1.names.charAt(i), dim);
+			assert d == null || d.intValue() == dim;
+		}
+
+		for (int i = 0; i < part2.names.length(); i++) {
+			int dim = part2.tensor.shape[i];
+			Integer d = dims.put(part2.names.charAt(i), dim);
+			assert d == null || d.intValue() == dim;
+		}
+
+		ArrayList<Character> keys = new ArrayList<Character>(dims.keySet());
+		for (int i = 0; i < names.length(); i++) {
+			Character c = names.charAt(i);
+			keys.remove(c);
+			keys.add(c);
+		}
+
+		int[] shape = new int[dims.size()];
+		for (int i = 0; i < shape.length; i++)
+			shape[i] = dims.get(keys.get(i));
+
+		int[] map = new int[part1.names.length()];
+		for (int i = 0; i < map.length; i++)
+			map[i] = keys.indexOf(part1.names.charAt(i));
+		Tensor<ELEM1> arg1 = Tensor.reshape(part1.tensor, shape, map);
+
+		map = new int[part2.names.length()];
+		for (int i = 0; i < map.length; i++)
+			map[i] = keys.indexOf(part2.names.charAt(i));
+		Tensor<ELEM2> arg2 = Tensor.reshape(part2.tensor, shape, map);
+
+		Tensor<ELEM> tensor = Tensor.map2(prod, arg1, arg2);
 		tensor = Tensor.fold(tensor, keys.size() - names.length(), sum);
 
 		return tensor;
@@ -385,7 +432,7 @@ public class Tensor<ELEM> implements Iterable<ELEM> {
 				Arrays.asList(0, 1, 0, 1, 0, 0, 0, 0, 1));
 		System.out.println(m2);
 
-		Tensor<Integer> m3 = Tensor.reduce(Func1.INT_PROD, Func1.INT_SUM, "ac",
+		Tensor<Integer> m3 = Tensor.reduce(Func1.INT_SUM, "ac", Func1.INT_PROD,
 				m1.named("ab"), m2.named("bc"));
 		System.out.println(m3);
 
@@ -395,7 +442,7 @@ public class Tensor<ELEM> implements Iterable<ELEM> {
 		m2 = Tensor.vector(Arrays.asList(10, 20));
 		System.out.println(m2);
 
-		m3 = Tensor.reduce(Func1.INT_PROD, Func1.INT_SUM, "ab", m1.named("a"),
+		m3 = Tensor.reduce(Func1.INT_SUM, "ab", Func1.INT_PROD, m1.named("a"),
 				m2.named("b"));
 		System.out.println(m3);
 	}

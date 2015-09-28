@@ -55,6 +55,7 @@ public abstract class BoolAlg<BOOL> {
 	public final Func2<BOOL, BOOL, BOOL> ADD;
 	public final Func2<BOOL, BOOL, BOOL> EQ;
 
+	public final Func1<BOOL, Boolean> LIFT;
 	public final Func1<BOOL, Iterable<BOOL>> ALL;
 	public final Func1<BOOL, Iterable<BOOL>> ANY;
 	public final Func1<BOOL, Iterable<BOOL>> SUM;
@@ -111,6 +112,13 @@ public abstract class BoolAlg<BOOL> {
 			public BOOL call(BOOL elem1, BOOL elem2) {
 				assert elem1 != null && elem2 != null;
 				return eq(elem1, elem2);
+			}
+		};
+
+		LIFT = new Func1<BOOL, Boolean>() {
+			@Override
+			public BOOL call(Boolean elem) {
+				return lift(elem);
 			}
 		};
 

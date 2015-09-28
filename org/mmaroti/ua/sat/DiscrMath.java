@@ -18,10 +18,7 @@
 
 package org.mmaroti.ua.sat;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class DiscrMath<BOOL> {
 	public final BoolAlg<BOOL> alg;
@@ -92,6 +89,31 @@ public class DiscrMath<BOOL> {
 		});
 	}
 
+	public Tensor<BOOL> lift(Tensor<Boolean> tensor) {
+		return Tensor.map(alg.LIFT, tensor);
+	}
+
+	public Tensor<BOOL> graph(final Tensor<Integer> tensor, final int domain) {
+		assert domain >= 0;
+
+		final int[] arg = new int[tensor.getOrder()];
+
+		int[] shape = new int[1 + tensor.getOrder()];
+		shape[0] = domain;
+		System.arraycopy(tensor.getShape(), 0, shape, 1, arg.length);
+
+		return Tensor.generate(shape, new Func1<BOOL, int[]>() {
+			@Override
+			public BOOL call(int[] elem) {
+				System.arraycopy(elem, 1, arg, 0, arg.length);
+				int res = tensor.getElem(arg);
+				assert (0 <= res && res < domain);
+
+				return alg.lift(res == elem[0]);
+			}
+		});
+	}
+
 	public static void main2(String[] args) {
 		Map<String, int[]> shapes = new HashMap<String, int[]>();
 		shapes.put("f", new int[] { 3, 3 });
@@ -116,7 +138,15 @@ public class DiscrMath<BOOL> {
 	public static void main(String[] args) {
 		DiscrMath<Boolean> discr = new DiscrMath<Boolean>(BoolAlg.BOOLEAN);
 
-		Tensor<Boolean> f = discr.projection(2, 1, 0);
-		Tensor.print(f, System.out);
+		Tensor<Integer> f = Tensor.matrix(new int[] { 3, 2 },
+				Arrays.asList(0, 1, 2, 0, 2, 1));
+		Tensor<Boolean> g = discr.graph(f, 3);
+
+		Tensor<Boolean> h = Tensor.reduce(BoolAlg.BOOLEAN.ANY, "xzpq",
+				BoolAlg.BOOLEAN.AND, g.named("xyp"), g.named("yzq"));
+		Tensor<Boolean> m = Tensor.reduce(BoolAlg.BOOLEAN.ALL, "pqr",
+				BoolAlg.BOOLEAN.EQ, h.named("xypq"), g.named("xyr"));
+
+		Tensor.print(m, System.out);
 	}
 }
