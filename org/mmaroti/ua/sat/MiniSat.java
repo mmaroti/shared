@@ -68,7 +68,7 @@ public class MiniSat extends SatSolver {
 			try {
 				result = proc.waitFor();
 			} catch (InterruptedException e) {
-				throw new IOException(e.getMessage());
+				throw new RuntimeException(e.getMessage());
 			}
 
 			time = System.currentTimeMillis() - time;
@@ -77,7 +77,7 @@ public class MiniSat extends SatSolver {
 				if (debugging)
 					System.err.println("exited with error code " + result);
 
-				throw new IOException("Minisat failed with error code "
+				throw new RuntimeException("Minisat failed with error code "
 						+ result);
 			}
 
@@ -94,14 +94,14 @@ public class MiniSat extends SatSolver {
 
 			String line = reader.readLine();
 			if (line == null || !line.equals("SAT"))
-				throw new IOException("Minisat failed to produce output");
+				throw new RuntimeException("Minisat failed to produce output");
 
 			line = reader.readLine();
 			assert line != null;
 
 			String[] sol = line.split("\\s+");
-			if (sol.length != variables + 1 || !sol[sol.length - 1].equals("0"))
-				throw new IOException("Minisat produced unexpected output");
+			if (sol.length > variables + 1 || !sol[sol.length - 1].equals("0"))
+				throw new RuntimeException("Minisat produced unexpected output");
 
 			boolean[] solution = new boolean[variables + 1];
 
@@ -109,7 +109,7 @@ public class MiniSat extends SatSolver {
 				int n = Integer.parseInt(sol[i]);
 				if (!sol[i].equals(Integer.toString(n))
 						|| Math.abs(n) > variables)
-					throw new IOException("Minisat produced unexpected literal");
+					throw new RuntimeException("Minisat produced unexpected literal");
 
 				if (n > 0)
 					solution[n] = true;

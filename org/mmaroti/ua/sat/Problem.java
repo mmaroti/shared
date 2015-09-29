@@ -38,6 +38,14 @@ public abstract class Problem {
 		shapes.put(name2, shape2);
 	}
 
+	public Problem(String name1, int[] shape1, String name2, int[] shape2,
+			String name3, int[] shape3) {
+		shapes = new TreeMap<String, int[]>();
+		shapes.put(name1, shape1);
+		shapes.put(name2, shape2);
+		shapes.put(name3, shape3);
+	}
+
 	public abstract <BOOL> BOOL compute(BoolAlg<BOOL> alg,
 			Map<String, Tensor<BOOL>> tensors);
 

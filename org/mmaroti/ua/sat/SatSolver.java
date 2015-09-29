@@ -22,7 +22,7 @@ import java.io.*;
 import java.util.*;
 
 public abstract class SatSolver extends BoolAlg<Integer> {
-	public boolean debugging = false;
+	public boolean debugging = true;
 
 	protected int variables;
 	protected List<int[]> clauses = new ArrayList<int[]>();
