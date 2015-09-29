@@ -231,6 +231,7 @@ public class MonadInt extends Problem {
 
 		MonadInt prob = new MonadInt(3, new int[] { 0, 0, 0, 0, 0, 2, 1, 1, 1,
 				2, 2, 2, 0, 1, 2, 0, 1, 0 });
-		Tensor.print(prob.solveAll(solver), System.out);
+		// Tensor.print(prob.solveAll(solver), System.out);
+		System.out.println(prob.solveAll(solver).size());
 	}
 }

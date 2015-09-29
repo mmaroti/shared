@@ -24,16 +24,23 @@ import org.sat4j.minisat.*;
 import org.sat4j.specs.*;
 
 public class Sat4J extends SatSolver {
+	protected int addedClauses = 0;
+	protected ISolver solver = null;
+
+	public void clear() {
+		addedClauses = 0;
+		solver = SolverFactory.newDefault();
+		super.clear();
+	}
+
 	protected static DecimalFormat TIME_FORMAT = new DecimalFormat("0.00");
 
 	@Override
 	public boolean[] solve() {
 		try {
-			ISolver solver = SolverFactory.newDefault();
-			solver.newVar(variables);
-			solver.setExpectedNumberOfClauses(clauses.size());
-			for (int[] clause : clauses)
-				solver.addClause(new VecInt(clause));
+			for (int i = addedClauses; i < clauses.size(); i++)
+				solver.addClause(new VecInt(clauses.get(i)));
+			addedClauses = clauses.size();
 
 			if (debugging)
 				System.err.print("Running Sat4J with " + variables
