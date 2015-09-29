@@ -18,90 +18,124 @@
 
 package org.mmaroti.sat;
 
-public abstract class Func2<ARG1, ARG2, RET> extends
-		Func1<ARG1, Func1<ARG2, RET>> {
+public abstract class Func2<ELEM, ELEM1, ELEM2> {
+	public abstract ELEM call(ELEM1 elem1, ELEM2 elem2);
 
-	public abstract RET apply2(ARG1 arg1, ARG2 arg2);
-
-	@Override
-	public Func1<ARG2, RET> apply1(final ARG1 arg1) {
-		return new Func1<ARG2, RET>() {
+	public <ELEM3> Func1<ELEM, ELEM3> combine(final Func1<ELEM1, ELEM3> fun1,
+			final Func1<ELEM2, ELEM3> fun2) {
+		final Func2<ELEM, ELEM1, ELEM2> me = this;
+		return new Func1<ELEM, ELEM3>() {
 			@Override
-			public RET apply1(ARG2 arg2) {
-				return apply2(arg1, arg2);
+			public ELEM call(ELEM3 elem3) {
+				return me.call(fun1.call(elem3), fun2.call(elem3));
 			}
 		};
 	}
 
-	public static Func1<Boolean, Func1<Boolean, Boolean>> BOOLEAN_AND = new Func2<Boolean, Boolean, Boolean>() {
-		@Override
-		public Boolean apply2(Boolean arg1, Boolean arg2) {
-			return arg1 && arg2;
-		}
-	};
-
-	public static Func1<Boolean, Func1<Boolean, Boolean>> BOOLEAN_OR = new Func2<Boolean, Boolean, Boolean>() {
-		@Override
-		public Boolean apply2(Boolean arg1, Boolean arg2) {
-			return arg1 || arg2;
-		}
-	};
-
-	public static Func1<Integer, Func1<Integer, Integer>> INTEGER_ADD = new Func2<Integer, Integer, Integer>() {
-		@Override
-		public Integer apply2(Integer arg1, Integer arg2) {
-			return arg1 + arg2;
-		}
-	};
-
-	public static Func1<Integer, Func1<Integer, Integer>> INTEGER_MUL = new Func2<Integer, Integer, Integer>() {
-		@Override
-		public Integer apply2(Integer arg1, Integer arg2) {
-			return arg1 * arg2;
-		}
-	};
-
-	public static <ELEM> Func1<ELEM, Func1<ELEM, Boolean>> OBJECT_EQU() {
-		return new Func2<ELEM, ELEM, Boolean>() {
+	public <ELEM3, ELEM4> Func2<ELEM, ELEM3, ELEM4> combine(
+			final Func2<ELEM1, ELEM3, ELEM4> fun1,
+			final Func2<ELEM2, ELEM3, ELEM4> fun2) {
+		final Func2<ELEM, ELEM1, ELEM2> me = this;
+		return new Func2<ELEM, ELEM3, ELEM4>() {
 			@Override
-			public Boolean apply2(ELEM arg1, ELEM arg2) {
-				return arg1.equals(arg2);
+			public ELEM call(ELEM3 elem3, ELEM4 elem4) {
+				return me
+						.call(fun1.call(elem3, elem4), fun2.call(elem3, elem4));
 			}
 		};
 	}
 
-	public static Func1<BoolTerm, Func1<BoolTerm, BoolTerm>> BOOLTERM_AND = new Func2<BoolTerm, BoolTerm, BoolTerm>() {
+	public static <ELEM, ELEM1, ELEM2> Func2<ELEM, ELEM1, ELEM2> constant(
+			final ELEM elem) {
+		return new Func2<ELEM, ELEM1, ELEM2>() {
+			@Override
+			public ELEM call(ELEM1 a1, ELEM2 a2) {
+				return elem;
+			}
+		};
+	}
+
+	@SuppressWarnings("rawtypes")
+	public final static Func2 OBJ_EQ = new Func2() {
 		@Override
-		public BoolTerm apply2(BoolTerm arg1, BoolTerm arg2) {
-			return arg1.and(arg2);
+		public Boolean call(Object elem1, Object elem2) {
+			assert elem1 != null && elem2 != null;
+			return elem1.equals(elem2);
 		}
 	};
 
-	public static Func1<BoolTerm, Func1<BoolTerm, BoolTerm>> BOOLTERM_OR = new Func2<BoolTerm, BoolTerm, BoolTerm>() {
+	@SuppressWarnings("unchecked")
+	public final static Func2<Boolean, Integer, Integer> INT_EQ = OBJ_EQ;
+
+	@SuppressWarnings("unchecked")
+	public final static Func2<Boolean, Double, Double> REAL_EQ = OBJ_EQ;
+
+	@SuppressWarnings("rawtypes")
+	public final static Func2 OBJ_FST = new Func2() {
 		@Override
-		public BoolTerm apply2(BoolTerm arg1, BoolTerm arg2) {
-			return arg1.or(arg2);
+		public Object call(Object elem1, Object elem2) {
+			return elem1;
 		}
 	};
 
-	public static Func1<BoolTerm, Func1<BoolTerm, BoolTerm>> BOOLTERM_XOR = new Func2<BoolTerm, BoolTerm, BoolTerm>() {
+	@SuppressWarnings("unchecked")
+	public final static Func2<Integer, Integer, Integer> INT_FST = OBJ_FST;
+
+	@SuppressWarnings("unchecked")
+	public final static Func2<Double, Double, Double> REAL_FST = OBJ_FST;
+
+	@SuppressWarnings("rawtypes")
+	public final static Func2 OBJ_SND = new Func2() {
 		@Override
-		public BoolTerm apply2(BoolTerm arg1, BoolTerm arg2) {
-			return arg1.xor(arg2);
+		public Object call(Object elem1, Object elem2) {
+			return elem2;
 		}
 	};
 
-	public static Func1<BoolTerm, Func1<BoolTerm, BoolTerm>> BOOLTERM_EQU = new Func2<BoolTerm, BoolTerm, BoolTerm>() {
+	@SuppressWarnings("unchecked")
+	public final static Func2<Integer, Integer, Integer> INT_SND = OBJ_SND;
+
+	@SuppressWarnings("unchecked")
+	public final static Func2<Double, Double, Double> REAL_SND = OBJ_SND;
+
+	public final static Func2<Integer, Integer, Integer> INT_ADD = new Func2<Integer, Integer, Integer>() {
 		@Override
-		public BoolTerm apply2(BoolTerm arg1, BoolTerm arg2) {
-			return arg1.equ(arg2);
+		public Integer call(Integer elem1, Integer elem2) {
+			return elem1 + elem2;
 		}
 	};
 
-	public static Func1<BoolTerm, Func1<BoolTerm, BoolTerm>> BOOLTERM_LEQ = new Func2<BoolTerm, BoolTerm, BoolTerm>() {
+	public final static Func2<Integer, Integer, Integer> INT_MUL = new Func2<Integer, Integer, Integer>() {
 		@Override
-		public BoolTerm apply2(BoolTerm arg1, BoolTerm arg2) {
-			return arg1.leq(arg2);
+		public Integer call(Integer elem1, Integer elem2) {
+			return elem1 * elem2;
+		}
+	};
+
+	public final static Func2<Boolean, Integer, Integer> INT_LEQ = new Func2<Boolean, Integer, Integer>() {
+		@Override
+		public Boolean call(Integer elem1, Integer elem2) {
+			return elem1.intValue() <= elem2.intValue();
+		}
+	};
+	public final static Func2<Double, Double, Double> REAL_ADD = new Func2<Double, Double, Double>() {
+		@Override
+		public Double call(Double elem1, Double elem2) {
+			return elem1 + elem2;
+		}
+	};
+
+	public final static Func2<Double, Double, Double> REAL_MUL = new Func2<Double, Double, Double>() {
+		@Override
+		public Double call(Double elem1, Double elem2) {
+			return elem1 * elem2;
+		}
+	};
+
+	public final static Func2<Boolean, Double, Double> REAL_LEQ = new Func2<Boolean, Double, Double>() {
+		@Override
+		public Boolean call(Double elem1, Double elem2) {
+			return elem1.intValue() <= elem2.intValue();
 		}
 	};
 }

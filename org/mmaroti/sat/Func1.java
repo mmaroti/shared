@@ -18,41 +18,117 @@
 
 package org.mmaroti.sat;
 
-public abstract class Func1<ARG, RET> {
-	public abstract RET apply1(ARG arg);
+public abstract class Func1<ELEM, ELEM1> {
+	public abstract ELEM call(ELEM1 elem);
 
-	public static Func1<Boolean, Boolean> BOOLEAN_NOT = new Func1<Boolean, Boolean>() {
+	public <ELEM2> Func1<ELEM, ELEM2> combine(final Func1<ELEM1, ELEM2> fun) {
+		final Func1<ELEM, ELEM1> me = this;
+		return new Func1<ELEM, ELEM2>() {
+			@Override
+			public ELEM call(ELEM2 elem) {
+				return me.call(fun.call(elem));
+			}
+		};
+	}
+
+	public <ELEM2, ELEM3> Func2<ELEM, ELEM2, ELEM3> combine(
+			final Func2<ELEM1, ELEM2, ELEM3> fun) {
+		final Func1<ELEM, ELEM1> me = this;
+		return new Func2<ELEM, ELEM2, ELEM3>() {
+			@Override
+			public ELEM call(ELEM2 elem2, ELEM3 elem3) {
+				return me.call(fun.call(elem2, elem3));
+			}
+		};
+	}
+
+	public static <ELEM, ELEM1> Func1<ELEM, ELEM1> constant(final ELEM elem) {
+		return new Func1<ELEM, ELEM1>() {
+			@Override
+			public ELEM call(ELEM1 a) {
+				return elem;
+			}
+		};
+	}
+
+	public static <ELEM> Func1<ELEM, Iterable<ELEM>> reducer(final ELEM unit,
+			final Func2<ELEM, ELEM, ELEM> prod) {
+		return new Func1<ELEM, Iterable<ELEM>>() {
+			@Override
+			public ELEM call(Iterable<ELEM> elems) {
+				ELEM value = unit;
+				for (ELEM elem : elems)
+					value = prod.call(value, elem);
+				return value;
+			}
+		};
+	}
+
+	@SuppressWarnings("rawtypes")
+	public final static Func1 OBJ_ID = new Func1() {
 		@Override
-		public Boolean apply1(Boolean arg) {
-			return !arg;
+		public Object call(Object elem) {
+			return elem;
 		}
 	};
 
-	public static Func1<Boolean, Integer> BOOLEAN_INT = new Func1<Boolean, Integer>() {
+	@SuppressWarnings("unchecked")
+	public final static Func1<Integer, Integer> INT_ID = OBJ_ID;
+
+	@SuppressWarnings("unchecked")
+	public final static Func1<Double, Double> REAL_ID = OBJ_ID;
+
+	public final static Func1<Integer, Integer> INT_NEG = new Func1<Integer, Integer>() {
 		@Override
-		public Integer apply1(Boolean arg) {
-			return arg ? 1 : 0;
+		public Integer call(Integer elem) {
+			return -elem;
 		}
 	};
 
-	public static Func1<Integer, Integer> INTEGER_NEG = new Func1<Integer, Integer>() {
+	public final static Func1<Double, Double> REAL_NEG = new Func1<Double, Double>() {
 		@Override
-		public Integer apply1(Integer arg) {
-			return -arg;
+		public Double call(Double elem) {
+			return -elem;
 		}
 	};
 
-	public static Func1<Boolean, BoolTerm> BOOLTERM_LIFT = new Func1<Boolean, BoolTerm>() {
+	public final static Func1<Integer, Iterable<Integer>> INT_SUM = new Func1<Integer, Iterable<Integer>>() {
 		@Override
-		public BoolTerm apply1(Boolean arg) {
-			return BoolTerm.lift(arg);
+		public Integer call(Iterable<Integer> elems) {
+			int sum = 0;
+			for (Integer elem : elems)
+				sum += elem;
+			return sum;
 		}
 	};
 
-	public static Func1<BoolTerm, BoolTerm> BOOLTERM_NOT = new Func1<BoolTerm, BoolTerm>() {
+	public final static Func1<Integer, Iterable<Integer>> INT_PROD = new Func1<Integer, Iterable<Integer>>() {
 		@Override
-		public BoolTerm apply1(BoolTerm arg) {
-			return arg.not();
+		public Integer call(Iterable<Integer> elems) {
+			int prod = 1;
+			for (Integer elem : elems)
+				prod *= elem;
+			return prod;
+		}
+	};
+
+	public final static Func1<Double, Iterable<Double>> REAL_SUM = new Func1<Double, Iterable<Double>>() {
+		@Override
+		public Double call(Iterable<Double> elems) {
+			double sum = 0;
+			for (Double elem : elems)
+				sum += elem;
+			return sum;
+		}
+	};
+
+	public final static Func1<Double, Iterable<Double>> REAL_PROD = new Func1<Double, Iterable<Double>>() {
+		@Override
+		public Double call(Iterable<Double> elems) {
+			double prod = 1.0;
+			for (Double elem : elems)
+				prod *= elem;
+			return prod;
 		}
 	};
 }
