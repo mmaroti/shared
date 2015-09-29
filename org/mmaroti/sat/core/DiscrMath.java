@@ -16,9 +16,10 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-package org.mmaroti.sat;
+package org.mmaroti.sat.core;
 
 import java.util.*;
+import org.mmaroti.sat.solvers.*;
 
 public class DiscrMath<BOOL> {
 	public final BoolAlg<BOOL> alg;

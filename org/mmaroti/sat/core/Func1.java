@@ -16,7 +16,7 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-package org.mmaroti.sat;
+package org.mmaroti.sat.core;
 
 public abstract class Func1<ELEM, ELEM1> {
 	public abstract ELEM call(ELEM1 elem);

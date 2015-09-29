@@ -16,9 +16,9 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-package org.mmaroti.sat;
+package org.mmaroti.sat.core;
 
-import java.io.PrintStream;
+import java.io.*;
 import java.util.*;
 
 public class Tensor<ELEM> implements Iterable<ELEM> {

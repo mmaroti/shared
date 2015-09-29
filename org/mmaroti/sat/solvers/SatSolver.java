@@ -16,10 +16,12 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-package org.mmaroti.sat;
+package org.mmaroti.sat.solvers;
 
 import java.io.*;
 import java.util.*;
+
+import org.mmaroti.sat.core.*;
 
 public abstract class SatSolver extends BoolAlg<Integer> {
 	public boolean debugging = true;

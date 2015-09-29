@@ -16,7 +16,7 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-package org.mmaroti.sat;
+package org.mmaroti.sat.solvers;
 
 import java.text.*;
 import org.sat4j.core.*;

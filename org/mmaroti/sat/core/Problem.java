@@ -16,9 +16,10 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-package org.mmaroti.sat;
+package org.mmaroti.sat.core;
 
 import java.util.*;
+import org.mmaroti.sat.solvers.*;
 
 public abstract class Problem {
 	public final Map<String, int[]> shapes;
@@ -118,25 +119,5 @@ public abstract class Problem {
 			solutions.add(solution);
 			solver.ensure(exclude);
 		}
-	}
-
-	public static void main(String[] args) {
-		Map<String, int[]> shapes = new HashMap<String, int[]>();
-		shapes.put("f", new int[] { 2, 2 });
-
-		Problem problem = new Problem(shapes) {
-			@Override
-			public <BOOL> BOOL compute(BoolAlg<BOOL> alg,
-					Map<String, Tensor<BOOL>> tensors) {
-				// BOOL a = Tensor.collapse(tensors.get("f"), 2, alg.SUM).get();
-				BOOL b = Tensor.fold(tensors.get("f"), 2, alg.ONE).get();
-				return b;
-			}
-		};
-
-		List<Map<String, Tensor<Boolean>>> solutions = problem
-				.solveAll(new MiniSat());
-		for (Map<String, Tensor<Boolean>> solution : solutions)
-			Tensor.print(solution, System.out);
 	}
 }
