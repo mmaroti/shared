@@ -343,7 +343,7 @@ public abstract class MonodialInt extends Problem {
 		solver.debugging = false;
 
 		int size = 3;
-		String monoid = "000 001 002 010 011 012 020 022 100 101 110 111 200 202 220 222";
+		String monoid = "012 021";
 		System.out.println("monoid: " + monoid);
 
 		System.out.println("unary relations:       "
