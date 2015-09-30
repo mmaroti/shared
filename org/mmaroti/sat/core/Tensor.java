@@ -427,7 +427,7 @@ public class Tensor<ELEM> implements Iterable<ELEM> {
 				Arrays.asList(0, 1, 0, 1, 0, 0, 0, 0, 1));
 		System.out.println(m2);
 
-		Tensor<Integer> m3 = Tensor.reduce(Func1.INT_SUM, "ac", Func1.INT_PROD,
+		Tensor<Integer> m3 = Tensor.reduce(Func1.INT_SUM, "ac", Func2.INT_MUL,
 				m1.named("ab"), m2.named("bc"));
 		System.out.println(m3);
 
@@ -437,7 +437,7 @@ public class Tensor<ELEM> implements Iterable<ELEM> {
 		m2 = Tensor.vector(Arrays.asList(10, 20));
 		System.out.println(m2);
 
-		m3 = Tensor.reduce(Func1.INT_SUM, "ab", Func1.INT_PROD, m1.named("a"),
+		m3 = Tensor.reduce(Func1.INT_SUM, "ab", Func2.INT_MUL, m1.named("a"),
 				m2.named("b"));
 		System.out.println(m3);
 	}

@@ -116,6 +116,12 @@ public abstract class Problem {
 			for (String key : tensors.keySet())
 				solution.put(key, Tensor.map(LOOKUP, tensors.get(key)));
 
+			if (solutions.size() == 20000) {
+				System.err.println("... more than " + solutions.size()
+						+ " solutions, aborting.");
+				return solutions;
+			}
+
 			solutions.add(solution);
 			solver.ensure(exclude);
 		}
