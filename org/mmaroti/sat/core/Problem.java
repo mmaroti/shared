@@ -119,11 +119,16 @@ public abstract class Problem {
 			if (solutions.size() == -20000) {
 				System.err.println("... more than " + solutions.size()
 						+ " solutions, aborting.");
+
 				return solutions;
 			}
 
 			solutions.add(solution);
 			solver.ensure(exclude);
+
+			if (solutions.size() % 100000 == 0)
+				System.err.println("... still working, " + solutions.size()
+						+ " solutions so far ...");
 		}
 	}
 }
