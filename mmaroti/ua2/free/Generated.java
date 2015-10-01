@@ -17,8 +17,6 @@
 package mmaroti.ua2.free;
 
 public class Generated extends Structure {
-	private final static boolean debugging = false;
-
 	public class Operation extends Structure.Operation {
 		private Operation(Structure.Operation base) {
 			super(base.symbol, 0);
@@ -40,7 +38,7 @@ public class Generated extends Structure {
 		this.xbase = base;
 	}
 
-	private int generate(Structure base, int[] generators) {
+	public int generate(Structure base, int[] generators) {
 		return 1;
 	}
 	

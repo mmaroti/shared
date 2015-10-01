@@ -4,9 +4,7 @@ package mmaroti.ua.math;
  *	Copyright (C) 2014 Miklos Maroti
  */
 
-import java.util.*;
 import mmaroti.ua.alg.*;
-import mmaroti.ua.util.*;
 
 public class ConMeetSemiDistr {
 
