@@ -19,7 +19,6 @@
 package org.mmaroti.sat.math;
 
 import java.util.*;
-
 import org.mmaroti.sat.core.*;
 import org.mmaroti.sat.solvers.*;
 

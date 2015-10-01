@@ -118,6 +118,28 @@ public abstract class Func2<ELEM, ELEM1, ELEM2> {
 			return elem1.intValue() <= elem2.intValue();
 		}
 	};
+
+	public final static Func2<Boolean, Integer, Integer> INT_GEQ = new Func2<Boolean, Integer, Integer>() {
+		@Override
+		public Boolean call(Integer elem1, Integer elem2) {
+			return elem1.intValue() >= elem2.intValue();
+		}
+	};
+
+	public final static Func2<Boolean, Integer, Integer> INT_LT = new Func2<Boolean, Integer, Integer>() {
+		@Override
+		public Boolean call(Integer elem1, Integer elem2) {
+			return elem1.intValue() < elem2.intValue();
+		}
+	};
+
+	public final static Func2<Boolean, Integer, Integer> INT_GT = new Func2<Boolean, Integer, Integer>() {
+		@Override
+		public Boolean call(Integer elem1, Integer elem2) {
+			return elem1.intValue() > elem2.intValue();
+		}
+	};
+
 	public final static Func2<Double, Double, Double> REAL_ADD = new Func2<Double, Double, Double>() {
 		@Override
 		public Double call(Double elem1, Double elem2) {
