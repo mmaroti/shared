@@ -50,6 +50,18 @@ public abstract class BoolAlg<BOOL> {
 		return not(add(elem1, elem2));
 	}
 
+	public BOOL one(Iterable<BOOL> elems) {
+		BOOL any = FALSE;
+		BOOL err = FALSE;
+
+		for (BOOL elem : elems) {
+			err = or(err, and(any, elem));
+			any = or(any, elem);
+		}
+
+		return and(any, not(err));
+	}
+
 	public final Func1<BOOL, BOOL> NOT;
 	public final Func2<BOOL, BOOL, BOOL> OR;
 	public final Func2<BOOL, BOOL, BOOL> AND;
@@ -132,15 +144,7 @@ public abstract class BoolAlg<BOOL> {
 		ONE = new Func1<BOOL, Iterable<BOOL>>() {
 			@Override
 			public BOOL call(Iterable<BOOL> elems) {
-				BOOL any = FALSE;
-				BOOL err = FALSE;
-
-				for (BOOL elem : elems) {
-					err = or(err, and(any, elem));
-					any = or(any, elem);
-				}
-
-				return and(any, not(err));
+				return one(elems);
 			}
 		};
 

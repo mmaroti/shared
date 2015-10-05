@@ -19,10 +19,13 @@
 package org.mmaroti.sat.core;
 
 import java.util.*;
-import org.mmaroti.sat.solvers.*;
 
 public abstract class Problem {
-	public final Map<String, int[]> shapes;
+	protected final Map<String, int[]> shapes;
+
+	public Map<String, int[]> getShapes() {
+		return shapes;
+	}
 
 	public Problem(Map<String, int[]> shapes) {
 		this.shapes = shapes;
@@ -54,81 +57,12 @@ public abstract class Problem {
 		return compute(BoolAlg.BOOLEAN, tensors);
 	}
 
-	public Map<String, Tensor<Boolean>> solveOne(SatSolver solver) {
-		solver.clear();
-
-		Map<String, Tensor<Integer>> tensors = new TreeMap<String, Tensor<Integer>>();
-		for (String key : shapes.keySet())
-			tensors.put(key, solver.tensor(shapes.get(key)));
-
-		solver.ensure(compute(solver, tensors));
-		final boolean[] sol = solver.solve();
-		if (sol == null)
-			return null;
-
-		Func1<Boolean, Integer> LOOKUP = new Func1<Boolean, Integer>() {
-			@Override
-			public Boolean call(Integer elem) {
-				return sol[elem];
-			}
-		};
-
-		Map<String, Tensor<Boolean>> solution = new TreeMap<String, Tensor<Boolean>>();
-		for (String key : tensors.keySet())
-			solution.put(key, Tensor.map(LOOKUP, tensors.get(key)));
-
-		return solution;
+	public <BOOL> Map<String, Tensor<Boolean>> solveOne(Solver<BOOL> solver) {
+		return solver.solveOne(this);
 	}
 
-	public List<Map<String, Tensor<Boolean>>> solveAll(SatSolver solver) {
-		solver.clear();
-
-		Map<String, Tensor<Integer>> tensors = new TreeMap<String, Tensor<Integer>>();
-		int vars = 0;
-
-		for (String key : shapes.keySet()) {
-			int[] shape = shapes.get(key);
-			vars += Tensor.getSize(shape);
-			tensors.put(key, solver.tensor(shape));
-		}
-
-		solver.ensure(compute(solver, tensors));
-
-		List<Map<String, Tensor<Boolean>>> solutions = new ArrayList<Map<String, Tensor<Boolean>>>();
-		for (;;) {
-			final boolean[] sol = solver.solve();
-			if (sol == null)
-				return solutions;
-
-			final int[] exclude = new int[vars];
-
-			Func1<Boolean, Integer> LOOKUP = new Func1<Boolean, Integer>() {
-				int index = 0;
-
-				@Override
-				public Boolean call(Integer elem) {
-					exclude[index++] = sol[elem] ? -elem : elem;
-					return sol[elem];
-				}
-			};
-
-			Map<String, Tensor<Boolean>> solution = new TreeMap<String, Tensor<Boolean>>();
-			for (String key : tensors.keySet())
-				solution.put(key, Tensor.map(LOOKUP, tensors.get(key)));
-
-			if (solutions.size() == -20000) {
-				System.err.println("... more than " + solutions.size()
-						+ " solutions, aborting.");
-
-				return solutions;
-			}
-
-			solutions.add(solution);
-			solver.ensure(exclude);
-
-			if (solutions.size() % 100000 == 0)
-				System.err.println("... still working, " + solutions.size()
-						+ " solutions so far ...");
-		}
+	public <BOOL> List<Map<String, Tensor<Boolean>>> solveAll(
+			Solver<BOOL> solver) {
+		return solver.solveAll(this);
 	}
 }
