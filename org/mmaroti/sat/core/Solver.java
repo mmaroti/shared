@@ -25,6 +25,16 @@ public abstract class Solver<BOOL> extends BoolAlg<BOOL> {
 		super(TRUE);
 	}
 
+	public abstract Tensor<BOOL> tensor(int[] shape);
+
+	public abstract void clear();
+
+	public abstract void ensure(BOOL literal);
+
+	public void ensure(BOOL[] clause) {
+		ensure(all(Arrays.asList(clause)));
+	}
+
 	public abstract Map<String, Tensor<Boolean>> solveOne(Problem problem);
 
 	public abstract List<Map<String, Tensor<Boolean>>> solveAll(Problem problem);

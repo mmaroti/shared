@@ -50,12 +50,20 @@ public abstract class SatSolver extends Solver<Integer> {
 		}
 	};
 
-	public final Tensor<Integer> tensor(int... shape) {
+	public final Tensor<Integer> tensor(int[] shape) {
 		return Tensor.generate(shape, GENERATOR);
 	}
 
-	public void ensure(int... clause) {
-		clauses.add(clause);
+	public void ensure(Integer literal) {
+		clauses.add(new int[] { literal });
+	}
+
+	public void ensure(Integer[] clause) {
+		int[] c = new int[clause.length];
+		for (int i = 0; i < clause.length; i++)
+			c[i] = clause[i];
+
+		clauses.add(c);
 	}
 
 	@Override
@@ -174,7 +182,7 @@ public abstract class SatSolver extends Solver<Integer> {
 			if (sol == null)
 				return solutions;
 
-			final int[] exclude = new int[vars];
+			final Integer[] exclude = new Integer[vars];
 
 			Func1<Boolean, Integer> LOOKUP = new Func1<Boolean, Integer>() {
 				int index = 0;

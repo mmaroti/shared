@@ -50,6 +50,33 @@ public abstract class BoolAlg<BOOL> {
 		return not(add(elem1, elem2));
 	}
 
+	public BOOL all(Iterable<BOOL> elems) {
+		BOOL ret = TRUE;
+
+		for (BOOL elem : elems)
+			ret = and(ret, elem);
+
+		return ret;
+	}
+
+	public BOOL any(Iterable<BOOL> elems) {
+		BOOL ret = FALSE;
+
+		for (BOOL elem : elems)
+			ret = or(ret, elem);
+
+		return ret;
+	}
+
+	public BOOL sum(Iterable<BOOL> elems) {
+		BOOL ret = FALSE;
+
+		for (BOOL elem : elems)
+			ret = add(ret, elem);
+
+		return ret;
+	}
+
 	public BOOL one(Iterable<BOOL> elems) {
 		BOOL any = FALSE;
 		BOOL err = FALSE;
@@ -137,9 +164,26 @@ public abstract class BoolAlg<BOOL> {
 			}
 		};
 
-		ALL = Func1.reducer(TRUE, AND);
-		ANY = Func1.reducer(FALSE, OR);
-		SUM = Func1.reducer(FALSE, ADD);
+		ALL = new Func1<BOOL, Iterable<BOOL>>() {
+			@Override
+			public BOOL call(Iterable<BOOL> elems) {
+				return all(elems);
+			}
+		};
+
+		ANY = new Func1<BOOL, Iterable<BOOL>>() {
+			@Override
+			public BOOL call(Iterable<BOOL> elems) {
+				return any(elems);
+			}
+		};
+
+		SUM = new Func1<BOOL, Iterable<BOOL>>() {
+			@Override
+			public BOOL call(Iterable<BOOL> elems) {
+				return sum(elems);
+			}
+		};
 
 		ONE = new Func1<BOOL, Iterable<BOOL>>() {
 			@Override
