@@ -34,7 +34,13 @@ public class MiniSat extends SatSolver {
 
 	protected static DecimalFormat TIME_FORMAT = new DecimalFormat("0.00");
 
-	public boolean[] solve() {
+	// variable indices in clauses and solution start at 1
+	protected boolean[] solution;
+
+	@Override
+	public boolean solve() {
+		solution = null;
+
 		File input = null;
 		PrintStream stream = null;
 
@@ -87,7 +93,7 @@ public class MiniSat extends SatSolver {
 						+ (result == 10 ? "satisfiable." : "unsatisfiable."));
 
 			if (result == 20)
-				return null;
+				return false;
 
 			reader = new BufferedReader(new InputStreamReader(
 					new FileInputStream(output)));
@@ -103,13 +109,14 @@ public class MiniSat extends SatSolver {
 			if (sol.length > variables + 1 || !sol[sol.length - 1].equals("0"))
 				throw new RuntimeException("Minisat produced unexpected output");
 
-			boolean[] solution = new boolean[variables + 1];
+			solution = new boolean[variables + 1];
 
 			for (int i = 0; i < sol.length; i++) {
 				int n = Integer.parseInt(sol[i]);
 				if (!sol[i].equals(Integer.toString(n))
 						|| Math.abs(n) > variables)
-					throw new RuntimeException("Minisat produced unexpected literal");
+					throw new RuntimeException(
+							"Minisat produced unexpected literal");
 
 				if (n > 0)
 					solution[n] = true;
@@ -117,7 +124,7 @@ public class MiniSat extends SatSolver {
 					solution[-n] = false;
 			}
 
-			return solution;
+			return true;
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		} finally {
@@ -136,5 +143,10 @@ public class MiniSat extends SatSolver {
 			if (output != null)
 				output.delete();
 		}
+	}
+
+	@Override
+	public boolean decode(Integer term) {
+		return solution[term];
 	}
 }

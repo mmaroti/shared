@@ -115,7 +115,7 @@ public class DiscrMath<BOOL> {
 		});
 	}
 
-	public static void main2(String[] args) {
+	public static void main(String[] args) {
 		Map<String, int[]> shapes = new HashMap<String, int[]>();
 		shapes.put("f", new int[] { 3, 3 });
 
@@ -130,13 +130,13 @@ public class DiscrMath<BOOL> {
 		};
 
 		List<Map<String, Tensor<Boolean>>> solutions = problem
-				.solveAll(new MiniSat());
+				.solveAll(new Sat4J(), 2);
 		System.out.println(solutions.size());
 		// for (Map<String, Tensor<Boolean>> solution : solutions)
 		// Tensor.print(solution, System.out);
 	}
 
-	public static void main(String[] args) {
+	public static void main2(String[] args) {
 		DiscrMath<Boolean> discr = new DiscrMath<Boolean>(BoolAlg.BOOLEAN);
 
 		Tensor<Integer> f = Tensor.matrix(new int[] { 3, 2 },

@@ -101,6 +101,16 @@ public class Tensor<ELEM> implements Iterable<ELEM> {
 	}
 
 	public static <ELEM> Tensor<ELEM> generate(final int[] shape,
+			final Func0<ELEM> func) {
+		Tensor<ELEM> tensor = new Tensor<ELEM>(shape);
+
+		for (int i = 0; i < tensor.elems.length; i++)
+			tensor.elems[i] = func.call();
+
+		return tensor;
+	}
+
+	public static <ELEM> Tensor<ELEM> generate(final int[] shape,
 			final Func1<ELEM, int[]> func) {
 		Tensor<ELEM> tensor = new Tensor<ELEM>(shape);
 

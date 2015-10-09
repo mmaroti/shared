@@ -18,34 +18,6 @@
 
 package org.mmaroti.sat.core;
 
-public abstract class Solver<BOOL> extends BoolAlg<BOOL> {
-	public boolean debugging = false;
-	
-	public Solver(BOOL TRUE) {
-		super(TRUE);
-	}
-
-	public abstract void clear();
-
-	public abstract BOOL variable();
-
-	public abstract void ensure(BOOL term);
-
-	public abstract boolean solve();
-
-	public abstract boolean decode(BOOL term);
-
-	public final Func0<BOOL> VARIABLE = new Func0<BOOL>() {
-		@Override
-		public BOOL call() {
-			return variable();
-		}
-	};
-
-	public final Func1<Boolean, BOOL> DECODE = new Func1<Boolean, BOOL>() {
-		@Override
-		public Boolean call(BOOL elem) {
-			return decode(elem);
-		}
-	};
+public abstract class Func0<ELEM> {
+	public abstract ELEM call();
 }

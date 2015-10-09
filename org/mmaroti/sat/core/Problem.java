@@ -58,11 +58,66 @@ public abstract class Problem {
 	}
 
 	public <BOOL> Map<String, Tensor<Boolean>> solveOne(Solver<BOOL> solver) {
-		return solver.solveOne(this);
+		solver.clear();
+
+		Map<String, Tensor<BOOL>> tensors = new TreeMap<String, Tensor<BOOL>>();
+		for (String key : shapes.keySet())
+			tensors.put(key, Tensor.generate(shapes.get(key), solver.VARIABLE));
+
+		solver.ensure(compute(solver, tensors));
+
+		if (!solver.solve())
+			return null;
+
+		Map<String, Tensor<Boolean>> solution = new TreeMap<String, Tensor<Boolean>>();
+		for (String key : shapes.keySet())
+			solution.put(key, Tensor.map(solver.DECODE, tensors.get(key)));
+
+		return solution;
+	}
+
+	public <BOOL> List<Map<String, Tensor<Boolean>>> solveAll(
+			Solver<BOOL> solver, int maxCount) {
+		solver.clear();
+
+		Map<String, Tensor<BOOL>> tensors = new TreeMap<String, Tensor<BOOL>>();
+		for (String key : shapes.keySet())
+			tensors.put(key, Tensor.generate(shapes.get(key), solver.VARIABLE));
+
+		solver.ensure(compute(solver, tensors));
+
+		List<Map<String, Tensor<Boolean>>> solutions = new ArrayList<Map<String, Tensor<Boolean>>>();
+		while (solver.solve()) {
+			ArrayList<BOOL> exclude = new ArrayList<BOOL>();
+
+			Map<String, Tensor<Boolean>> solution = new TreeMap<String, Tensor<Boolean>>();
+			for (String key : shapes.keySet()) {
+				Tensor<BOOL> t = tensors.get(key);
+				Tensor<Boolean> s = Tensor.map(solver.DECODE, t);
+				solution.put(key, s);
+
+				t = Tensor.map2(solver.ADD, Tensor.map(solver.LIFT, s), t);
+				for (BOOL b : t)
+					exclude.add(b);
+			}
+
+			solutions.add(solution);
+			solver.ensure(solver.any(exclude));
+
+			if (solutions.size() == maxCount) {
+				System.err.println("... at least " + maxCount
+						+ " solutions found, aborting.");
+				return solutions;
+			} else if (solutions.size() % 100000 == 0)
+				System.err.println("... still working, " + solutions.size()
+						+ " solutions so far ...");
+		}
+
+		return solutions;
 	}
 
 	public <BOOL> List<Map<String, Tensor<Boolean>>> solveAll(
 			Solver<BOOL> solver) {
-		return solver.solveAll(this);
+		return solveAll(solver, 0);
 	}
 }
