@@ -270,7 +270,7 @@ public abstract class MonodialInt extends Problem {
 			}
 		};
 
-		List<Map<String, Tensor<Boolean>>> solutions = prob.solveAll(solver);
+		List<Map<String, Tensor<Boolean>>> solutions = prob.solveAll(solver, 20000);
 		return collect(solutions, "rel");
 	}
 
@@ -314,7 +314,7 @@ public abstract class MonodialInt extends Problem {
 			}
 		};
 
-		List<Map<String, Tensor<Boolean>>> solutions = prob.solveAll(solver);
+		List<Map<String, Tensor<Boolean>>> solutions = prob.solveAll(solver, 20000);
 		return collect(solutions, "func");
 	}
 

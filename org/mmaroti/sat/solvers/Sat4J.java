@@ -19,7 +19,7 @@
 package org.mmaroti.sat.solvers;
 
 import java.text.*;
-import org.mmaroti.sat.core.*;
+import java.util.*;
 import org.sat4j.core.*;
 import org.sat4j.minisat.*;
 import org.sat4j.specs.*;
@@ -40,7 +40,7 @@ public class Sat4J extends Solver<Integer> {
 		solution = new boolean[0];
 
 		solver.newVar(1);
-		ensure(1);
+		clause(new int[] { 1 });
 	}
 
 	protected static DecimalFormat TIME_FORMAT = new DecimalFormat("0.00");
@@ -92,16 +92,10 @@ public class Sat4J extends Solver<Integer> {
 		int a = solver.newVar(++variables);
 		assert a == variables;
 
-		System.out.println("variable: " + variables);
 		return variables;
 	}
 
 	public void clause(int[] clause) {
-		System.out.print("clause:");
-		for (int i = 0; i < clause.length; i++)
-			System.out.print(" " + clause[i]);
-		System.out.println();
-
 		try {
 			solver.addClause(new VecInt(clause));
 		} catch (ContradictionException e) {
@@ -110,13 +104,17 @@ public class Sat4J extends Solver<Integer> {
 	}
 
 	@Override
-	public void ensure(Integer term) {
-		clause(new int[] { term });
+	public void clause(List<Integer> clause) {
+		int[] c = new int[clause.size()];
+		for (int i = 0; i < clause.size(); i++)
+			c[i] = clause.get(i);
+
+		clause(c);
 	}
 
 	@Override
 	public boolean decode(Integer term) {
-		return solution[term];
+		return solution[term - 1];
 	}
 
 	@Override
@@ -172,5 +170,29 @@ public class Sat4J extends Solver<Integer> {
 		clause(new int[] { -a, -b, -var });
 
 		return var;
+	}
+
+	public static void main(String[] args) {
+		Solver<Integer> solver = new Sat4J();
+		Integer a = solver.variable();
+		Integer b = solver.variable();
+		solver.clause(Arrays.asList(solver.or(a, b)));
+		if (solver.solve())
+			System.out.println(solver.decode(a) + " " + solver.decode(b));
+		solver.clause(Arrays.asList(
+				solver.add(a, solver.lift(solver.decode(a))),
+				solver.add(b, solver.lift(solver.decode(b)))));
+		if (solver.solve())
+			System.out.println(solver.decode(a) + " " + solver.decode(b));
+		solver.clause(Arrays.asList(
+				solver.add(a, solver.lift(solver.decode(a))),
+				solver.add(b, solver.lift(solver.decode(b)))));
+		if (solver.solve())
+			System.out.println(solver.decode(a) + " " + solver.decode(b));
+		solver.clause(Arrays.asList(
+				solver.add(a, solver.lift(solver.decode(a))),
+				solver.add(b, solver.lift(solver.decode(b)))));
+		if (solver.solve())
+			System.out.println(solver.decode(a) + " " + solver.decode(b));
 	}
 }

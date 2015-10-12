@@ -22,14 +22,107 @@ import java.io.*;
 import java.text.*;
 import java.util.*;
 
-public class MiniSat extends SatSolver {
-	protected List<String> options = new ArrayList<String>();
+public class MiniSat extends Solver<Integer> {
+	protected int variables;
+	protected List<int[]> clauses = new ArrayList<int[]>();
 
-	public void addOption(String option) {
-		if (option == null || !option.startsWith("'"))
-			throw new IllegalArgumentException();
+	public String options;
 
-		options.add(option);
+	public MiniSat(String options) {
+		super(1);
+		this.options = options;
+		clear();
+	}
+
+	public MiniSat() {
+		super(1);
+		this.options = null;
+		clear();
+	}
+
+	public void clear() {
+		variables = 1;
+		clauses.clear();
+		clauses.add(new int[] { 1 });
+	}
+
+	@Override
+	public final Integer variable() {
+		return ++variables;
+	}
+
+	@Override
+	public void clause(List<Integer> clause) {
+		int[] c = new int[clause.size()];
+		for (int i = 0; i < clause.size(); i++)
+			c[i] = clause.get(i);
+
+		clauses.add(c);
+	}
+
+	@Override
+	public Integer not(Integer b) {
+		return -b;
+	}
+
+	@Override
+	public Integer or(Integer elem1, Integer elem2) {
+		int a = elem1.intValue();
+		int b = elem2.intValue();
+
+		if (a == -1)
+			return b;
+		else if (a == 1)
+			return 1;
+		else if (b == -1)
+			return a;
+		else if (b == 1)
+			return 1;
+		else if (a == b)
+			return a;
+		else if (a == -b)
+			return 1;
+
+		int var = variable();
+		clauses.add(new int[] { -a, var });
+		clauses.add(new int[] { -b, var });
+		clauses.add(new int[] { a, b, -var });
+		return var;
+	}
+
+	@Override
+	public Integer add(Integer elem1, Integer elem2) {
+		int a = elem1.intValue();
+		int b = elem2.intValue();
+
+		if (a == 1)
+			return -b;
+		else if (a == -1)
+			return b;
+		else if (b == 1)
+			return -a;
+		else if (b == -1)
+			return a;
+
+		int var = variable();
+		clauses.add(new int[] { a, b, -var });
+		clauses.add(new int[] { a, -b, var });
+		clauses.add(new int[] { -a, b, var });
+		clauses.add(new int[] { -a, -b, -var });
+		return var;
+	}
+
+	public void dimacs(PrintStream stream) {
+		stream.println("p cnf " + variables + " " + clauses.size());
+		for (int[] clause : clauses) {
+			for (int i : clause) {
+				assert i != 0 && Math.abs(i) <= variables;
+
+				stream.print(i);
+				stream.print(' ');
+			}
+			stream.println('0');
+		}
 	}
 
 	protected static DecimalFormat TIME_FORMAT = new DecimalFormat("0.00");
@@ -58,7 +151,8 @@ public class MiniSat extends SatSolver {
 
 			List<String> args = new ArrayList<String>();
 			args.add("minisat");
-			args.addAll(options);
+			if (options != null)
+				args.addAll(Arrays.asList(options.split(" ")));
 			args.add(input.getAbsolutePath());
 			args.add(output.getAbsolutePath());
 

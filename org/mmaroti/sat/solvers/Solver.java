@@ -16,11 +16,14 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-package org.mmaroti.sat.core;
+package org.mmaroti.sat.solvers;
+
+import java.util.*;
+import org.mmaroti.sat.core.*;
 
 public abstract class Solver<BOOL> extends BoolAlg<BOOL> {
 	public boolean debugging = false;
-	
+
 	public Solver(BOOL TRUE) {
 		super(TRUE);
 	}
@@ -29,7 +32,7 @@ public abstract class Solver<BOOL> extends BoolAlg<BOOL> {
 
 	public abstract BOOL variable();
 
-	public abstract void ensure(BOOL term);
+	public abstract void clause(List<BOOL> clause);
 
 	public abstract boolean solve();
 

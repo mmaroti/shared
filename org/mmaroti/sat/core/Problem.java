@@ -19,6 +19,7 @@
 package org.mmaroti.sat.core;
 
 import java.util.*;
+import org.mmaroti.sat.solvers.*;
 
 public abstract class Problem {
 	protected final Map<String, int[]> shapes;
@@ -64,7 +65,7 @@ public abstract class Problem {
 		for (String key : shapes.keySet())
 			tensors.put(key, Tensor.generate(shapes.get(key), solver.VARIABLE));
 
-		solver.ensure(compute(solver, tensors));
+		solver.clause(Arrays.asList(compute(solver, tensors)));
 
 		if (!solver.solve())
 			return null;
@@ -84,7 +85,7 @@ public abstract class Problem {
 		for (String key : shapes.keySet())
 			tensors.put(key, Tensor.generate(shapes.get(key), solver.VARIABLE));
 
-		solver.ensure(compute(solver, tensors));
+		solver.clause(Arrays.asList(compute(solver, tensors)));
 
 		List<Map<String, Tensor<Boolean>>> solutions = new ArrayList<Map<String, Tensor<Boolean>>>();
 		while (solver.solve()) {
@@ -102,7 +103,7 @@ public abstract class Problem {
 			}
 
 			solutions.add(solution);
-			solver.ensure(solver.any(exclude));
+			solver.clause(exclude);
 
 			if (solutions.size() == maxCount) {
 				System.err.println("... at least " + maxCount
