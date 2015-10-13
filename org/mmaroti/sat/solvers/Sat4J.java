@@ -24,7 +24,7 @@ import org.sat4j.core.*;
 import org.sat4j.minisat.*;
 import org.sat4j.specs.*;
 
-public class Sat4J extends Solver<Integer> {
+public class Sat4J extends SatSolver<Integer> {
 	protected int variables;
 	protected ISolver solver = SolverFactory.newDefault();
 	protected boolean[] solution;
@@ -121,78 +121,5 @@ public class Sat4J extends Solver<Integer> {
 	public Integer not(Integer elem) {
 		assert elem != 0 && elem != Integer.MIN_VALUE;
 		return -elem;
-	}
-
-	@Override
-	public Integer or(Integer elem1, Integer elem2) {
-		int a = elem1.intValue();
-		int b = elem2.intValue();
-
-		if (a == -1)
-			return b;
-		else if (a == 1)
-			return 1;
-		else if (b == -1)
-			return a;
-		else if (b == 1)
-			return 1;
-		else if (a == b)
-			return a;
-		else if (a == -b)
-			return 1;
-
-		int var = variable();
-		clause(new int[] { -a, var });
-		clause(new int[] { -b, var });
-		clause(new int[] { a, b, -var });
-
-		return var;
-	}
-
-	@Override
-	public Integer add(Integer elem1, Integer elem2) {
-		int a = elem1.intValue();
-		int b = elem2.intValue();
-
-		if (a == 1)
-			return -b;
-		else if (a == -1)
-			return b;
-		else if (b == 1)
-			return -a;
-		else if (b == -1)
-			return a;
-
-		int var = variable();
-		clause(new int[] { a, b, -var });
-		clause(new int[] { a, -b, var });
-		clause(new int[] { -a, b, var });
-		clause(new int[] { -a, -b, -var });
-
-		return var;
-	}
-
-	public static void main(String[] args) {
-		Solver<Integer> solver = new Sat4J();
-		Integer a = solver.variable();
-		Integer b = solver.variable();
-		solver.clause(Arrays.asList(solver.or(a, b)));
-		if (solver.solve())
-			System.out.println(solver.decode(a) + " " + solver.decode(b));
-		solver.clause(Arrays.asList(
-				solver.add(a, solver.lift(solver.decode(a))),
-				solver.add(b, solver.lift(solver.decode(b)))));
-		if (solver.solve())
-			System.out.println(solver.decode(a) + " " + solver.decode(b));
-		solver.clause(Arrays.asList(
-				solver.add(a, solver.lift(solver.decode(a))),
-				solver.add(b, solver.lift(solver.decode(b)))));
-		if (solver.solve())
-			System.out.println(solver.decode(a) + " " + solver.decode(b));
-		solver.clause(Arrays.asList(
-				solver.add(a, solver.lift(solver.decode(a))),
-				solver.add(b, solver.lift(solver.decode(b)))));
-		if (solver.solve())
-			System.out.println(solver.decode(a) + " " + solver.decode(b));
 	}
 }

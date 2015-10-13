@@ -58,7 +58,7 @@ public abstract class Problem {
 		return compute(BoolAlg.BOOLEAN, tensors);
 	}
 
-	public <BOOL> Map<String, Tensor<Boolean>> solveOne(Solver<BOOL> solver) {
+	public <BOOL> Map<String, Tensor<Boolean>> solveOne(SatSolver<BOOL> solver) {
 		solver.clear();
 
 		Map<String, Tensor<BOOL>> tensors = new TreeMap<String, Tensor<BOOL>>();
@@ -78,7 +78,7 @@ public abstract class Problem {
 	}
 
 	public <BOOL> List<Map<String, Tensor<Boolean>>> solveAll(
-			Solver<BOOL> solver, int maxCount) {
+			SatSolver<BOOL> solver, int maxCount) {
 		solver.clear();
 
 		Map<String, Tensor<BOOL>> tensors = new TreeMap<String, Tensor<BOOL>>();
@@ -118,7 +118,7 @@ public abstract class Problem {
 	}
 
 	public <BOOL> List<Map<String, Tensor<Boolean>>> solveAll(
-			Solver<BOOL> solver) {
+			SatSolver<BOOL> solver) {
 		return solveAll(solver, 0);
 	}
 }

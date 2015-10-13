@@ -19,10 +19,9 @@
 package org.mmaroti.sat.solvers;
 
 import java.io.*;
-import java.text.*;
 import java.util.*;
 
-public class MiniSat extends Solver<Integer> {
+public class MiniSat extends SatSolver<Integer> {
 	protected int variables;
 	protected List<int[]> clauses = new ArrayList<int[]>();
 
@@ -65,53 +64,6 @@ public class MiniSat extends Solver<Integer> {
 		return -b;
 	}
 
-	@Override
-	public Integer or(Integer elem1, Integer elem2) {
-		int a = elem1.intValue();
-		int b = elem2.intValue();
-
-		if (a == -1)
-			return b;
-		else if (a == 1)
-			return 1;
-		else if (b == -1)
-			return a;
-		else if (b == 1)
-			return 1;
-		else if (a == b)
-			return a;
-		else if (a == -b)
-			return 1;
-
-		int var = variable();
-		clauses.add(new int[] { -a, var });
-		clauses.add(new int[] { -b, var });
-		clauses.add(new int[] { a, b, -var });
-		return var;
-	}
-
-	@Override
-	public Integer add(Integer elem1, Integer elem2) {
-		int a = elem1.intValue();
-		int b = elem2.intValue();
-
-		if (a == 1)
-			return -b;
-		else if (a == -1)
-			return b;
-		else if (b == 1)
-			return -a;
-		else if (b == -1)
-			return a;
-
-		int var = variable();
-		clauses.add(new int[] { a, b, -var });
-		clauses.add(new int[] { a, -b, var });
-		clauses.add(new int[] { -a, b, var });
-		clauses.add(new int[] { -a, -b, -var });
-		return var;
-	}
-
 	public void dimacs(PrintStream stream) {
 		stream.println("p cnf " + variables + " " + clauses.size());
 		for (int[] clause : clauses) {
@@ -124,8 +76,6 @@ public class MiniSat extends Solver<Integer> {
 			stream.println('0');
 		}
 	}
-
-	protected static DecimalFormat TIME_FORMAT = new DecimalFormat("0.00");
 
 	// variable indices in clauses and solution start at 1
 	protected boolean[] solution;

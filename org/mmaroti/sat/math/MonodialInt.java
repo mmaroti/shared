@@ -214,8 +214,8 @@ public abstract class MonodialInt extends Problem {
 		return Tensor.stack(list);
 	}
 
-	public static <SBOOL> Tensor<Boolean> getUnaryRels(
-			Solver<SBOOL> solver, int size, String monoid) {
+	public static <SBOOL> Tensor<Boolean> getUnaryRels(SatSolver<SBOOL> solver,
+			int size, String monoid) {
 		MonodialInt prob = new MonodialInt(size, monoid, "rel",
 				new int[] { size }) {
 			@Override
@@ -234,8 +234,8 @@ public abstract class MonodialInt extends Problem {
 		return collect(solutions, "rel");
 	}
 
-	public static <SBOOL> Tensor<Boolean> getBinaryRels(
-			Solver<SBOOL> solver, int size, String monoid) {
+	public static <SBOOL> Tensor<Boolean> getBinaryRels(SatSolver<SBOOL> solver,
+			int size, String monoid) {
 		MonodialInt prob = new MonodialInt(size, monoid, "rel", new int[] {
 				size, size }) {
 			@Override
@@ -254,8 +254,8 @@ public abstract class MonodialInt extends Problem {
 		return collect(solutions, "rel");
 	}
 
-	public static <SBOOL> Tensor<Boolean> getTernaryRels(
-			Solver<SBOOL> solver, int size, String monoid) {
+	public static <SBOOL> Tensor<Boolean> getTernaryRels(SatSolver<SBOOL> solver,
+			int size, String monoid) {
 		MonodialInt prob = new MonodialInt(size, monoid, "rel", new int[] {
 				size, size, size }) {
 			@Override
@@ -270,12 +270,13 @@ public abstract class MonodialInt extends Problem {
 			}
 		};
 
-		List<Map<String, Tensor<Boolean>>> solutions = prob.solveAll(solver, 20000);
+		List<Map<String, Tensor<Boolean>>> solutions = prob.solveAll(solver,
+				20000);
 		return collect(solutions, "rel");
 	}
 
-	public static <SBOOL> Tensor<Boolean> getBinaryOps(
-			Solver<SBOOL> solver, int size, String monoid) {
+	public static <SBOOL> Tensor<Boolean> getBinaryOps(SatSolver<SBOOL> solver,
+			int size, String monoid) {
 		MonodialInt prob = new MonodialInt(size, monoid, "func", new int[] {
 				size, size, size }) {
 			@Override
@@ -296,8 +297,8 @@ public abstract class MonodialInt extends Problem {
 		return collect(solutions, "func");
 	}
 
-	public static <SBOOL> Tensor<Boolean> getTernaryOps(
-			Solver<SBOOL> solver, int size, String monoid) {
+	public static <SBOOL> Tensor<Boolean> getTernaryOps(SatSolver<SBOOL> solver,
+			int size, String monoid) {
 		MonodialInt prob = new MonodialInt(size, monoid, "func", new int[] {
 				size, size, size, size }) {
 			@Override
@@ -314,7 +315,8 @@ public abstract class MonodialInt extends Problem {
 			}
 		};
 
-		List<Map<String, Tensor<Boolean>>> solutions = prob.solveAll(solver, 20000);
+		List<Map<String, Tensor<Boolean>>> solutions = prob.solveAll(solver,
+				20000);
 		return collect(solutions, "func");
 	}
 
@@ -339,8 +341,10 @@ public abstract class MonodialInt extends Problem {
 	}
 
 	public static void main(String[] args) {
-		Solver<Integer> solver = new Sat4J();
+		SatSolver<Integer> solver = new Sat4J();
 		solver.debugging = false;
+
+		long time = System.currentTimeMillis();
 
 		int size = 3;
 		String monoid = "012 021";
@@ -360,5 +364,8 @@ public abstract class MonodialInt extends Problem {
 
 		System.out.println("essential ternary ops: "
 				+ getTernaryOps(solver, size, monoid).getDim(0));
+
+		time = System.currentTimeMillis() - time;
+		System.err.println("finished in " + (0.001 * time) + " seconds");
 	}
 }
