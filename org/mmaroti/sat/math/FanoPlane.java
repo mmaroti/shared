@@ -41,11 +41,11 @@ public class FanoPlane extends Problem {
 		good = alg.and(good, nonzero(alg, y));
 		good = alg.and(good, nonzero(alg, xy));
 
-		Tensor<BOOL> xvy = Tensor.reduce(alg.ALL, "ij", alg.EQ, x.named("di"),
+		Tensor<BOOL> xvy = Tensor.reduce(alg.ALL, "ij", alg.EQU, x.named("di"),
 				y.named("dj"));
-		Tensor<BOOL> xvxy = Tensor.reduce(alg.ALL, "ij", alg.EQ, x.named("di"),
+		Tensor<BOOL> xvxy = Tensor.reduce(alg.ALL, "ij", alg.EQU, x.named("di"),
 				xy.named("dj"));
-		Tensor<BOOL> yvxy = Tensor.reduce(alg.ALL, "ij", alg.EQ, y.named("di"),
+		Tensor<BOOL> yvxy = Tensor.reduce(alg.ALL, "ij", alg.EQU, y.named("di"),
 				xy.named("dj"));
 
 		// test, line1, line2

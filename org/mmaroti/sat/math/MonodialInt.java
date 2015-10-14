@@ -40,7 +40,7 @@ public abstract class MonodialInt extends Problem {
 				func.named("xyz"), monoid.named("ztp"));
 		t = Tensor.reduce(alg.ANY, "xtpq", alg.AND, t.named("xytp"),
 				monoid.named("ytq"));
-		t = Tensor.reduce(alg.ALL, "rpq", alg.EQ, t.named("xtpq"),
+		t = Tensor.reduce(alg.ALL, "rpq", alg.EQU, t.named("xtpq"),
 				monoid.named("xtr"));
 		t = Tensor.fold(Tensor.fold(t, 1, alg.ONE), 2, alg.ALL);
 
@@ -57,7 +57,7 @@ public abstract class MonodialInt extends Problem {
 				monoid.named("ctq"));
 		t = Tensor.reduce(alg.ANY, "atpqr", alg.AND, t.named("atpqd"),
 				monoid.named("dtr"));
-		t = Tensor.reduce(alg.ALL, "spqr", alg.EQ, t.named("atpqr"),
+		t = Tensor.reduce(alg.ALL, "spqr", alg.EQU, t.named("atpqr"),
 				monoid.named("ats"));
 		t = Tensor.fold(Tensor.fold(t, 1, alg.ONE), 3, alg.ALL);
 

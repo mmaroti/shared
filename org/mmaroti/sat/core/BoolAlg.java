@@ -43,10 +43,10 @@ public abstract class BoolAlg<BOOL> {
 	}
 
 	public BOOL add(BOOL elem1, BOOL elem2) {
-		return not(eq(elem1, elem2));
+		return not(equ(elem1, elem2));
 	}
 
-	public BOOL eq(BOOL elem1, BOOL elem2) {
+	public BOOL equ(BOOL elem1, BOOL elem2) {
 		return not(add(elem1, elem2));
 	}
 
@@ -89,12 +89,32 @@ public abstract class BoolAlg<BOOL> {
 		return and(any, not(err));
 	}
 
+	public BOOL lexless(Iterable<BOOL> elem1, Iterable<BOOL> elem2) {
+		BOOL less = FALSE;
+		BOOL equal = TRUE;
+
+		Iterator<BOOL> iter1 = elem1.iterator();
+		Iterator<BOOL> iter2 = elem2.iterator();
+		while (iter1.hasNext()) {
+			assert iter2.hasNext();
+
+			BOOL a = iter1.next();
+			BOOL b = iter2.next();
+
+			less = or(less, and(equal, and(not(a), b)));
+			equal = and(equal, equ(a, b));
+		}
+		assert !iter2.hasNext();
+
+		return less;
+	}
+
 	public final Func1<BOOL, BOOL> NOT;
 	public final Func2<BOOL, BOOL, BOOL> OR;
 	public final Func2<BOOL, BOOL, BOOL> AND;
 	public final Func2<BOOL, BOOL, BOOL> LEQ;
 	public final Func2<BOOL, BOOL, BOOL> ADD;
-	public final Func2<BOOL, BOOL, BOOL> EQ;
+	public final Func2<BOOL, BOOL, BOOL> EQU;
 
 	public final Func1<BOOL, Boolean> LIFT;
 	public final Func1<BOOL, Iterable<BOOL>> ALL;
@@ -149,11 +169,11 @@ public abstract class BoolAlg<BOOL> {
 			}
 		};
 
-		EQ = new Func2<BOOL, BOOL, BOOL>() {
+		EQU = new Func2<BOOL, BOOL, BOOL>() {
 			@Override
 			public BOOL call(BOOL elem1, BOOL elem2) {
 				assert elem1 != null && elem2 != null;
-				return eq(elem1, elem2);
+				return equ(elem1, elem2);
 			}
 		};
 
@@ -202,7 +222,7 @@ public abstract class BoolAlg<BOOL> {
 
 				BOOL res = TRUE;
 				while (iter.hasNext())
-					res = and(res, eq(fst, iter.next()));
+					res = and(res, equ(fst, iter.next()));
 
 				return res;
 			}

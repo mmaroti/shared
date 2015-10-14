@@ -158,7 +158,7 @@ public abstract class SatSolver<BOOL> extends BoolAlg<BOOL> {
 		clause(Arrays.asList(a, b, not(var)));
 		clause(Arrays.asList(a, not(b), var));
 		clause(Arrays.asList(not(a), b, var));
-		clause(Arrays.asList(not(a), not(b), var));
+		clause(Arrays.asList(not(a), not(b), not(var)));
 		return var;
 	}
 

@@ -274,6 +274,24 @@ public class Tensor<ELEM> implements Iterable<ELEM> {
 		return tensor;
 	}
 
+	public static <ELEM> List<Tensor<ELEM>> unconcat(Tensor<ELEM> tensor) {
+		assert tensor.getOrder() >= 1;
+
+		int[] shape = new int[tensor.getOrder() - 1];
+		System.arraycopy(tensor.getShape(), 0, shape, 0, shape.length);
+		int size = getSize(shape);
+		int last = tensor.getDim(shape.length);
+
+		List<Tensor<ELEM>> list = new ArrayList<Tensor<ELEM>>();
+		for (int i = 0; i < last; i++) {
+			Tensor<ELEM> t = new Tensor<ELEM>(shape);
+			System.arraycopy(tensor.elems, i * size, t.elems, 0, size);
+			list.add(t);
+		}
+
+		return list;
+	}
+
 	public static <ELEM1, ELEM2> Tensor<ELEM2> fold(Tensor<ELEM1> arg,
 			int proj, Func1<ELEM2, Iterable<ELEM1>> func) {
 

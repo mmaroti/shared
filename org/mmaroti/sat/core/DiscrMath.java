@@ -146,7 +146,7 @@ public class DiscrMath<BOOL> {
 		Tensor<Boolean> h = Tensor.reduce(BoolAlg.BOOLEAN.ANY, "xzpq",
 				BoolAlg.BOOLEAN.AND, g.named("xyp"), g.named("yzq"));
 		Tensor<Boolean> m = Tensor.reduce(BoolAlg.BOOLEAN.ALL, "pqr",
-				BoolAlg.BOOLEAN.EQ, h.named("xypq"), g.named("xyr"));
+				BoolAlg.BOOLEAN.EQU, h.named("xypq"), g.named("xyr"));
 
 		Tensor.print(m, System.out);
 	}

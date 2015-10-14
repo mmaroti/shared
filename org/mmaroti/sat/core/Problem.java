@@ -74,6 +74,7 @@ public abstract class Problem {
 		for (String key : shapes.keySet())
 			solution.put(key, Tensor.map(solver.DECODE, tensors.get(key)));
 
+		assert check(solution);
 		return solution;
 	}
 
@@ -102,6 +103,7 @@ public abstract class Problem {
 					exclude.add(b);
 			}
 
+			assert check(solution);
 			solutions.add(solution);
 			solver.clause(exclude);
 
