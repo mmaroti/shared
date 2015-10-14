@@ -292,8 +292,8 @@ public class Tensor<ELEM> implements Iterable<ELEM> {
 		return list;
 	}
 
-	public static <ELEM1, ELEM2> Tensor<ELEM2> fold(Tensor<ELEM1> arg,
-			int proj, Func1<ELEM2, Iterable<ELEM1>> func) {
+	public static <ELEM1, ELEM2> Tensor<ELEM2> fold(
+			Func1<ELEM2, Iterable<ELEM1>> func, int proj, Tensor<ELEM1> arg) {
 
 		int[] shape1 = new int[proj];
 		System.arraycopy(arg.shape, 0, shape1, 0, proj);
@@ -330,50 +330,6 @@ public class Tensor<ELEM> implements Iterable<ELEM> {
 	public Named<ELEM> named(String names) {
 		return new Named<ELEM>(this, names);
 	}
-
-	@SafeVarargs
-	public static <ELEM> Tensor<ELEM> reduce(Func1<ELEM, Iterable<ELEM>> sum,
-			String names, Func1<ELEM, Iterable<ELEM>> prod,
-			Named<ELEM>... parts) {
-		assert parts.length > 0;
-
-		TreeMap<Character, Integer> dims = new TreeMap<Character, Integer>();
-		for (Named<ELEM> part : parts) {
-			for (int i = 0; i < part.names.length(); i++) {
-				int dim = part.tensor.shape[i];
-				Integer d = dims.put(part.names.charAt(i), dim);
-
-				assert d == null || d.intValue() == dim;
-			}
-		}
-
-		ArrayList<Character> keys = new ArrayList<Character>(dims.keySet());
-		for (int i = 0; i < names.length(); i++) {
-			Character c = names.charAt(i);
-			keys.remove(c);
-			keys.add(c);
-		}
-
-		ArrayList<Tensor<ELEM>> tensors = new ArrayList<Tensor<ELEM>>();
-
-		int[] shape = new int[dims.size()];
-		for (int i = 0; i < shape.length; i++)
-			shape[i] = dims.get(keys.get(i));
-
-		for (Named<ELEM> part : parts) {
-			int[] map = new int[part.names.length()];
-			for (int i = 0; i < map.length; i++)
-				map[i] = keys.indexOf(part.names.charAt(i));
-
-			tensors.add(Tensor.reshape(part.tensor, shape, map));
-		}
-
-		Tensor<ELEM> tensor = Tensor.stack(tensors);
-		tensor = Tensor.fold(tensor, 1, prod);
-		tensor = Tensor.fold(tensor, keys.size() - names.length(), sum);
-
-		return tensor;
-	};
 
 	public static <ELEM, ELEM1, ELEM2> Tensor<ELEM> reduce(
 			Func1<ELEM, Iterable<ELEM>> sum, String names,
@@ -416,7 +372,7 @@ public class Tensor<ELEM> implements Iterable<ELEM> {
 		Tensor<ELEM2> arg2 = Tensor.reshape(part2.tensor, shape, map);
 
 		Tensor<ELEM> tensor = Tensor.map2(prod, arg1, arg2);
-		tensor = Tensor.fold(tensor, keys.size() - names.length(), sum);
+		tensor = Tensor.fold(sum, keys.size() - names.length(), tensor);
 
 		return tensor;
 	};

@@ -43,17 +43,17 @@ public class FanoPlane2 {
 
 			Tensor<BOOL> t = Tensor.reduce(alg.SUM, "ik", alg.AND,
 					g.named("ij"), p.named("jk"));
-			BOOL b = Tensor.fold(Tensor.fold(t, 1, alg.ANY), 1, alg.ALL).get();
+			BOOL b = Tensor.fold(alg.ALL, 1, Tensor.fold(alg.ANY, 1, t)).get();
 
 			List<Tensor<BOOL>> xs = Tensor.unconcat(t);
-			
+
 			b = alg.and(b, alg.lexless(xs.get(0), xs.get(1)));
 			b = alg.and(b, alg.lexless(xs.get(0), xs.get(2)));
 			b = alg.and(b, alg.lexless(xs.get(0), xs.get(3)));
 			b = alg.and(b, alg.lexless(xs.get(0), xs.get(4)));
 			b = alg.and(b, alg.lexless(xs.get(0), xs.get(5)));
 			b = alg.and(b, alg.lexless(xs.get(0), xs.get(6)));
-			
+
 			b = alg.and(b, alg.lexless(xs.get(1), xs.get(2)));
 			b = alg.and(b, alg.lexless(xs.get(1), xs.get(3)));
 			b = alg.and(b, alg.lexless(xs.get(1), xs.get(4)));
@@ -63,7 +63,7 @@ public class FanoPlane2 {
 			b = alg.and(b, alg.lexless(xs.get(2), xs.get(4)));
 			b = alg.and(b, alg.lexless(xs.get(2), xs.get(5)));
 			b = alg.and(b, alg.lexless(xs.get(2), xs.get(6)));
-			
+
 			return b;
 		}
 	}

@@ -27,8 +27,8 @@ public abstract class MonodialInt extends Problem {
 	final Tensor<Boolean> monoid;
 
 	public <BOOL> BOOL isFunction(BoolAlg<BOOL> alg, Tensor<BOOL> func) {
-		func = Tensor.fold(func, 1, alg.ONE);
-		func = Tensor.fold(func, func.getOrder(), alg.ALL);
+		func = Tensor.fold(alg.ONE, 1, func);
+		func = Tensor.fold(alg.ALL, func.getOrder(), func);
 		return func.get();
 	}
 
@@ -42,7 +42,7 @@ public abstract class MonodialInt extends Problem {
 				monoid.named("ytq"));
 		t = Tensor.reduce(alg.ALL, "rpq", alg.EQU, t.named("xtpq"),
 				monoid.named("xtr"));
-		t = Tensor.fold(Tensor.fold(t, 1, alg.ONE), 2, alg.ALL);
+		t = Tensor.fold(alg.ALL, 2, Tensor.fold(alg.ONE, 1, t));
 
 		return t.get();
 	}
@@ -59,7 +59,7 @@ public abstract class MonodialInt extends Problem {
 				monoid.named("dtr"));
 		t = Tensor.reduce(alg.ALL, "spqr", alg.EQU, t.named("atpqr"),
 				monoid.named("ats"));
-		t = Tensor.fold(Tensor.fold(t, 1, alg.ONE), 3, alg.ALL);
+		t = Tensor.fold(alg.ALL, 3, Tensor.fold(alg.ONE, 1, t));
 
 		return t.get();
 	}
@@ -69,11 +69,11 @@ public abstract class MonodialInt extends Problem {
 
 		Tensor<BOOL> t;
 		t = Tensor.reshape(func, func.getShape(), new int[] { 1, 0, 2 });
-		t = Tensor.fold(Tensor.fold(t, 1, alg.EQS), 2, alg.ALL);
+		t = Tensor.fold(alg.ALL, 2, Tensor.fold(alg.EQS, 1, t));
 		BOOL proj = t.get();
 
 		t = Tensor.reshape(func, func.getShape(), new int[] { 1, 2, 0 });
-		t = Tensor.fold(Tensor.fold(t, 1, alg.EQS), 2, alg.ALL);
+		t = Tensor.fold(alg.ALL, 2, Tensor.fold(alg.EQS, 1, t));
 		proj = alg.or(proj, t.get());
 
 		return alg.not(proj);
@@ -84,15 +84,15 @@ public abstract class MonodialInt extends Problem {
 
 		Tensor<BOOL> t;
 		t = Tensor.reshape(func, func.getShape(), new int[] { 1, 0, 2, 3 });
-		t = Tensor.fold(Tensor.fold(t, 1, alg.EQS), 3, alg.ALL);
+		t = Tensor.fold(alg.ALL, 3, Tensor.fold(alg.EQS, 1, t));
 		BOOL proj = t.get();
 
 		t = Tensor.reshape(func, func.getShape(), new int[] { 1, 2, 0, 3 });
-		t = Tensor.fold(Tensor.fold(t, 1, alg.EQS), 3, alg.ALL);
+		t = Tensor.fold(alg.ALL, 3, Tensor.fold(alg.EQS, 1, t));
 		proj = alg.or(proj, t.get());
 
 		t = Tensor.reshape(func, func.getShape(), new int[] { 1, 2, 3, 0 });
-		t = Tensor.fold(Tensor.fold(t, 1, alg.EQS), 3, alg.ALL);
+		t = Tensor.fold(alg.ALL, 3, Tensor.fold(alg.EQS, 1, t));
 		proj = alg.or(proj, t.get());
 
 		return alg.not(proj);
@@ -106,7 +106,7 @@ public abstract class MonodialInt extends Problem {
 		t = Tensor.reduce(alg.ANY, "y", alg.AND, rel.named("x"),
 				monoid.named("yxp"));
 		t = Tensor.map2(alg.LEQ, t, rel);
-		t = Tensor.fold(t, 1, alg.ALL);
+		t = Tensor.fold(alg.ALL, 1, t);
 
 		return t.get();
 	}
@@ -121,7 +121,7 @@ public abstract class MonodialInt extends Problem {
 		t = Tensor.reduce(alg.ANY, "uv", alg.AND, t.named("uyp"),
 				monoid.named("vyp"));
 		t = Tensor.map2(alg.LEQ, t, rel);
-		t = Tensor.fold(t, 2, alg.ALL);
+		t = Tensor.fold(alg.ALL, 2, t);
 
 		return t.get();
 	}
@@ -139,7 +139,7 @@ public abstract class MonodialInt extends Problem {
 				monoid.named("wzp"));
 
 		t = Tensor.map2(alg.LEQ, t, rel);
-		t = Tensor.fold(t, 3, alg.ALL);
+		t = Tensor.fold(alg.ALL, 3, t);
 
 		return t.get();
 	}
@@ -148,11 +148,11 @@ public abstract class MonodialInt extends Problem {
 			Tensor<BOOL> rel) {
 		assert func.getOrder() == 3 && rel.getOrder() == 1;
 
-		Tensor<BOOL> t;
-		t = Tensor.reduce(alg.ANY, "x", alg.ALL, rel.named("a"),
-				rel.named("b"), func.named("xab"));
+		Tensor<BOOL> t = Tensor.reduce(alg.ANY, "xb", alg.AND,
+				func.named("xab"), rel.named("a"));
+		t = Tensor.reduce(alg.ANY, "x", alg.AND, t.named("xb"), rel.named("b"));
 		t = Tensor.map2(alg.LEQ, t, rel);
-		t = Tensor.fold(t, 1, alg.ALL);
+		t = Tensor.fold(alg.ALL, 1, t);
 
 		return t.get();
 	}
@@ -161,11 +161,14 @@ public abstract class MonodialInt extends Problem {
 			Tensor<BOOL> rel) {
 		assert func.getOrder() == 3 && rel.getOrder() == 2;
 
-		Tensor<BOOL> t;
-		t = Tensor.reduce(alg.ANY, "xy", alg.ALL, rel.named("ab"),
-				rel.named("cd"), func.named("xac"), func.named("ybd"));
+		Tensor<BOOL> t = Tensor.reduce(alg.ANY, "bxc", alg.AND,
+				rel.named("ab"), func.named("xac"));
+		t = Tensor.reduce(alg.ANY, "xycd", alg.AND, t.named("bxc"),
+				func.named("ybd"));
+		t = Tensor.reduce(alg.ANY, "xy", alg.AND, t.named("xycd"),
+				rel.named("cd"));
 		t = Tensor.map2(alg.LEQ, t, rel);
-		t = Tensor.fold(t, 2, alg.ALL);
+		t = Tensor.fold(alg.ALL, 2, t);
 
 		return t.get();
 	}
@@ -174,12 +177,17 @@ public abstract class MonodialInt extends Problem {
 			Tensor<BOOL> rel) {
 		assert func.getOrder() == 3 && rel.getOrder() == 3;
 
-		Tensor<BOOL> t;
-		t = Tensor.reduce(alg.ANY, "xyz", alg.ALL, rel.named("abc"),
-				rel.named("def"), func.named("xad"), func.named("ybe"),
+		Tensor<BOOL> t = Tensor.reduce(alg.ANY, "bcxd", alg.AND,
+				rel.named("abc"), func.named("xad"));
+		t = Tensor.reduce(alg.ANY, "cxyde", alg.AND, t.named("bcxd"),
+				func.named("ybe"));
+		t = Tensor.reduce(alg.ANY, "xyzdef", alg.AND, t.named("cxyde"),
 				func.named("zcf"));
+		t = Tensor.reduce(alg.ANY, "xyz", alg.AND, t.named("xyzdef"),
+				rel.named("def"));
+
 		t = Tensor.map2(alg.LEQ, t, rel);
-		t = Tensor.fold(t, 3, alg.ALL);
+		t = Tensor.fold(alg.ALL, 3, t);
 
 		return t.get();
 	}
@@ -234,8 +242,8 @@ public abstract class MonodialInt extends Problem {
 		return collect(solutions, "rel");
 	}
 
-	public static <SBOOL> Tensor<Boolean> getBinaryRels(SatSolver<SBOOL> solver,
-			int size, String monoid) {
+	public static <SBOOL> Tensor<Boolean> getBinaryRels(
+			SatSolver<SBOOL> solver, int size, String monoid) {
 		MonodialInt prob = new MonodialInt(size, monoid, "rel", new int[] {
 				size, size }) {
 			@Override
@@ -254,8 +262,8 @@ public abstract class MonodialInt extends Problem {
 		return collect(solutions, "rel");
 	}
 
-	public static <SBOOL> Tensor<Boolean> getTernaryRels(SatSolver<SBOOL> solver,
-			int size, String monoid) {
+	public static <SBOOL> Tensor<Boolean> getTernaryRels(
+			SatSolver<SBOOL> solver, int size, String monoid) {
 		MonodialInt prob = new MonodialInt(size, monoid, "rel", new int[] {
 				size, size, size }) {
 			@Override
@@ -297,8 +305,8 @@ public abstract class MonodialInt extends Problem {
 		return collect(solutions, "func");
 	}
 
-	public static <SBOOL> Tensor<Boolean> getTernaryOps(SatSolver<SBOOL> solver,
-			int size, String monoid) {
+	public static <SBOOL> Tensor<Boolean> getTernaryOps(
+			SatSolver<SBOOL> solver, int size, String monoid) {
 		MonodialInt prob = new MonodialInt(size, monoid, "func", new int[] {
 				size, size, size, size }) {
 			@Override

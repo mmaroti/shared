@@ -31,8 +31,8 @@ public class DiscrMath<BOOL> {
 	BOOL isFunction(Tensor<BOOL> tensor) {
 		assert tensor.getOrder() >= 1;
 
-		tensor = Tensor.fold(tensor, 1, alg.ONE);
-		tensor = Tensor.fold(tensor, tensor.getOrder(), alg.ALL);
+		tensor = Tensor.fold(alg.ONE, 1, tensor);
+		tensor = Tensor.fold(alg.ALL, tensor.getOrder(), tensor);
 
 		return tensor.get();
 	}
@@ -70,7 +70,7 @@ public class DiscrMath<BOOL> {
 		arg1 = Tensor.reshape(arg1, shape, map);
 
 		tensor = Tensor.map2(alg.AND, tensor, arg1);
-		tensor = Tensor.fold(tensor, 1, alg.ANY);
+		tensor = Tensor.fold(alg.ANY, 1, tensor);
 
 		return tensor;
 	}
@@ -129,8 +129,8 @@ public class DiscrMath<BOOL> {
 			}
 		};
 
-		List<Map<String, Tensor<Boolean>>> solutions = problem
-				.solveAll(new Sat4J(), 2);
+		List<Map<String, Tensor<Boolean>>> solutions = problem.solveAll(
+				new Sat4J(), 2);
 		System.out.println(solutions.size());
 		// for (Map<String, Tensor<Boolean>> solution : solutions)
 		// Tensor.print(solution, System.out);
