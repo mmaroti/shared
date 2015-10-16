@@ -228,40 +228,17 @@ public class Tensor<ELEM> implements Iterable<ELEM> {
 		return tensor;
 	}
 
-	public static <ELEM> Tensor<ELEM> stack(List<Tensor<ELEM>> list) {
-		assert list.size() >= 1;
-		for (int i = 0; i < list.size(); i++)
-			assert Arrays.equals(list.get(0).shape, list.get(i).shape);
+	public static <ELEM> Tensor<ELEM> concat(int[] commonShape,
+			List<Tensor<ELEM>> list) {
+		for (Tensor<ELEM> tensor : list)
+			assert Arrays.equals(commonShape, tensor.shape);
 
 		int count = list.size();
-		int size = getSize(list.get(0).shape);
+		int size = getSize(commonShape);
 
-		int[] shape = new int[1 + list.get(0).getOrder()];
-		shape[0] = list.size();
-		System.arraycopy(list.get(0).shape, 0, shape, 1, shape.length - 1);
-
-		Tensor<ELEM> tensor = new Tensor<ELEM>(shape);
-
-		int pos = 0;
-		for (int i = 0; i < size; i++) {
-			for (int j = 0; j < count; j++)
-				tensor.elems[pos++] = list.get(j).elems[i];
-		}
-
-		return tensor;
-	}
-
-	public static <ELEM> Tensor<ELEM> concat(List<Tensor<ELEM>> list) {
-		assert list.size() >= 1;
-		for (int i = 0; i < list.size(); i++)
-			assert Arrays.equals(list.get(0).shape, list.get(i).shape);
-
-		int count = list.size();
-		int size = getSize(list.get(0).shape);
-
-		int[] shape = new int[list.get(0).getOrder() + 1];
-		System.arraycopy(list.get(0).shape, 0, shape, 0, shape.length - 1);
-		shape[shape.length - 1] = list.size();
+		int[] shape = new int[commonShape.length + 1];
+		System.arraycopy(commonShape, 0, shape, 0, commonShape.length);
+		shape[commonShape.length] = list.size();
 
 		Tensor<ELEM> tensor = new Tensor<ELEM>(shape);
 
@@ -272,6 +249,11 @@ public class Tensor<ELEM> implements Iterable<ELEM> {
 		}
 
 		return tensor;
+	}
+
+	public static <ELEM> Tensor<ELEM> concat(List<Tensor<ELEM>> list) {
+		assert list.size() >= 1;
+		return concat(list.get(0).shape, list);
 	}
 
 	public static <ELEM> List<Tensor<ELEM>> unconcat(Tensor<ELEM> tensor) {

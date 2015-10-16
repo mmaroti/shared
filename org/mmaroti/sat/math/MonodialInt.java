@@ -213,15 +213,6 @@ public abstract class MonodialInt extends Problem {
 		});
 	}
 
-	public static Tensor<Boolean> collect(
-			List<Map<String, Tensor<Boolean>>> solutions, String name) {
-		List<Tensor<Boolean>> list = new ArrayList<Tensor<Boolean>>();
-		for (Map<String, Tensor<Boolean>> solution : solutions)
-			list.add(solution.get(name));
-
-		return Tensor.stack(list);
-	}
-
 	public static <SBOOL> Tensor<Boolean> getUnaryRels(SatSolver<SBOOL> solver,
 			int size, String monoid) {
 		MonodialInt prob = new MonodialInt(size, monoid, "rel",
@@ -238,8 +229,7 @@ public abstract class MonodialInt extends Problem {
 			}
 		};
 
-		List<Map<String, Tensor<Boolean>>> solutions = prob.solveAll(solver);
-		return collect(solutions, "rel");
+		return prob.solveAll(solver).get("rel");
 	}
 
 	public static <SBOOL> Tensor<Boolean> getBinaryRels(
@@ -258,8 +248,7 @@ public abstract class MonodialInt extends Problem {
 			}
 		};
 
-		List<Map<String, Tensor<Boolean>>> solutions = prob.solveAll(solver);
-		return collect(solutions, "rel");
+		return prob.solveAll(solver).get("rel");
 	}
 
 	public static <SBOOL> Tensor<Boolean> getTernaryRels(
@@ -278,9 +267,7 @@ public abstract class MonodialInt extends Problem {
 			}
 		};
 
-		List<Map<String, Tensor<Boolean>>> solutions = prob.solveAll(solver,
-				20000);
-		return collect(solutions, "rel");
+		return prob.solveAll(solver, 20000).get("rel");
 	}
 
 	public static <SBOOL> Tensor<Boolean> getBinaryOps(SatSolver<SBOOL> solver,
@@ -301,8 +288,7 @@ public abstract class MonodialInt extends Problem {
 			}
 		};
 
-		List<Map<String, Tensor<Boolean>>> solutions = prob.solveAll(solver);
-		return collect(solutions, "func");
+		return prob.solveAll(solver).get("func");
 	}
 
 	public static <SBOOL> Tensor<Boolean> getTernaryOps(
@@ -323,9 +309,7 @@ public abstract class MonodialInt extends Problem {
 			}
 		};
 
-		List<Map<String, Tensor<Boolean>>> solutions = prob.solveAll(solver,
-				20000);
-		return collect(solutions, "func");
+		return prob.solveAll(solver, 20000).get("func");
 	}
 
 	public static int[] decodeMonoid(String monoid) {
@@ -359,19 +343,19 @@ public abstract class MonodialInt extends Problem {
 		System.out.println("monoid: " + monoid);
 
 		System.out.println("unary relations:       "
-				+ getUnaryRels(solver, size, monoid).getDim(0));
+				+ getUnaryRels(solver, size, monoid).getDim(1));
 
 		System.out.println("binary relations:      "
-				+ getBinaryRels(solver, size, monoid).getDim(0));
+				+ getBinaryRels(solver, size, monoid).getDim(2));
 
 		System.out.println("essential binary ops:  "
-				+ getBinaryOps(solver, size, monoid).getDim(0));
+				+ getBinaryOps(solver, size, monoid).getDim(3));
 
 		System.out.println("ternary relations:     "
-				+ getTernaryRels(solver, size, monoid).getDim(0));
+				+ getTernaryRels(solver, size, monoid).getDim(3));
 
 		System.out.println("essential ternary ops: "
-				+ getTernaryOps(solver, size, monoid).getDim(0));
+				+ getTernaryOps(solver, size, monoid).getDim(4));
 
 		time = System.currentTimeMillis() - time;
 		System.err.println("finished in " + (0.001 * time) + " seconds");

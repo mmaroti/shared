@@ -129,9 +129,9 @@ public class DiscrMath<BOOL> {
 			}
 		};
 
-		List<Map<String, Tensor<Boolean>>> solutions = problem.solveAll(
+		Map<String, Tensor<Boolean>> solutions = problem.solveAll(
 				new Sat4J(), 2);
-		System.out.println(solutions.size());
+		System.out.println(solutions.get("f"));
 		// for (Map<String, Tensor<Boolean>> solution : solutions)
 		// Tensor.print(solution, System.out);
 	}

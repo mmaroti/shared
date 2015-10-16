@@ -78,8 +78,8 @@ public abstract class Problem {
 		return solution;
 	}
 
-	public <BOOL> List<Map<String, Tensor<Boolean>>> solveAll(
-			SatSolver<BOOL> solver, int maxCount) {
+	public <BOOL> Map<String, Tensor<Boolean>> solveAll(SatSolver<BOOL> solver,
+			int maxCount) {
 		solver.clear();
 
 		Map<String, Tensor<BOOL>> tensors = new TreeMap<String, Tensor<BOOL>>();
@@ -110,17 +110,25 @@ public abstract class Problem {
 			if (solutions.size() == maxCount) {
 				System.err.println("... at least " + maxCount
 						+ " solutions found, aborting.");
-				return solutions;
+				break;
 			} else if (solutions.size() % 100000 == 0)
 				System.err.println("... still working, " + solutions.size()
 						+ " solutions so far ...");
 		}
 
-		return solutions;
+		Map<String, Tensor<Boolean>> result = new HashMap<String, Tensor<Boolean>>();
+		for (String key : shapes.keySet()) {
+			List<Tensor<Boolean>> list = new ArrayList<Tensor<Boolean>>();
+			for (Map<String, Tensor<Boolean>> solution : solutions)
+				list.add(solution.get(key));
+
+			result.put(key, Tensor.concat(shapes.get(key), list));
+		}
+
+		return result;
 	}
 
-	public <BOOL> List<Map<String, Tensor<Boolean>>> solveAll(
-			SatSolver<BOOL> solver) {
+	public <BOOL> Map<String, Tensor<Boolean>> solveAll(SatSolver<BOOL> solver) {
 		return solveAll(solver, 0);
 	}
 }

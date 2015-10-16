@@ -68,15 +68,6 @@ public class FanoPlane2 {
 		}
 	}
 
-	public static Tensor<Boolean> collect(
-			List<Map<String, Tensor<Boolean>>> solutions, String name) {
-		List<Tensor<Boolean>> list = new ArrayList<Tensor<Boolean>>();
-		for (Map<String, Tensor<Boolean>> solution : solutions)
-			list.add(solution.get(name));
-
-		return Tensor.stack(list);
-	}
-
 	public static void main(String[] args) {
 		Planes p = new Planes();
 		System.out.println(p.solveAll(new Sat4J()).size());
