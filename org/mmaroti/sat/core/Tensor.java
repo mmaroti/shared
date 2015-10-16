@@ -67,7 +67,7 @@ public class Tensor<ELEM> implements Iterable<ELEM> {
 		return new Iter<ELEM>(elems);
 	}
 
-	public ELEM getElem(int[] index) {
+	public ELEM getElem(int... index) {
 		assert index.length == shape.length;
 
 		int pos = 0;

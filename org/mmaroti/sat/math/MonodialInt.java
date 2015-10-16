@@ -98,7 +98,7 @@ public abstract class MonodialInt extends Problem {
 		return alg.not(proj);
 	}
 
-	public <BOOL> BOOL isSubalg1(BoolAlg<BOOL> alg, Tensor<BOOL> rel) {
+	public <BOOL> BOOL isCompRel1(BoolAlg<BOOL> alg, Tensor<BOOL> rel) {
 		assert rel.getOrder() == 1;
 		Tensor<BOOL> monoid = Tensor.map(alg.LIFT, this.monoid);
 
@@ -111,7 +111,7 @@ public abstract class MonodialInt extends Problem {
 		return t.get();
 	}
 
-	public <BOOL> BOOL isSubalg2(BoolAlg<BOOL> alg, Tensor<BOOL> rel) {
+	public <BOOL> BOOL isCompRel2(BoolAlg<BOOL> alg, Tensor<BOOL> rel) {
 		assert rel.getOrder() == 2;
 		Tensor<BOOL> monoid = Tensor.map(alg.LIFT, this.monoid);
 
@@ -126,7 +126,7 @@ public abstract class MonodialInt extends Problem {
 		return t.get();
 	}
 
-	public <BOOL> BOOL isSubalg3(BoolAlg<BOOL> alg, Tensor<BOOL> rel) {
+	public <BOOL> BOOL isCompRel3(BoolAlg<BOOL> alg, Tensor<BOOL> rel) {
 		assert rel.getOrder() == 3;
 		Tensor<BOOL> monoid = Tensor.map(alg.LIFT, this.monoid);
 
@@ -153,22 +153,6 @@ public abstract class MonodialInt extends Problem {
 		t = Tensor.reduce(alg.ANY, "x", alg.AND, t.named("xb"), rel.named("b"));
 		t = Tensor.map2(alg.LEQ, t, rel);
 		t = Tensor.fold(alg.ALL, 1, t);
-
-		return t.get();
-	}
-
-	public <BOOL> BOOL preserves2(BoolAlg<BOOL> alg, Tensor<BOOL> func,
-			Tensor<BOOL> rel) {
-		assert func.getOrder() == 3 && rel.getOrder() == 2;
-
-		Tensor<BOOL> t = Tensor.reduce(alg.ANY, "bxc", alg.AND,
-				rel.named("ab"), func.named("xac"));
-		t = Tensor.reduce(alg.ANY, "xycd", alg.AND, t.named("bxc"),
-				func.named("ybd"));
-		t = Tensor.reduce(alg.ANY, "xy", alg.AND, t.named("xycd"),
-				rel.named("cd"));
-		t = Tensor.map2(alg.LEQ, t, rel);
-		t = Tensor.fold(alg.ALL, 2, t);
 
 		return t.get();
 	}
@@ -223,7 +207,7 @@ public abstract class MonodialInt extends Problem {
 
 				Tensor<BOOL> func = tensors.get("rel");
 
-				BOOL res = isSubalg1(alg, func);
+				BOOL res = isCompRel1(alg, func);
 
 				return res;
 			}
@@ -242,7 +226,7 @@ public abstract class MonodialInt extends Problem {
 
 				Tensor<BOOL> func = tensors.get("rel");
 
-				BOOL res = isSubalg2(alg, func);
+				BOOL res = isCompRel2(alg, func);
 
 				return res;
 			}
@@ -261,7 +245,7 @@ public abstract class MonodialInt extends Problem {
 
 				Tensor<BOOL> func = tensors.get("rel");
 
-				BOOL res = isSubalg3(alg, func);
+				BOOL res = isCompRel3(alg, func);
 
 				return res;
 			}
@@ -282,6 +266,26 @@ public abstract class MonodialInt extends Problem {
 
 				BOOL res = isFunction(alg, func);
 				res = alg.and(res, inStabilizer2(alg, func));
+
+				return res;
+			}
+		};
+
+		return prob.solveAll(solver).get("func");
+	}
+
+	public static <SBOOL> Tensor<Boolean> getEssentialBinaryOps(
+			SatSolver<SBOOL> solver, int size, String monoid) {
+		MonodialInt prob = new MonodialInt(size, monoid, "func", new int[] {
+				size, size, size }) {
+			@Override
+			public <BOOL> BOOL compute(BoolAlg<BOOL> alg,
+					Map<String, Tensor<BOOL>> tensors) {
+
+				Tensor<BOOL> func = tensors.get("func");
+
+				BOOL res = isFunction(alg, func);
+				res = alg.and(res, inStabilizer2(alg, func));
 				res = alg.and(res, isEssential2(alg, func));
 
 				return res;
@@ -291,7 +295,7 @@ public abstract class MonodialInt extends Problem {
 		return prob.solveAll(solver).get("func");
 	}
 
-	public static <SBOOL> Tensor<Boolean> getTernaryOps(
+	public static <SBOOL> Tensor<Boolean> getEssentialTernaryOps(
 			SatSolver<SBOOL> solver, int size, String monoid) {
 		MonodialInt prob = new MonodialInt(size, monoid, "func", new int[] {
 				size, size, size, size }) {
@@ -332,7 +336,7 @@ public abstract class MonodialInt extends Problem {
 		return ys;
 	}
 
-	public static void main(String[] args) {
+	public static void main2(String[] args) {
 		SatSolver<Integer> solver = new Sat4J();
 		solver.debugging = false;
 
@@ -349,15 +353,107 @@ public abstract class MonodialInt extends Problem {
 				+ getBinaryRels(solver, size, monoid).getDim(2));
 
 		System.out.println("essential binary ops:  "
-				+ getBinaryOps(solver, size, monoid).getDim(3));
+				+ getEssentialBinaryOps(solver, size, monoid).getDim(3));
 
 		System.out.println("ternary relations:     "
 				+ getTernaryRels(solver, size, monoid).getDim(3));
 
 		System.out.println("essential ternary ops: "
-				+ getTernaryOps(solver, size, monoid).getDim(4));
+				+ getEssentialTernaryOps(solver, size, monoid).getDim(4));
 
 		time = System.currentTimeMillis() - time;
 		System.err.println("finished in " + (0.001 * time) + " seconds");
+	}
+
+	public static void printBinRels(Tensor<Boolean> binrels) {
+		assert binrels.getOrder() == 3;
+
+		for (int p = 0; p < binrels.getDim(2); p++) {
+			System.out.print("binrel " + p + ":");
+			for (int i = 0; i < binrels.getDim(0); i++) {
+				for (int j = 0; j < binrels.getDim(1); j++)
+					if (binrels.getElem(i, j, p))
+						System.out.print(" " + i + "" + j);
+			}
+			System.out.println();
+		}
+	}
+
+	public static void printBinOps(Tensor<Boolean> binops) {
+		assert binops.getOrder() == 4;
+
+		for (int p = 0; p < binops.getDim(3); p++) {
+			System.out.print("binop " + p + ":");
+			for (int i = 0; i < binops.getDim(1); i++) {
+				System.out.print(" ");
+				for (int j = 0; j < binops.getDim(2); j++)
+					for (int k = 0; k < binops.getDim(0); k++)
+						if (binops.getElem(k, i, j, p))
+							System.out.print(k);
+			}
+			System.out.println();
+		}
+	}
+
+	public <BOOL> BOOL preserves2(BoolAlg<BOOL> alg, Tensor<BOOL> func,
+			Tensor<BOOL> rel) {
+		assert func.getOrder() == 3 && rel.getOrder() == 2;
+
+		Tensor<BOOL> t = Tensor.reduce(alg.ANY, "bxc", alg.AND,
+				rel.named("ab"), func.named("xac"));
+		t = Tensor.reduce(alg.ANY, "xycd", alg.AND, t.named("bxc"),
+				func.named("ybd"));
+		t = Tensor.reduce(alg.ANY, "xy", alg.AND, t.named("xycd"),
+				rel.named("cd"));
+		t = Tensor.map2(alg.LEQ, t, rel);
+		t = Tensor.fold(alg.ALL, 2, t);
+
+		return t.get();
+	}
+
+	public static Tensor<Boolean> getCompatMat22(Tensor<Boolean> binrels,
+			Tensor<Boolean> binops) {
+		assert binrels.getOrder() == 3 && binops.getOrder() == 4;
+
+		BoolAlg<Boolean> alg = BoolAlg.BOOLEAN;
+		Tensor<Boolean> t = Tensor.reduce(alg.ANY, "bcxrf", alg.AND,
+				binrels.named("abr"), binops.named("xacf"));
+		t = Tensor.reduce(alg.ANY, "cdxyrf", alg.AND, t.named("bcxrf"),
+				binops.named("ybdf"));
+		t = Tensor.reduce(alg.ANY, "xyrf", alg.AND, t.named("cdxyrf"),
+				binrels.named("cdr"));
+		t = Tensor.reduce(alg.ALL, "rf", alg.LEQ, t.named("xyrf"),
+				binrels.named("xyr"));
+
+		return t;
+	}
+
+	public static void printBinMat(String what, Tensor<Boolean> binrel) {
+		assert binrel.getOrder() == 2;
+
+		System.out.println(what + ":");
+		for (int i = 0; i < binrel.getDim(0); i++) {
+			for (int j = 0; j < binrel.getDim(1); j++)
+				System.out.print(binrel.getElem(i, j) ? "1" : "0");
+			System.out.println();
+		}
+	}
+
+	public static void main(String[] args) {
+		SatSolver<Integer> solver = new Sat4J();
+		solver.debugging = false;
+
+		int size = 3;
+		String monoid = "000 001 002 010 012 020 111 222";
+		System.out.println("monoid: " + monoid);
+
+		Tensor<Boolean> binrels = getBinaryRels(solver, size, monoid);
+		printBinRels(binrels);
+
+		Tensor<Boolean> binops = getBinaryOps(solver, size, monoid);
+		printBinOps(binops);
+
+		Tensor<Boolean> compat = getCompatMat22(binrels, binops);
+		printBinMat("compat", compat);
 	}
 }
