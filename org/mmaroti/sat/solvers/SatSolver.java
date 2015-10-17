@@ -77,25 +77,29 @@ public abstract class SatSolver<BOOL> extends BoolAlg<BOOL> {
 
 	@Override
 	public BOOL all(Iterable<BOOL> elems) {
-		ArrayList<BOOL> es = new ArrayList<BOOL>();
+		ArrayList<BOOL> list = new ArrayList<BOOL>();
 		for (BOOL a : elems) {
 			if (a == FALSE)
 				return FALSE;
 			else if (a != TRUE)
-				es.add(not(a));
+				list.add(a);
 		}
 
-		if (es.size() == 0)
+		if (list.size() == 0)
 			return TRUE;
-		else if (es.size() == 1)
-			return es.get(0);
+		else if (list.size() == 1)
+			return list.get(0);
 
 		BOOL var = variable();
-		for (BOOL a : es)
-			clause(Arrays.asList(not(a), not(var)));
+		for (BOOL a : list)
+			clause(Arrays.asList(a, not(var)));
 
-		es.add(var);
-		clause(es);
+		for (int i = 0; i < list.size(); i++)
+			list.set(i, not(list.get(i)));
+
+		list.add(var);
+		clause(list);
+
 		return var;
 	}
 
@@ -121,25 +125,26 @@ public abstract class SatSolver<BOOL> extends BoolAlg<BOOL> {
 
 	@Override
 	public BOOL any(Iterable<BOOL> elems) {
-		ArrayList<BOOL> es = new ArrayList<BOOL>();
+		ArrayList<BOOL> list = new ArrayList<BOOL>();
 		for (BOOL a : elems) {
 			if (a == TRUE)
 				return TRUE;
 			else if (a != FALSE)
-				es.add(a);
+				list.add(a);
 		}
 
-		if (es.size() == 0)
+		if (list.size() == 0)
 			return FALSE;
-		else if (es.size() == 1)
-			return es.get(0);
+		else if (list.size() == 1)
+			return list.get(0);
 
 		BOOL var = variable();
-		for (BOOL a : es)
+		for (BOOL a : list)
 			clause(Arrays.asList(not(a), var));
 
-		es.add(not(var));
-		clause(es);
+		list.add(not(var));
+		clause(list);
+
 		return var;
 	}
 
