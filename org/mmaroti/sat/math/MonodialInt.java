@@ -438,22 +438,22 @@ public class MonodialInt {
 	}
 
 	public static void main(String[] args) {
-		SatSolver<Integer> solver = new MiniSat();
+		SatSolver<Integer> solver = new Sat4J();
 		solver.debugging = false;
 
-		int size = 2;
-		String monoid = "01 00";
+		int size = 3;
+		String monoid = "000 001 002 010 012 020 111 222";
 		System.out.println("monoid: " + monoid);
 
 		Tensor<Boolean> rels = collectTernaryRels(solver, size, monoid);
-		printTernaryRels(rels);
+		// printBinaryRels(rels);
 
 		Tensor<Boolean> ops = collectBinaryOps(solver, size, monoid);
 		printBinaryOps(ops);
 
 		Tensor<Boolean> compat = getCompatibility32(BoolAlg.BOOLEAN, rels, ops);
 		compat = transpose(compat);
-		printMatrix("compat", compat);
+		// printMatrix("compat", compat);
 
 		Tensor<Boolean> closed = collectClosedSubsets(solver, compat);
 		printMatrix("closed", transpose(closed));
