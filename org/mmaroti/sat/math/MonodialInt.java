@@ -513,7 +513,7 @@ public class MonodialInt {
 		SatSolver<Integer> solver = new Sat4J();
 		solver.debugging = false;
 
-		for (String monoid : FINITE_MONOIDS) {
+		for (String monoid : UNKNOWN_MONOIDS) {
 			int size = 3;
 			// String monoid = "002 012 112";
 			System.out.println("monoid: " + monoid);
