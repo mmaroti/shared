@@ -147,9 +147,9 @@ public class Tensor<ELEM> implements Iterable<ELEM> {
 		Tensor<ELEM> tensor = new Tensor<ELEM>(new int[] { dim1, dim2 });
 
 		int pos = 0;
-		for (int i = 0; i < dim1; i++)
-			for (int j = 0; j < dim2; j++)
-				tensor.elems[pos++] = func.call(j, i);
+		for (int j = 0; j < dim2; j++)
+			for (int i = 0; i < dim1; i++)
+				tensor.elems[pos++] = func.call(i, j);
 
 		return tensor;
 	}
@@ -373,6 +373,20 @@ public class Tensor<ELEM> implements Iterable<ELEM> {
 			if (i != 0)
 				str.append(',');
 			str.append(elems[i]);
+		}
+		str.append("]");
+
+		return str.toString();
+	}
+
+	public String info() {
+		StringBuilder str = new StringBuilder();
+
+		str.append("Tensor [");
+		for (int i = 0; i < shape.length; i++) {
+			if (i != 0)
+				str.append(',');
+			str.append(shape[i]);
 		}
 		str.append("]");
 

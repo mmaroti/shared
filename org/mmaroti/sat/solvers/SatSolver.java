@@ -25,8 +25,8 @@ import org.mmaroti.sat.core.*;
 public abstract class SatSolver<BOOL> extends BoolAlg<BOOL> {
 	public boolean debugging = false;
 
-	public SatSolver(BOOL TRUE) {
-		super(TRUE);
+	public SatSolver(BOOL FALSE, BOOL TRUE) {
+		super(FALSE, TRUE);
 	}
 
 	public abstract void clear();

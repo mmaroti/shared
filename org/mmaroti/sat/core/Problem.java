@@ -108,11 +108,11 @@ public abstract class Problem {
 			solver.clause(exclude);
 
 			if (solutions.size() == maxCount) {
-				System.err.println("... at least " + maxCount
+				System.out.println("... at least " + maxCount
 						+ " solutions found, aborting.");
 				break;
 			} else if (solutions.size() % 100000 == 0)
-				System.err.println("... still working, " + solutions.size()
+				System.out.println("... still working, " + solutions.size()
 						+ " solutions so far ...");
 		}
 

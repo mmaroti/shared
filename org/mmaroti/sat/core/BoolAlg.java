@@ -123,11 +123,11 @@ public abstract class BoolAlg<BOOL> {
 	public final Func1<BOOL, Iterable<BOOL>> ONE;
 	public final Func1<BOOL, Iterable<BOOL>> EQS;
 
-	public BoolAlg(final BOOL TRUE) {
+	public BoolAlg(final BOOL FALSE, final BOOL TRUE) {
+		this.FALSE = FALSE;
 		this.TRUE = TRUE;
-		FALSE = not(TRUE);
 
-		assert TRUE != null && FALSE != null;
+		assert TRUE != null && FALSE != null && TRUE != FALSE;
 
 		NOT = new Func1<BOOL, BOOL>() {
 			@Override
@@ -229,7 +229,8 @@ public abstract class BoolAlg<BOOL> {
 		};
 	}
 
-	public static BoolAlg<Boolean> BOOLEAN = new BoolAlg<Boolean>(true) {
+	public static BoolAlg<Boolean> BOOLEAN = new BoolAlg<Boolean>(
+			Boolean.FALSE, Boolean.TRUE) {
 		@Override
 		public Boolean not(Boolean elem) {
 			return !elem.booleanValue();
@@ -241,8 +242,23 @@ public abstract class BoolAlg<BOOL> {
 		}
 
 		@Override
+		public Boolean and(Boolean elem1, Boolean elem2) {
+			return elem1.booleanValue() && elem2.booleanValue();
+		}
+
+		@Override
 		public Boolean add(Boolean elem1, Boolean elem2) {
 			return elem1.booleanValue() != elem2.booleanValue();
+		}
+
+		@Override
+		public Boolean equ(Boolean elem1, Boolean elem2) {
+			return elem1.booleanValue() == elem2.booleanValue();
+		}
+
+		@Override
+		public Boolean leq(Boolean elem1, Boolean elem2) {
+			return !elem1.booleanValue() || elem2.booleanValue();
 		}
 	};
 }

@@ -28,13 +28,13 @@ public class MiniSat extends SatSolver<Integer> {
 	public String options;
 
 	public MiniSat(String options) {
-		super(1);
+		super(-1, 1);
 		this.options = options;
 		clear();
 	}
 
 	public MiniSat() {
-		super(1);
+		super(-1, 1);
 		this.options = null;
 		clear();
 	}
