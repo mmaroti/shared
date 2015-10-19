@@ -216,7 +216,7 @@ public class MonodialInt {
 			}
 		};
 
-		return prob.solveAll(solver, 2000).get("rel");
+		return prob.solveAll(solver, 5000).get("rel");
 	}
 
 	public static <SBOOL> Tensor<Boolean> collectBinaryOps(
@@ -237,7 +237,7 @@ public class MonodialInt {
 			}
 		};
 
-		return prob.solveAll(solver, 2000).get("func");
+		return prob.solveAll(solver, 5000).get("func");
 	}
 
 	public static <SBOOL> Tensor<Boolean> collectEssentialBinaryOps(
@@ -471,8 +471,19 @@ public class MonodialInt {
 						1, 0 });
 	}
 
-	public static String[] MONOIDS = new String[] { "012 021", "002 012 112",
-			"002 012 220", "000 002 010 012", "000 002 012 022",
+	public static String[] FINITE_MONOIDS = new String[] {
+			"000 012 111",
+			"012 120 201",
+			"000 002 012 111 222",
+			"000 012 021 102 111 120 201 210 222",
+			"000 001 002 011 012 022 111 112 122 222",
+			"000 001 002 010 011 012 020 022 100 101 110 111 112 121 122 200 202 211 212 220 221 222",
+			"000 001 002 010 011 012 020 021 022 100 101 110 111 112 121 122 200 202 211 212 220 221 222",
+			"000 001 002 010 011 012 020 022 100 101 110 111 112 120 121 122 200 201 202 211 212 220 221 222",
+			"000 001 002 010 011 012 020 021 022 100 101 102 110 111 112 120 121 122 200 201 202 210 211 212 220 221 222" };
+
+	public static String[] UNKNOWN_MONOIDS = new String[] { "012 021",
+			"002 012 112", "002 012 220", "000 002 010 012", "000 002 012 022",
 			"000 002 012 111", "000 002 012 222", "000 011 012 022",
 			"002 012 102 112", "000 002 010 012 111", "000 002 012 022 222",
 			"000 002 012 111 112", "000 002 012 220 222",
@@ -502,7 +513,7 @@ public class MonodialInt {
 		SatSolver<Integer> solver = new Sat4J();
 		solver.debugging = false;
 
-		for (String monoid : MONOIDS) {
+		for (String monoid : FINITE_MONOIDS) {
 			int size = 3;
 			// String monoid = "002 012 112";
 			System.out.println("monoid: " + monoid);
