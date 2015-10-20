@@ -260,5 +260,23 @@ public abstract class BoolAlg<BOOL> {
 		public Boolean leq(Boolean elem1, Boolean elem2) {
 			return !elem1.booleanValue() || elem2.booleanValue();
 		}
+
+		@Override
+		public Boolean all(Iterable<Boolean> elems) {
+			for (boolean elem : elems)
+				if (!elem)
+					return false;
+
+			return true;
+		}
+
+		@Override
+		public Boolean any(Iterable<Boolean> elems) {
+			for (boolean elem : elems)
+				if (elem)
+					return true;
+
+			return false;
+		}
 	};
 }

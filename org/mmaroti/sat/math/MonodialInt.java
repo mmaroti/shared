@@ -620,20 +620,20 @@ public class MonodialInt {
 		SatSolver<Integer> solver = new Sat4J();
 		solver.debugging = false;
 
-		for (String monoid : UNKNOWN_MONOIDS) {
+		for (String monoid : INFINITE_MONOIDS) {
 			int size = 3;
 			// String monoid = "002 012 112";
 			System.out.println("monoid: " + monoid);
 
 			Tensor<Boolean> rels = collectTernaryRels(solver, size, monoid);
-			System.out.println("rels: " + rels.info());
+			System.out.println("ternary rels: " + rels.info());
 			// printBinaryRels(rels);
 
-			Tensor<Boolean> ops = collectTernaryOps(solver, size, monoid);
+			Tensor<Boolean> ops = collectBinaryOps(solver, size, monoid);
 			// printTernaryOps(ops);
-			System.out.println("ops: " + ops.info());
+			System.out.println("binary ops: " + ops.info());
 
-			Tensor<Boolean> compat = getCompatibility33Alt(BoolAlg.BOOLEAN,
+			Tensor<Boolean> compat = getCompatibility32Alt(BoolAlg.BOOLEAN,
 					rels, ops);
 			System.out.println("compat: " + compat.info());
 
@@ -653,7 +653,7 @@ public class MonodialInt {
 		solver.debugging = false;
 
 		int size = 3;
-		String monoid = "000 002 010 012 111 222";
+		String monoid = "000 002 012 022 111 200 210 220 222";
 		System.out.println("monoid: " + monoid);
 
 		Tensor<Boolean> rels = collectTernaryRels(solver, size, monoid);
@@ -664,9 +664,12 @@ public class MonodialInt {
 		System.out.println("ops: " + ops.info());
 		// printTernaryOps(ops);
 
+		long time = System.currentTimeMillis();
 		Tensor<Boolean> compat = getCompatibility33Alt(BoolAlg.BOOLEAN, rels,
 				ops);
 		System.out.println("compat: " + compat.info());
+		time = System.currentTimeMillis() - time;
+		System.err.println("finished in " + (0.001 * time) + " seconds");
 
 		compat = transpose(compat);
 		// printMatrix("compat", compat);

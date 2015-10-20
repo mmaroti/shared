@@ -191,7 +191,7 @@ public class Tensor<ELEM> implements Iterable<ELEM> {
 		return tensor;
 	}
 
-	public static <ELEM> Tensor<ELEM> reshape(final Tensor<ELEM> arg,
+	public static <ELEM> Tensor<ELEM> reshape_old(final Tensor<ELEM> arg,
 			final int[] shape, final int[] map) {
 		assert arg.getOrder() == map.length;
 		final int[] index = new int[map.length];
@@ -204,6 +204,48 @@ public class Tensor<ELEM> implements Iterable<ELEM> {
 				return arg.getElem(index);
 			}
 		});
+	}
+
+	public static <ELEM> Tensor<ELEM> reshape(Tensor<ELEM> arg, int[] shape,
+			int[] map) {
+		assert arg.getOrder() == map.length;
+
+		Tensor<ELEM> tensor = new Tensor<ELEM>(shape);
+
+		int[] index = new int[shape.length];
+		int[] stepa = new int[shape.length];
+		int[] stepb = new int[shape.length];
+
+		for (int s = 1, i = 0; i < map.length; i++) {
+			stepa[map[i]] += s;
+			s *= arg.shape[i];
+		}
+
+		for (int i = 0; i < shape.length; i++)
+			stepb[i] = stepa[i] * (shape[i] - 1);
+
+		ELEM[] src = arg.elems;
+		ELEM[] dst = tensor.elems;
+
+		int pos = 0;
+		int idx = 0;
+		outer: for (;;) {
+			dst[idx++] = src[pos];
+
+			for (int i = 0; i < index.length; i++) {
+				if (++index[i] >= shape[i]) {
+					index[i] = 0;
+					pos -= stepb[i];
+				} else {
+					pos += stepa[i];
+					continue outer;
+				}
+			}
+			break;
+		}
+		assert idx == dst.length;
+
+		return tensor;
 	}
 
 	public static <ELEM, ELEM1> Tensor<ELEM> map(Func1<ELEM, ELEM1> func,
