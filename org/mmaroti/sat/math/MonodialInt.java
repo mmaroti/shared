@@ -262,6 +262,27 @@ public class MonodialInt {
 		return prob.solveAll(solver).get("func");
 	}
 
+	public static <SBOOL> Tensor<Boolean> collectTernaryOps(
+			SatSolver<SBOOL> solver, int size, String monoid) {
+		final Tensor<Boolean> mon = decodeMonoid(size, monoid);
+		Problem prob = new Problem("func", new int[] { size, size, size, size }) {
+			@Override
+			public <BOOL> BOOL compute(BoolAlg<BOOL> alg,
+					Map<String, Tensor<BOOL>> tensors) {
+
+				Tensor<BOOL> func = tensors.get("func");
+				Tensor<BOOL> monoid = Tensor.map(alg.LIFT, mon);
+
+				BOOL res = isFunction(alg, func);
+				res = alg.and(res, isStabilizer3(alg, func, monoid));
+
+				return res;
+			}
+		};
+
+		return prob.solveAll(solver, 2000).get("func");
+	}
+
 	public static <SBOOL> Tensor<Boolean> collectEssentialTernaryOps(
 			SatSolver<SBOOL> solver, int size, String monoid) {
 		final Tensor<Boolean> mon = decodeMonoid(size, monoid);
@@ -356,6 +377,23 @@ public class MonodialInt {
 		}
 	}
 
+	public static void printTernaryOps(Tensor<Boolean> ops) {
+		assert ops.getOrder() == 5;
+
+		for (int p = 0; p < ops.getDim(4); p++) {
+			System.out.print("trnop " + p + ":");
+			for (int i = 0; i < ops.getDim(1); i++)
+				for (int j = 0; j < ops.getDim(2); j++) {
+					System.out.print(" ");
+					for (int k = 0; k < ops.getDim(3); k++)
+						for (int l = 0; l < ops.getDim(0); l++)
+							if (ops.getElem(l, i, j, k, p))
+								System.out.print(l);
+				}
+			System.out.println();
+		}
+	}
+
 	public static <BOOL> Tensor<BOOL> getCompatibility22(BoolAlg<BOOL> alg,
 			Tensor<BOOL> rels, Tensor<BOOL> ops) {
 		assert rels.getOrder() == 3 && ops.getOrder() == 4;
@@ -424,6 +462,42 @@ public class MonodialInt {
 				});
 	}
 
+	public static <BOOL> BOOL isCompatible33(BoolAlg<BOOL> alg,
+			Tensor<BOOL> rel, Tensor<BOOL> op) {
+		assert rel.getOrder() == 3 && op.getOrder() == 4;
+
+		Tensor<BOOL> t = Tensor.reduce(alg.ANY, "adbecf", alg.AND,
+				rel.named("abc"), rel.named("def"));
+		t = Tensor.reduce(alg.ANY, "becfgx", alg.AND, t.named("adbecf"),
+				op.named("xadg"));
+		t = Tensor.reduce(alg.ANY, "cfghxy", alg.AND, t.named("becfgx"),
+				op.named("ybeh"));
+		t = Tensor.reduce(alg.ANY, "ghixyz", alg.AND, t.named("cfghxy"),
+				op.named("zcfi"));
+		t = Tensor.reduce(alg.ANY, "xyz", alg.AND, t.named("ghixyz"),
+				rel.named("ghi"));
+		t = Tensor.reduce(alg.ALL, "", alg.LEQ, t.named("xyz"),
+				rel.named("xyz"));
+
+		return t.get();
+	}
+
+	public static <BOOL> Tensor<BOOL> getCompatibility33Alt(
+			final BoolAlg<BOOL> alg, Tensor<BOOL> rels, Tensor<BOOL> ops) {
+		assert rels.getOrder() == 4 && ops.getOrder() == 5;
+
+		final List<Tensor<BOOL>> rs = Tensor.unconcat(rels);
+		final List<Tensor<BOOL>> os = Tensor.unconcat(ops);
+
+		return Tensor.generate(rs.size(), os.size(),
+				new Func2<BOOL, Integer, Integer>() {
+					@Override
+					public BOOL call(Integer a, Integer b) {
+						return isCompatible33(alg, rs.get(a), os.get(b));
+					}
+				});
+	}
+
 	public static void printMatrix(String what, Tensor<Boolean> rel) {
 		assert rel.getOrder() == 2;
 
@@ -470,6 +544,39 @@ public class MonodialInt {
 				new int[] { matrix.getDim(1), matrix.getDim(0) }, new int[] {
 						1, 0 });
 	}
+
+	public static String[] INFINITE_MONOIDS = new String[] { "012", "000 012",
+			"002 012", "001 012", "000 002 012", "000 011 012", "000 021",
+			"002 012 022", "001 002 012", "001 010 012", "001 011 012",
+			"001 012 111", "001 002 010 012", "002 011 012", "001 002 012 111",
+			"001 010 011 012", "001 010 012 111", "001 011 012 111",
+			"001 012 110", "001 012 112", "001 012 222", "002 010 011 012",
+			"001 002 010 012 111", "001 012 022", "002 011 012 111",
+			"001 002 012 110", "001 002 012 112", "001 002 012 222",
+			"001 010 011 012 111", "001 010 012 110", "001 010 012 222",
+			"001 011 012 112", "001 011 012 222", "001 012 110 222",
+			"001 012 112 222", "002 010 011 012 111", "001 002 010 012 110",
+			"001 002 010 012 222", "002 011 012 110", "002 011 012 112",
+			"002 011 012 222", "001 002 012 110 112", "001 002 012 110 222",
+			"001 002 012 112 222", "001 010 011 012 110",
+			"001 010 011 012 222", "001 012 101", "001 010 012 110 222",
+			"001 011 012 112 222", "001 102 222", "002 010 011 012 110",
+			"002 010 011 012 222", "001 002 012 101", "001 002 010 012 112",
+			"001 002 010 012 110 222", "002 012 100", "002 011 012 110 222",
+			"002 011 012 112 222", "001 002 102", "001 002 012 110 112 222",
+			"001 012 220", "001 010 011 012 110 222", "001 012 101 222",
+			"001 011 021", "002 010 011 012 112", "002 010 011 012 110 222",
+			"002 012 101 112", "001 002 012 101 222",
+			"001 002 010 012 112 222", "001 010 012 220", "002 012 100 222",
+			"011 012 220", "001 002 102 222", "001 010 012 100",
+			"002 010 012 100", "002 010 011 012 112 222", "010 011 012 220",
+			"002 012 101 112 222", "001 012 101 220", "012 100 220",
+			"001 002 012 221", "001 010 102", "001 010 012 100 222",
+			"001 011 021 111", "002 010 012 100 112", "002 010 012 100 222",
+			"002 010 012 221", "001 102 220", "001 010 102 222", "002 010 102",
+			"002 010 012 100 112 222", "010 012 100 220",
+			"002 010 011 012 221", "002 012 101 221", "002 010 102 222",
+			"002 010 012 100 221", "010 102 220", "001 021 100" };
 
 	public static String[] FINITE_MONOIDS = new String[] {
 			"000 012 111",
@@ -519,14 +626,14 @@ public class MonodialInt {
 			System.out.println("monoid: " + monoid);
 
 			Tensor<Boolean> rels = collectTernaryRels(solver, size, monoid);
-			System.out.println("ternary rels: " + rels.info());
+			System.out.println("rels: " + rels.info());
 			// printBinaryRels(rels);
 
-			Tensor<Boolean> ops = collectBinaryOps(solver, size, monoid);
-			// printBinaryOps(ops);
-			System.out.println("binary ops: " + ops.info());
+			Tensor<Boolean> ops = collectTernaryOps(solver, size, monoid);
+			// printTernaryOps(ops);
+			System.out.println("ops: " + ops.info());
 
-			Tensor<Boolean> compat = getCompatibility32Alt(BoolAlg.BOOLEAN,
+			Tensor<Boolean> compat = getCompatibility33Alt(BoolAlg.BOOLEAN,
 					rels, ops);
 			System.out.println("compat: " + compat.info());
 
@@ -539,5 +646,35 @@ public class MonodialInt {
 
 			System.out.println();
 		}
+	}
+
+	public static void main3(String[] args) {
+		SatSolver<Integer> solver = new Sat4J();
+		solver.debugging = false;
+
+		int size = 3;
+		String monoid = "000 002 010 012 111 222";
+		System.out.println("monoid: " + monoid);
+
+		Tensor<Boolean> rels = collectTernaryRels(solver, size, monoid);
+		System.out.println("rels: " + rels.info());
+		// printTernaryRels(rels);
+
+		Tensor<Boolean> ops = collectTernaryOps(solver, size, monoid);
+		System.out.println("ops: " + ops.info());
+		// printTernaryOps(ops);
+
+		Tensor<Boolean> compat = getCompatibility33Alt(BoolAlg.BOOLEAN, rels,
+				ops);
+		System.out.println("compat: " + compat.info());
+
+		compat = transpose(compat);
+		// printMatrix("compat", compat);
+
+		Tensor<Boolean> closed = collectClosedSubsets(solver, compat);
+		System.out.println("closed: " + closed.info());
+		// printMatrix("closed", transpose(closed));
+
+		System.out.println();
 	}
 }
