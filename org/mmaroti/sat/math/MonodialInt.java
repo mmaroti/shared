@@ -850,7 +850,7 @@ public class MonodialInt {
 	}
 
 	public static void main(String[] args) {
-		for (String monoid : UNKNOWN_MONOIDS)
+		for (String monoid : FINITE_MONOIDS)
 			printStatistics(3, monoid);
 	}
 
