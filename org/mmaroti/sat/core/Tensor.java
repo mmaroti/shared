@@ -357,6 +357,40 @@ public class Tensor<ELEM> implements Iterable<ELEM> {
 
 	public static <ELEM, ELEM1, ELEM2> Tensor<ELEM> reduce(
 			Func1<ELEM, Iterable<ELEM>> sum, String names,
+			Func1<ELEM, ELEM1> func, Named<ELEM1> part) {
+
+		TreeMap<Character, Integer> dims = new TreeMap<Character, Integer>();
+
+		for (int i = 0; i < part.names.length(); i++) {
+			int dim = part.tensor.shape[i];
+			Integer d = dims.put(part.names.charAt(i), dim);
+			assert d == null || d.intValue() == dim;
+		}
+
+		ArrayList<Character> keys = new ArrayList<Character>(dims.keySet());
+		for (int i = 0; i < names.length(); i++) {
+			Character c = names.charAt(i);
+			keys.remove(c);
+			keys.add(c);
+		}
+
+		int[] shape = new int[dims.size()];
+		for (int i = 0; i < shape.length; i++)
+			shape[i] = dims.get(keys.get(i));
+
+		int[] map = new int[part.names.length()];
+		for (int i = 0; i < map.length; i++)
+			map[i] = keys.indexOf(part.names.charAt(i));
+		Tensor<ELEM1> arg = Tensor.reshape(part.tensor, shape, map);
+
+		Tensor<ELEM> tensor = Tensor.map(func, arg);
+		tensor = Tensor.fold(sum, keys.size() - names.length(), tensor);
+
+		return tensor;
+	};
+
+	public static <ELEM, ELEM1, ELEM2> Tensor<ELEM> reduce(
+			Func1<ELEM, Iterable<ELEM>> sum, String names,
 			Func2<ELEM, ELEM1, ELEM2> prod, Named<ELEM1> part1,
 			Named<ELEM2> part2) {
 

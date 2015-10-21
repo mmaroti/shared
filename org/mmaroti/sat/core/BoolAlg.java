@@ -109,6 +109,7 @@ public abstract class BoolAlg<BOOL> {
 		return less;
 	}
 
+	public final Func1<BOOL, BOOL> ID;
 	public final Func1<BOOL, BOOL> NOT;
 	public final Func2<BOOL, BOOL, BOOL> OR;
 	public final Func2<BOOL, BOOL, BOOL> AND;
@@ -128,6 +129,13 @@ public abstract class BoolAlg<BOOL> {
 		this.TRUE = TRUE;
 
 		assert TRUE != null && FALSE != null && TRUE != FALSE;
+
+		ID = new Func1<BOOL, BOOL>() {
+			@Override
+			public BOOL call(BOOL elem) {
+				return elem;
+			}
+		};
 
 		NOT = new Func1<BOOL, BOOL>() {
 			@Override
