@@ -920,8 +920,8 @@ public class MonoidalInt {
 
 	public static void main(String[] args) {
 		System.out.println("FINITE MONOIDS:");
-//		for (String monoid : FINITE_MONOIDS)
-//			printStatistics(3, monoid);
+		for (String monoid : FINITE_MONOIDS)
+			printStatistics(3, monoid);
 
 		System.out.println("INFINITE MONOIDS:");
 		for (String monoid : INFINITE_MONOIDS)
