@@ -728,6 +728,24 @@ public class MonodialInt {
 						1, 0 });
 	}
 
+	public static <BOOL> BOOL isMonoid(BoolAlg<BOOL> alg, Tensor<BOOL> monoid) {
+		assert monoid.getOrder() == 3;
+
+		Tensor<BOOL> t;
+		t = Tensor.reduce(alg.ANY, "xzij", alg.AND, monoid.named("xyi"),
+				monoid.named("yzj"));
+		t = Tensor.reduce(alg.ALL, "kij", alg.EQU, t.named("xzij"),
+				monoid.named("xzk"));
+		
+		return isFunction(alg, t);
+	}
+
+	public static void checkMonoid(int size, String monoid) {
+		final Tensor<Boolean> mon = decodeMonoid(size, monoid);
+		if (!isMonoid(BoolAlg.BOOLEAN, mon))
+			throw new RuntimeException("This is not a monoid: " + monoid);
+	}
+
 	protected static DecimalFormat TIME_FORMAT = new DecimalFormat("0.00");
 
 	public static String[] INFINITE_MONOIDS = new String[] { "012", "000 012",
@@ -807,6 +825,7 @@ public class MonodialInt {
 
 		long time = System.currentTimeMillis();
 		System.out.println("monoid: " + monoid);
+		checkMonoid(size, monoid);
 
 		System.out.println("unary relations:        "
 				+ collectUnaryRels(solver, size, monoid).getDim(1));
@@ -850,7 +869,7 @@ public class MonodialInt {
 	}
 
 	public static void main(String[] args) {
-		for (String monoid : FINITE_MONOIDS)
+		for (String monoid : INFINITE_MONOIDS)
 			printStatistics(3, monoid);
 	}
 
@@ -919,5 +938,5 @@ public class MonodialInt {
 		System.out.println();
 	}
 
-	public static final int LIMIT = 10000;
+	public static final int LIMIT = 1000;
 }
