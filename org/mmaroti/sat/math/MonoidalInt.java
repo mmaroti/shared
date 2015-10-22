@@ -24,7 +24,7 @@ import java.util.*;
 import org.mmaroti.sat.core.*;
 import org.mmaroti.sat.solvers.*;
 
-public class MonodialInt {
+public class MonoidalInt {
 	public static Tensor<Boolean> decodeMonoid(final int size, String monoid) {
 		final List<Integer> elems = new ArrayList<Integer>();
 		for (int i = 0; i < monoid.length(); i++) {
@@ -736,7 +736,7 @@ public class MonodialInt {
 				monoid.named("yzj"));
 		t = Tensor.reduce(alg.ALL, "kij", alg.EQU, t.named("xzij"),
 				monoid.named("xzk"));
-		
+
 		return isFunction(alg, t);
 	}
 
@@ -749,37 +749,77 @@ public class MonodialInt {
 	protected static DecimalFormat TIME_FORMAT = new DecimalFormat("0.00");
 
 	public static String[] INFINITE_MONOIDS = new String[] { "012", "000 012",
-			"002 012", "001 012", "000 002 012", "000 011 012", "000 021",
-			"002 012 022", "001 002 012", "001 010 012", "001 011 012",
-			"001 012 111", "001 002 010 012", "002 011 012", "001 002 012 111",
-			"001 010 011 012", "001 010 012 111", "001 011 012 111",
-			"001 012 110", "001 012 112", "001 012 222", "002 010 011 012",
-			"001 002 010 012 111", "001 012 022", "002 011 012 111",
-			"001 002 012 110", "001 002 012 112", "001 002 012 222",
-			"001 010 011 012 111", "001 010 012 110", "001 010 012 222",
-			"001 011 012 112", "001 011 012 222", "001 012 110 222",
-			"001 012 112 222", "002 010 011 012 111", "001 002 010 012 110",
-			"001 002 010 012 222", "002 011 012 110", "002 011 012 112",
-			"002 011 012 222", "001 002 012 110 112", "001 002 012 110 222",
-			"001 002 012 112 222", "001 010 011 012 110",
-			"001 010 011 012 222", "001 012 101", "001 010 012 110 222",
-			"001 011 012 112 222", "001 102 222", "002 010 011 012 110",
-			"002 010 011 012 222", "001 002 012 101", "001 002 010 012 112",
-			"001 002 010 012 110 222", "002 012 100", "002 011 012 110 222",
-			"002 011 012 112 222", "001 002 102", "001 002 012 110 112 222",
-			"001 012 220", "001 010 011 012 110 222", "001 012 101 222",
-			"001 011 021", "002 010 011 012 112", "002 010 011 012 110 222",
-			"002 012 101 112", "001 002 012 101 222",
-			"001 002 010 012 112 222", "001 010 012 220", "002 012 100 222",
-			"011 012 220", "001 002 102 222", "001 010 012 100",
-			"002 010 012 100", "002 010 011 012 112 222", "010 011 012 220",
-			"002 012 101 112 222", "001 012 101 220", "012 100 220",
-			"001 002 012 221", "001 010 102", "001 010 012 100 222",
-			"001 011 021 111", "002 010 012 100 112", "002 010 012 100 222",
-			"002 010 012 221", "001 102 220", "001 010 102 222", "002 010 102",
-			"002 010 012 100 112 222", "010 012 100 220",
-			"002 010 011 012 221", "002 012 101 221", "002 010 102 222",
-			"002 010 012 100 221", "010 102 220", "001 021 100" };
+			"002 012", "000 001 012", "000 002 012", "000 011 012",
+			"000 012 021", "002 012 022", "000 001 002 012", "000 001 010 012",
+			"000 001 011 012", "000 001 012 111", "000 001 002 010 012",
+			"000 001 002 011 012", "000 001 002 012 111",
+			"000 001 010 011 012", "000 001 010 012 111",
+			"000 001 011 012 111", "000 001 012 110 111",
+			"000 001 012 111 112", "000 001 012 111 222",
+			"000 001 002 010 011 012", "000 001 002 010 012 111",
+			"000 001 002 011 012 022", "000 001 002 011 012 111",
+			"000 001 002 012 110 111", "000 001 002 012 111 112",
+			"000 001 002 012 111 222", "000 001 010 011 012 111",
+			"000 001 010 012 110 111", "000 001 010 012 111 222",
+			"000 001 011 012 111 112", "000 001 011 012 111 222",
+			"000 001 012 102 110 111", "000 001 012 110 111 222",
+			"000 001 012 111 112 222", "000 002 010 012 101 111",
+			"000 002 010 012 111 222", "000 001 002 010 011 012 111",
+			"000 001 002 010 012 110 111", "000 001 002 010 012 111 222",
+			"000 001 002 011 012 110 111", "000 001 002 011 012 111 112",
+			"000 001 002 011 012 111 222", "000 001 002 012 110 111 112",
+			"000 001 002 012 110 111 222", "000 001 002 012 111 112 222",
+			"000 001 010 011 012 110 111", "000 001 010 011 012 111 222",
+			"000 001 010 012 101 110 111", "000 001 010 012 110 111 222",
+			"000 001 011 012 111 112 222", "000 001 012 102 110 111 222",
+			"000 001 002 010 011 012 110 111",
+			"000 001 002 010 011 012 111 222",
+			"000 001 002 010 012 101 110 111",
+			"000 001 002 010 012 110 111 112",
+			"000 001 002 010 012 110 111 222",
+			"000 001 002 011 012 100 110 111",
+			"000 001 002 011 012 110 111 222",
+			"000 001 002 011 012 111 112 222",
+			"000 001 002 012 102 110 111 112",
+			"000 001 002 012 110 111 112 222",
+			"000 001 002 012 110 111 220 222",
+			"000 001 010 011 012 110 111 222",
+			"000 001 010 012 101 110 111 222",
+			"000 001 002 010 011 012 020 021 022",
+			"000 001 002 010 011 012 110 111 112",
+			"000 001 002 010 011 012 110 111 222",
+			"000 001 002 010 012 101 110 111 112",
+			"000 001 002 010 012 101 110 111 222",
+			"000 001 002 010 012 110 111 112 222",
+			"000 001 002 010 012 110 111 220 222",
+			"000 001 002 011 012 100 110 111 222",
+			"000 001 002 011 012 110 111 220 222",
+			"000 001 002 012 102 110 111 112 222",
+			"000 001 010 011 012 100 101 110 111",
+			"000 001 002 010 011 012 100 101 110 111",
+			"000 001 002 010 011 012 110 111 112 222",
+			"000 001 002 010 011 012 110 111 220 222",
+			"000 001 002 010 012 101 110 111 112 222",
+			"000 001 002 010 012 101 110 111 220 222",
+			"000 001 002 011 012 100 110 111 220 222",
+			"000 001 002 012 110 111 112 220 221 222",
+			"000 001 010 011 012 100 101 102 110 111",
+			"000 001 010 011 012 100 101 110 111 222",
+			"000 001 002 010 011 012 020 021 022 111 222",
+			"000 001 002 010 011 012 100 101 110 111 112",
+			"000 001 002 010 011 012 100 101 110 111 222",
+			"000 001 002 010 012 110 111 112 220 221 222",
+			"000 001 002 012 102 110 111 112 220 221 222",
+			"000 001 010 011 012 100 101 102 110 111 222",
+			"000 001 002 010 011 012 100 101 102 110 111 112",
+			"000 001 002 010 011 012 100 101 110 111 112 222",
+			"000 001 002 010 011 012 100 101 110 111 220 222",
+			"000 001 002 010 011 012 110 111 112 220 221 222",
+			"000 001 002 010 012 101 110 111 112 220 221 222",
+			"000 001 002 010 011 012 100 101 102 110 111 112 222",
+			"000 001 002 010 011 012 100 101 110 111 112 220 221 222",
+			"000 001 002 010 011 012 100 101 102 110 111 112 220 221 222",
+			"000 001 002 010 011 012 020 021 022 100 101 110 111 200 202 220 222" };
 
 	public static String[] FINITE_MONOIDS = new String[] {
 			"000 012 111",
@@ -839,14 +879,15 @@ public class MonodialInt {
 		System.out.println("essential binary rels:  "
 				+ collectEssentialBinaryRels(solver, size, monoid).getDim(2));
 
-		System.out.println("essential ternary rels: "
-				+ collectEssentialTernaryRels(solver, size, monoid).getDim(3));
+		Tensor<Boolean> ternaryRels = collectEssentialTernaryRels(solver, size,
+				monoid);
+		System.out.println("essential ternary rels: " + ternaryRels.getDim(3));
 
 		System.out.println("quasiorder relations:   "
 				+ collectQuasiorderRels(solver, size, monoid).getDim(2));
 
-		System.out.println("binary ops:             "
-				+ collectBinaryOps(solver, size, monoid).getDim(3));
+		Tensor<Boolean> binaryOps = collectBinaryOps(solver, size, monoid);
+		System.out.println("binary ops:             " + binaryOps.getDim(3));
 
 		System.out.println("ternary ops:            "
 				+ collectTernaryOps(solver, size, monoid).getDim(4));
@@ -863,46 +904,32 @@ public class MonodialInt {
 		System.out.println("maltsev ops:            "
 				+ collectMaltsevOps(solver, size, monoid).getDim(4));
 
+		Tensor<Boolean> compat = getCompatibility32Alt(BoolAlg.BOOLEAN,
+				ternaryRels, binaryOps);
+		compat = transpose(compat);
+		System.out.println("galois connection:      " + compat.getDim(0) + " "
+				+ compat.getDim(1));
+
+		Tensor<Boolean> closed = collectClosedSubsets(solver, compat);
+		System.out.println("closed sets (clones):   " + closed.getDim(1));
+
 		time = System.currentTimeMillis() - time;
 		System.out.println("finished in " + TIME_FORMAT.format(0.001 * time)
 				+ " seconds\n");
 	}
 
 	public static void main(String[] args) {
+		System.out.println("FINITE MONOIDS:");
+//		for (String monoid : FINITE_MONOIDS)
+//			printStatistics(3, monoid);
+
+		System.out.println("INFINITE MONOIDS:");
 		for (String monoid : INFINITE_MONOIDS)
 			printStatistics(3, monoid);
-	}
 
-	public static void main3(String[] args) {
-		SatSolver<Integer> solver = new Sat4J();
-		solver.debugging = false;
-
-		for (String monoid : INFINITE_MONOIDS) {
-			int size = 3;
-			// String monoid = "002 012 112";
-			System.out.println("monoid: " + monoid);
-
-			Tensor<Boolean> rels = collectTernaryRels(solver, size, monoid);
-			System.out.println("ternary rels: " + rels.info());
-			// printBinaryRels(rels);
-
-			Tensor<Boolean> ops = collectBinaryOps(solver, size, monoid);
-			// printTernaryOps(ops);
-			System.out.println("binary ops: " + ops.info());
-
-			Tensor<Boolean> compat = getCompatibility32Alt(BoolAlg.BOOLEAN,
-					rels, ops);
-			System.out.println("compat: " + compat.info());
-
-			compat = transpose(compat);
-			// printMatrix("compat", compat);
-
-			Tensor<Boolean> closed = collectClosedSubsets(solver, compat);
-			System.out.println("closed: " + closed.info());
-			// printMatrix("closed", transpose(closed));
-
-			System.out.println();
-		}
+		System.out.println("UNKNOWN MONOIDS:");
+		for (String monoid : UNKNOWN_MONOIDS)
+			printStatistics(3, monoid);
 	}
 
 	public static void main2(String[] args) {
@@ -938,5 +965,5 @@ public class MonodialInt {
 		System.out.println();
 	}
 
-	public static final int LIMIT = 1000;
+	public static final int LIMIT = 5000;
 }
