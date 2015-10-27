@@ -8,8 +8,6 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="jars/choco-1_2_06.jar"/>
 	<classpathentry kind="lib" path="jars/collections.jar"/>
-	<classpathentry kind="lib" path="jars/Jama-1.0.1-src.zip"/>
-	<classpathentry kind="lib" path="jars/Jama-1.0.1.jar"/>
 	<classpathentry kind="lib" path="jars/javailp-1.2a.jar"/>
 	<classpathentry kind="lib" path="jars/jmathplot.jar"/>
 	<classpathentry kind="lib" path="jars/jsoup-1.5.1.jar"/>
@@ -17,5 +15,6 @@
 	<classpathentry kind="lib" path="jars/jxl.jar"/>
 	<classpathentry kind="lib" path="jars/lpsolve55j.jar"/>
 	<classpathentry kind="lib" path="jars/org.sat4j.core.jar"/>
+	<classpathentry kind="lib" path="jars/Jama-1.0.3.jar"/>
 	<classpathentry kind="output" path=""/>
 </classpath>
