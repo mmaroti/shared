@@ -355,17 +355,80 @@ public class Tensor<ELEM> implements Iterable<ELEM> {
 		return new Named<ELEM>(this, names);
 	}
 
+	private static class DimInfo {
+		public final int dim;
+		public final int idx;
+
+		public DimInfo(int dim, int idx) {
+			this.dim = dim;
+			this.idx = idx;
+		}
+	}
+
+	private static Map<Character, DimInfo> getDimInfo(Named<?>[] parts,
+			String names) {
+
+		Map<Character, DimInfo> info = new TreeMap<Character, DimInfo>();
+
+		for (int i = parts.length - 1; i >= 0; i--) {
+			Named<?> part = parts[i];
+			assert part.tensor.getOrder() == part.names.length();
+
+			for (int j = 0; j < part.names.length(); j++) {
+				int dim = part.tensor.getDim(j);
+				char c = part.names.charAt(j);
+				DimInfo inf = info.get(c);
+
+				if (inf == null) {
+					int idx = names.indexOf(c) >= 0 ? parts.length : i;
+					info.put(c, new DimInfo(dim, idx));
+				} else
+					assert inf.dim == dim;
+			}
+		}
+
+		for (int i = 0; i < names.length(); i++) {
+			char c = names.charAt(i);
+			assert info.get(c) != null;
+		}
+
+		return info;
+	}
+
+	@SafeVarargs
+	public static <ELEM> Tensor<ELEM> contract(Func1<ELEM, Iterable<ELEM>> sum,
+			String names, Func2<ELEM, ELEM, ELEM> prod, Named<ELEM>... parts) {
+
+		Map<Character, DimInfo> info = getDimInfo(parts, names);
+		Named<ELEM> base = parts[0];
+
+		for (int i = 1; i < parts.length; i++) {
+			Named<ELEM> part = parts[i];
+		}
+
+		return null;
+	}
+
+	private static Map<Character, Integer> getDimensionMap(Named<?>... parts) {
+		TreeMap<Character, Integer> dims = new TreeMap<Character, Integer>();
+
+		for (Named<?> part : parts) {
+			assert part.tensor.getOrder() == part.names.length();
+			for (int i = 0; i < part.names.length(); i++) {
+				int a = part.tensor.getDim(i);
+				Integer b = dims.put(part.names.charAt(i), a);
+				assert b == null || b.intValue() == a;
+			}
+		}
+
+		return dims;
+	}
+
 	public static <ELEM, ELEM1, ELEM2> Tensor<ELEM> reduce(
 			Func1<ELEM, Iterable<ELEM>> sum, String names,
 			Func1<ELEM, ELEM1> func, Named<ELEM1> part) {
 
-		TreeMap<Character, Integer> dims = new TreeMap<Character, Integer>();
-
-		for (int i = 0; i < part.names.length(); i++) {
-			int dim = part.tensor.shape[i];
-			Integer d = dims.put(part.names.charAt(i), dim);
-			assert d == null || d.intValue() == dim;
-		}
+		Map<Character, Integer> dims = getDimensionMap(part);
 
 		ArrayList<Character> keys = new ArrayList<Character>(dims.keySet());
 		for (int i = 0; i < names.length(); i++) {
@@ -394,19 +457,7 @@ public class Tensor<ELEM> implements Iterable<ELEM> {
 			Func2<ELEM, ELEM1, ELEM2> prod, Named<ELEM1> part1,
 			Named<ELEM2> part2) {
 
-		TreeMap<Character, Integer> dims = new TreeMap<Character, Integer>();
-
-		for (int i = 0; i < part1.names.length(); i++) {
-			int dim = part1.tensor.shape[i];
-			Integer d = dims.put(part1.names.charAt(i), dim);
-			assert d == null || d.intValue() == dim;
-		}
-
-		for (int i = 0; i < part2.names.length(); i++) {
-			int dim = part2.tensor.shape[i];
-			Integer d = dims.put(part2.names.charAt(i), dim);
-			assert d == null || d.intValue() == dim;
-		}
+		Map<Character, Integer> dims = getDimensionMap(part1, part2);
 
 		ArrayList<Character> keys = new ArrayList<Character>(dims.keySet());
 		for (int i = 0; i < names.length(); i++) {
