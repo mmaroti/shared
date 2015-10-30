@@ -658,27 +658,29 @@ public class MonoidalInt {
 	}
 
 	public static <BOOL> Tensor<BOOL> getCompatibility22(BoolAlg<BOOL> alg,
-			Tensor<BOOL> rels, Tensor<BOOL> ops) {
-		assert rels.getOrder() == 3 && ops.getOrder() == 4;
+			Tensor<BOOL> ops, Tensor<BOOL> rels) {
+		assert ops.getOrder() == 4 && rels.getOrder() == 3;
 
-		Tensor<BOOL> t = Tensor.reduce(alg.ANY, "bcxrf", alg.AND,
-				rels.named("abr"), ops.named("xacf"));
-		t = Tensor.reduce(alg.ANY, "cdxyrf", alg.AND, t.named("bcxrf"),
+		Tensor<BOOL> t;
+		t = Tensor.reduce(alg.ANY, "bcxfr", alg.AND, rels.named("abr"),
+				ops.named("xacf"));
+		t = Tensor.reduce(alg.ANY, "cdxyfr", alg.AND, t.named("bcxfr"),
 				ops.named("ybdf"));
-		t = Tensor.reduce(alg.ANY, "xyrf", alg.AND, t.named("cdxyrf"),
+		t = Tensor.reduce(alg.ANY, "xyfr", alg.AND, t.named("cdxyfr"),
 				rels.named("cdr"));
-		t = Tensor.reduce(alg.ALL, "rf", alg.LEQ, t.named("xyrf"),
+		t = Tensor.reduce(alg.ALL, "fr", alg.LEQ, t.named("xyfr"),
 				rels.named("xyr"));
 
 		return t;
 	}
 
-	public static <BOOL> BOOL isCompatible32(BoolAlg<BOOL> alg,
-			Tensor<BOOL> rel, Tensor<BOOL> op) {
-		assert rel.getOrder() == 3 && op.getOrder() == 3;
+	public static <BOOL> BOOL isCompatible23(BoolAlg<BOOL> alg,
+			Tensor<BOOL> op, Tensor<BOOL> rel) {
+		assert op.getOrder() == 3 && rel.getOrder() == 3;
 
-		Tensor<BOOL> t = Tensor.reduce(alg.ANY, "bcdx", alg.AND,
-				op.named("xad"), rel.named("abc"));
+		Tensor<BOOL> t;
+		t = Tensor.reduce(alg.ANY, "bcdx", alg.AND, op.named("xad"),
+				rel.named("abc"));
 		t = Tensor.reduce(alg.ANY, "cdexy", alg.AND, t.named("bcdx"),
 				op.named("ybe"));
 		t = Tensor.reduce(alg.ANY, "defxyz", alg.AND, t.named("cdexy"),
@@ -691,25 +693,25 @@ public class MonoidalInt {
 		return t.get();
 	}
 
-	public static <BOOL> Tensor<BOOL> getCompatibility32(
-			final BoolAlg<BOOL> alg, Tensor<BOOL> rels, Tensor<BOOL> ops) {
-		assert rels.getOrder() == 4 && ops.getOrder() == 4;
+	public static <BOOL> Tensor<BOOL> getCompatibility23(
+			final BoolAlg<BOOL> alg, Tensor<BOOL> ops, Tensor<BOOL> rels) {
+		assert ops.getOrder() == 4 && rels.getOrder() == 4;
 
-		final List<Tensor<BOOL>> rs = Tensor.unconcat(rels);
 		final List<Tensor<BOOL>> os = Tensor.unconcat(ops);
+		final List<Tensor<BOOL>> rs = Tensor.unconcat(rels);
 
-		return Tensor.generate(rs.size(), os.size(),
+		return Tensor.generate(os.size(), rs.size(),
 				new Func2<BOOL, Integer, Integer>() {
 					@Override
 					public BOOL call(Integer a, Integer b) {
-						return isCompatible32(alg, rs.get(a), os.get(b));
+						return isCompatible23(alg, os.get(a), rs.get(b));
 					}
 				});
 	}
 
-	public static <BOOL> BOOL isCompatible42(BoolAlg<BOOL> alg,
-			Tensor<BOOL> rel, Tensor<BOOL> op) {
-		assert rel.getOrder() == 4 && op.getOrder() == 3;
+	public static <BOOL> BOOL isCompatible24(BoolAlg<BOOL> alg,
+			Tensor<BOOL> op, Tensor<BOOL> rel) {
+		assert op.getOrder() == 3 && rel.getOrder() == 4;
 
 		Tensor<BOOL> t;
 		t = Tensor.reduce(alg.ANY, "bcdex", alg.AND, rel.named("abcd"),
@@ -728,28 +730,63 @@ public class MonoidalInt {
 		return t.get();
 	}
 
-	public static <BOOL> Tensor<BOOL> getCompatibility42(
-			final BoolAlg<BOOL> alg, Tensor<BOOL> rels, Tensor<BOOL> ops) {
-		assert rels.getOrder() == 5 && ops.getOrder() == 4;
+	public static <BOOL> Tensor<BOOL> getCompatibility24(
+			final BoolAlg<BOOL> alg, Tensor<BOOL> ops, Tensor<BOOL> rels) {
+		assert ops.getOrder() == 4 && rels.getOrder() == 5;
 
-		final List<Tensor<BOOL>> rs = Tensor.unconcat(rels);
 		final List<Tensor<BOOL>> os = Tensor.unconcat(ops);
+		final List<Tensor<BOOL>> rs = Tensor.unconcat(rels);
 
-		return Tensor.generate(rs.size(), os.size(),
+		return Tensor.generate(os.size(), rs.size(),
 				new Func2<BOOL, Integer, Integer>() {
 					@Override
 					public BOOL call(Integer a, Integer b) {
-						return isCompatible42(alg, rs.get(a), os.get(b));
+						return isCompatible24(alg, os.get(a), rs.get(b));
+					}
+				});
+	}
+
+	public static <BOOL> BOOL isCompatible32(BoolAlg<BOOL> alg,
+			Tensor<BOOL> op, Tensor<BOOL> rel) {
+		assert op.getOrder() == 4 && rel.getOrder() == 2;
+
+		Tensor<BOOL> t;
+		t = Tensor.reduce(alg.ANY, "acbd", alg.AND, rel.named("ab"),
+				rel.named("cd"));
+		t = Tensor.reduce(alg.ANY, "bdex", alg.AND, t.named("acbd"),
+				op.named("xace"));
+		t = Tensor.reduce(alg.ANY, "efxy", alg.AND, t.named("bdex"),
+				op.named("ybdf"));
+		t = Tensor.reduce(alg.ANY, "xy", alg.AND, t.named("efxy"),
+				rel.named("ef"));
+		t = Tensor.reduce(alg.ALL, "", alg.LEQ, t.named("xy"), rel.named("xy"));
+
+		return t.get();
+	}
+
+	public static <BOOL> Tensor<BOOL> getCompatibility32(
+			final BoolAlg<BOOL> alg, Tensor<BOOL> ops, Tensor<BOOL> rels) {
+		assert ops.getOrder() == 5 && rels.getOrder() == 3;
+
+		final List<Tensor<BOOL>> os = Tensor.unconcat(ops);
+		final List<Tensor<BOOL>> rs = Tensor.unconcat(rels);
+
+		return Tensor.generate(os.size(), rs.size(),
+				new Func2<BOOL, Integer, Integer>() {
+					@Override
+					public BOOL call(Integer a, Integer b) {
+						return isCompatible32(alg, os.get(a), rs.get(b));
 					}
 				});
 	}
 
 	public static <BOOL> BOOL isCompatible33(BoolAlg<BOOL> alg,
-			Tensor<BOOL> rel, Tensor<BOOL> op) {
-		assert rel.getOrder() == 3 && op.getOrder() == 4;
+			Tensor<BOOL> op, Tensor<BOOL> rel) {
+		assert op.getOrder() == 4 && rel.getOrder() == 3;
 
-		Tensor<BOOL> t = Tensor.reduce(alg.ANY, "adbecf", alg.AND,
-				rel.named("abc"), rel.named("def"));
+		Tensor<BOOL> t;
+		t = Tensor.reduce(alg.ANY, "adbecf", alg.AND, rel.named("abc"),
+				rel.named("def"));
 		t = Tensor.reduce(alg.ANY, "becfgx", alg.AND, t.named("adbecf"),
 				op.named("xadg"));
 		t = Tensor.reduce(alg.ANY, "cfghxy", alg.AND, t.named("becfgx"),
@@ -765,17 +802,56 @@ public class MonoidalInt {
 	}
 
 	public static <BOOL> Tensor<BOOL> getCompatibility33(
-			final BoolAlg<BOOL> alg, Tensor<BOOL> rels, Tensor<BOOL> ops) {
-		assert rels.getOrder() == 4 && ops.getOrder() == 5;
+			final BoolAlg<BOOL> alg, Tensor<BOOL> ops, Tensor<BOOL> rels) {
+		assert ops.getOrder() == 5 && rels.getOrder() == 4;
 
-		final List<Tensor<BOOL>> rs = Tensor.unconcat(rels);
 		final List<Tensor<BOOL>> os = Tensor.unconcat(ops);
+		final List<Tensor<BOOL>> rs = Tensor.unconcat(rels);
 
-		return Tensor.generate(rs.size(), os.size(),
+		return Tensor.generate(os.size(), rs.size(),
 				new Func2<BOOL, Integer, Integer>() {
 					@Override
 					public BOOL call(Integer a, Integer b) {
-						return isCompatible33(alg, rs.get(a), os.get(b));
+						return isCompatible33(alg, os.get(a), rs.get(b));
+					}
+				});
+	}
+
+	public static <BOOL> BOOL isCompatible34(BoolAlg<BOOL> alg,
+			Tensor<BOOL> op, Tensor<BOOL> rel) {
+		assert op.getOrder() == 4 && rel.getOrder() == 4;
+
+		Tensor<BOOL> t;
+		t = Tensor.reduce(alg.ANY, "aebfcgdh", alg.AND, rel.named("abcd"),
+				rel.named("efgh"));
+		t = Tensor.reduce(alg.ANY, "bfcgdhix", alg.AND, t.named("aebfcgdh"),
+				op.named("xaei"));
+		t = Tensor.reduce(alg.ANY, "cgdhijxy", alg.AND, t.named("bfcgdhix"),
+				op.named("ybfj"));
+		t = Tensor.reduce(alg.ANY, "dhijkxyz", alg.AND, t.named("cgdhijxy"),
+				op.named("zcgk"));
+		t = Tensor.reduce(alg.ANY, "ijklxyzu", alg.AND, t.named("dhijkxyz"),
+				op.named("udhl"));
+		t = Tensor.reduce(alg.ANY, "xyzu", alg.AND, t.named("ijklxyzu"),
+				rel.named("ijkl"));
+		t = Tensor.reduce(alg.ALL, "", alg.LEQ, t.named("xyzu"),
+				rel.named("xyzu"));
+
+		return t.get();
+	}
+
+	public static <BOOL> Tensor<BOOL> getCompatibility34(
+			final BoolAlg<BOOL> alg, Tensor<BOOL> ops, Tensor<BOOL> rels) {
+		assert ops.getOrder() == 5 && rels.getOrder() == 5;
+
+		final List<Tensor<BOOL>> os = Tensor.unconcat(ops);
+		final List<Tensor<BOOL>> rs = Tensor.unconcat(rels);
+
+		return Tensor.generate(os.size(), rs.size(),
+				new Func2<BOOL, Integer, Integer>() {
+					@Override
+					public BOOL call(Integer a, Integer b) {
+						return isCompatible34(alg, os.get(a), rs.get(b));
 					}
 				});
 	}
@@ -1005,13 +1081,13 @@ public class MonoidalInt {
 		Tensor<Boolean> binaryRels = getBinaryRels(solver, size, monoid);
 		System.out.println("binary relations:       " + binaryRels.getDim(2));
 		binaryRels = sort(binaryRels);
-		printBinaryRels(binaryRels);
+		// printBinaryRels(binaryRels);
 
 		Tensor<Boolean> ternaryRels = getTernaryRels(solver, size, monoid);
 		System.out.println("ternary relations:      " + ternaryRels.getDim(3));
 
-		// Tensor<Boolean> qaryRels = getQuaternaryRels(solver, size, monoid);
-		// System.out.println("quaternary relations:   " + qaryRels.getDim(4));
+		Tensor<Boolean> qaryRels = getQuaternaryRels(solver, size, monoid);
+		System.out.println("quaternary relations:   " + qaryRels.getDim(4));
 
 		System.out.println("essential binary rels:  "
 				+ getEssentialBinaryRels(solver, size, monoid).getDim(2));
@@ -1025,13 +1101,13 @@ public class MonoidalInt {
 		Tensor<Boolean> binaryOps = getBinaryOps(solver, size, monoid);
 		System.out.println("binary ops:             " + binaryOps.getDim(3));
 		binaryOps = sort(binaryOps);
-		printBinaryOps(binaryOps);
+		// printBinaryOps(binaryOps);
 
 		Tensor<Boolean> ternaryOps = getTernaryOps(solver, size, monoid);
 		System.out.println("ternary ops:            " + ternaryOps.getDim(4));
 
-		// Tensor<Boolean> qaryOps = getQuaternaryOps(solver, size, monoid);
-		// System.out.println("quaternary ops:         " + qaryOps.getDim(5));
+		Tensor<Boolean> qaryOps = getQuaternaryOps(solver, size, monoid);
+		System.out.println("quaternary ops:         " + qaryOps.getDim(5));
 
 		System.out.println("essential binary ops:   "
 				+ getEssentialBinaryOps(solver, size, monoid).getDim(3));
@@ -1047,25 +1123,31 @@ public class MonoidalInt {
 
 		Tensor<Boolean> compat, closed;
 
-		compat = getCompatibility22(BoolAlg.BOOLEAN, binaryRels, binaryOps);
-		closed = getClosedSubsets(solver, transpose(compat));
+		compat = getCompatibility22(BoolAlg.BOOLEAN, binaryOps, binaryRels);
+		closed = getClosedSubsets(solver, compat);
 		System.out.println("clones (op 2 rel 2):    " + closed.getDim(1));
-		closed = sort(closed);
-		printMatrix("close binary op sets", closed);
+		// printMatrix("close binary op sets", sort(closed));
 
-		compat = getCompatibility32(BoolAlg.BOOLEAN, ternaryRels, binaryOps);
-		closed = getClosedSubsets(solver, transpose(compat));
+		compat = getCompatibility23(BoolAlg.BOOLEAN, binaryOps, ternaryRels);
+		closed = getClosedSubsets(solver, compat);
 		System.out.println("clones (op 2 rel 3):    " + closed.getDim(1));
-		closed = sort(closed);
-		printMatrix("closed binary op sets", closed);
+		// printMatrix("closed binary op sets", sort(closed));
 
-		// compat = getCompatibility42(BoolAlg.BOOLEAN, qaryRels, binaryOps);
-		// closed = getClosedSubsets(solver, compat);
-		// System.out.println("clones (op 2 rel 4):    " + closed.getDim(1));
+		compat = getCompatibility24(BoolAlg.BOOLEAN, binaryOps, qaryRels);
+		closed = getClosedSubsets(solver, compat);
+		System.out.println("clones (op 2 rel 4):    " + closed.getDim(1));
 
-		compat = getCompatibility33(BoolAlg.BOOLEAN, ternaryRels, ternaryOps);
+		compat = getCompatibility32(BoolAlg.BOOLEAN, ternaryOps, binaryRels);
+		closed = getClosedSubsets(solver, compat);
+		System.out.println("clones (op 3 rel 2):    " + closed.getDim(1));
+
+		compat = getCompatibility33(BoolAlg.BOOLEAN, ternaryOps, ternaryRels);
 		closed = getClosedSubsets(solver, compat);
 		System.out.println("clones (op 3 rel 3):    " + closed.getDim(1));
+
+		compat = getCompatibility34(BoolAlg.BOOLEAN, ternaryOps, qaryRels);
+		closed = getClosedSubsets(solver, compat);
+		System.out.println("clones (op 3 rel 4):    " + closed.getDim(1));
 
 		time = System.currentTimeMillis() - time;
 		System.out.println("finished in " + TIME_FORMAT.format(0.001 * time)
@@ -1073,8 +1155,9 @@ public class MonoidalInt {
 	}
 
 	public static void main(String[] args) {
-		// for (String monoid : TWO_MONOIDS)
-		printStatistics(3, "000 002 012 102 111 112 222");
+		// printStatistics(3, "000 002 012 102 111 112 222");
+		for (String monoid : TWO_MONOIDS)
+			printStatistics(2, monoid);
 	}
 
 	public static void main2(String[] args) {
@@ -1091,5 +1174,5 @@ public class MonoidalInt {
 			printStatistics(3, monoid);
 	}
 
-	public static final int LIMIT = 5000;
+	public static final int LIMIT = 70000;
 }
