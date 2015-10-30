@@ -1081,7 +1081,7 @@ public class MonoidalInt {
 		Tensor<Boolean> binaryRels = getBinaryRels(solver, size, monoid);
 		System.out.println("binary relations:       " + binaryRels.getDim(2));
 		binaryRels = sort(binaryRels);
-		// printBinaryRels(binaryRels);
+		printBinaryRels(binaryRels);
 
 		Tensor<Boolean> ternaryRels = getTernaryRels(solver, size, monoid);
 		System.out.println("ternary relations:      " + ternaryRels.getDim(3));
@@ -1101,7 +1101,7 @@ public class MonoidalInt {
 		Tensor<Boolean> binaryOps = getBinaryOps(solver, size, monoid);
 		System.out.println("binary ops:             " + binaryOps.getDim(3));
 		binaryOps = sort(binaryOps);
-		// printBinaryOps(binaryOps);
+		printBinaryOps(binaryOps);
 
 		Tensor<Boolean> ternaryOps = getTernaryOps(solver, size, monoid);
 		System.out.println("ternary ops:            " + ternaryOps.getDim(4));
