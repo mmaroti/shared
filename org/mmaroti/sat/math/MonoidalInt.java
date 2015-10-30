@@ -1080,8 +1080,8 @@ public class MonoidalInt {
 
 		Tensor<Boolean> binaryRels = getBinaryRels(solver, size, monoid);
 		System.out.println("binary relations:       " + binaryRels.getDim(2));
-		binaryRels = sort(binaryRels);
-		printBinaryRels(binaryRels);
+		// binaryRels = sort(binaryRels);
+		// printBinaryRels(binaryRels);
 
 		Tensor<Boolean> ternaryRels = getTernaryRels(solver, size, monoid);
 		System.out.println("ternary relations:      " + ternaryRels.getDim(3));
@@ -1100,8 +1100,8 @@ public class MonoidalInt {
 
 		Tensor<Boolean> binaryOps = getBinaryOps(solver, size, monoid);
 		System.out.println("binary ops:             " + binaryOps.getDim(3));
-		binaryOps = sort(binaryOps);
-		printBinaryOps(binaryOps);
+		// binaryOps = sort(binaryOps);
+		// printBinaryOps(binaryOps);
 
 		Tensor<Boolean> ternaryOps = getTernaryOps(solver, size, monoid);
 		System.out.println("ternary ops:            " + ternaryOps.getDim(4));
@@ -1126,12 +1126,12 @@ public class MonoidalInt {
 		compat = getCompatibility22(BoolAlg.BOOLEAN, binaryOps, binaryRels);
 		closed = getClosedSubsets(solver, compat);
 		System.out.println("clones (op 2 rel 2):    " + closed.getDim(1));
-		printMatrix("close binary op sets", sort(closed));
+		// printMatrix("close binary op sets", sort(closed));
 
 		compat = getCompatibility23(BoolAlg.BOOLEAN, binaryOps, ternaryRels);
 		closed = getClosedSubsets(solver, compat);
 		System.out.println("clones (op 2 rel 3):    " + closed.getDim(1));
-		printMatrix("closed binary op sets", sort(closed));
+		// printMatrix("closed binary op sets", sort(closed));
 
 		compat = getCompatibility24(BoolAlg.BOOLEAN, binaryOps, qaryRels);
 		closed = getClosedSubsets(solver, compat);
@@ -1154,25 +1154,25 @@ public class MonoidalInt {
 				+ " seconds\n");
 	}
 
-	public static void main(String[] args) {
+	public static void main2(String[] args) {
 		printStatistics(3, "000 002 012 102 111 112 222");
 		// for (String monoid : TWO_MONOIDS)
 		// printStatistics(2, monoid);
 	}
 
-	public static void main2(String[] args) {
-		System.out.println("FINITE MONOIDS:");
+	public static void main(String[] args) {
+		System.out.println("FINITE INTERVALS:");
 		for (String monoid : FINITE_MONOIDS)
 			printStatistics(3, monoid);
 
-		System.out.println("INFINITE MONOIDS:");
+		System.out.println("INFINITE INTERVALS:");
 		for (String monoid : INFINITE_MONOIDS)
 			printStatistics(3, monoid);
 
-		System.out.println("UNKNOWN MONOIDS:");
+		System.out.println("UNKNOWN INTERVALS:");
 		for (String monoid : UNKNOWN_MONOIDS)
 			printStatistics(3, monoid);
 	}
 
-	public static final int LIMIT = 50000;
+	public static final int LIMIT = 10000;
 }
