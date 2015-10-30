@@ -1126,12 +1126,12 @@ public class MonoidalInt {
 		compat = getCompatibility22(BoolAlg.BOOLEAN, binaryOps, binaryRels);
 		closed = getClosedSubsets(solver, compat);
 		System.out.println("clones (op 2 rel 2):    " + closed.getDim(1));
-		// printMatrix("close binary op sets", sort(closed));
+		printMatrix("close binary op sets", sort(closed));
 
 		compat = getCompatibility23(BoolAlg.BOOLEAN, binaryOps, ternaryRels);
 		closed = getClosedSubsets(solver, compat);
 		System.out.println("clones (op 2 rel 3):    " + closed.getDim(1));
-		// printMatrix("closed binary op sets", sort(closed));
+		printMatrix("closed binary op sets", sort(closed));
 
 		compat = getCompatibility24(BoolAlg.BOOLEAN, binaryOps, qaryRels);
 		closed = getClosedSubsets(solver, compat);
@@ -1155,9 +1155,9 @@ public class MonoidalInt {
 	}
 
 	public static void main(String[] args) {
-		// printStatistics(3, "000 002 012 102 111 112 222");
-		for (String monoid : TWO_MONOIDS)
-			printStatistics(2, monoid);
+		printStatistics(3, "000 002 012 102 111 112 222");
+		// for (String monoid : TWO_MONOIDS)
+		// printStatistics(2, monoid);
 	}
 
 	public static void main2(String[] args) {
@@ -1174,5 +1174,5 @@ public class MonoidalInt {
 			printStatistics(3, monoid);
 	}
 
-	public static final int LIMIT = 70000;
+	public static final int LIMIT = 50000;
 }
