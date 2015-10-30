@@ -784,8 +784,8 @@ public class MonoidalInt {
 		assert rel.getOrder() == 2;
 
 		System.out.println(what + ":");
-		for (int i = 0; i < rel.getDim(0); i++) {
-			for (int j = 0; j < rel.getDim(1); j++)
+		for (int j = 0; j < rel.getDim(1); j++) {
+			for (int i = 0; i < rel.getDim(0); i++)
 				System.out.print(rel.getElem(i, j) ? "1" : "0");
 			System.out.println();
 		}
@@ -843,6 +843,36 @@ public class MonoidalInt {
 		final Tensor<Boolean> mon = decodeMonoid(size, monoid);
 		if (!isMonoid(BoolAlg.BOOLEAN, mon))
 			throw new RuntimeException("This is not a monoid: " + monoid);
+	}
+
+	public static Tensor<Boolean> sort(Tensor<Boolean> tensor) {
+		List<Tensor<Boolean>> list = Tensor.unconcat(tensor);
+
+		Collections.sort(list, new Comparator<Tensor<Boolean>>() {
+			@Override
+			public int compare(Tensor<Boolean> arg0, Tensor<Boolean> arg1) {
+				Iterator<Boolean> iter0 = arg0.iterator();
+				Iterator<Boolean> iter1 = arg1.iterator();
+
+				while (iter0.hasNext()) {
+					if (!iter1.hasNext())
+						return 1;
+
+					boolean b0 = iter0.next();
+					boolean b1 = iter1.next();
+					if (b0 && !b1)
+						return 1;
+					else if (!b0 && b1)
+						return -1;
+				}
+
+				return iter1.hasNext() ? -1 : 0;
+			}
+		});
+
+		int[] shape = new int[tensor.getOrder() - 1];
+		System.arraycopy(tensor.getShape(), 0, shape, 0, shape.length);
+		return Tensor.concat(shape, list);
 	}
 
 	protected static DecimalFormat TIME_FORMAT = new DecimalFormat("0.00");
@@ -974,12 +1004,14 @@ public class MonoidalInt {
 
 		Tensor<Boolean> binaryRels = getBinaryRels(solver, size, monoid);
 		System.out.println("binary relations:       " + binaryRels.getDim(2));
+		binaryRels = sort(binaryRels);
+		printBinaryRels(binaryRels);
 
 		Tensor<Boolean> ternaryRels = getTernaryRels(solver, size, monoid);
 		System.out.println("ternary relations:      " + ternaryRels.getDim(3));
 
-		Tensor<Boolean> qaryRels = getQuaternaryRels(solver, size, monoid);
-		System.out.println("quaternary relations:   " + qaryRels.getDim(4));
+		// Tensor<Boolean> qaryRels = getQuaternaryRels(solver, size, monoid);
+		// System.out.println("quaternary relations:   " + qaryRels.getDim(4));
 
 		System.out.println("essential binary rels:  "
 				+ getEssentialBinaryRels(solver, size, monoid).getDim(2));
@@ -992,12 +1024,14 @@ public class MonoidalInt {
 
 		Tensor<Boolean> binaryOps = getBinaryOps(solver, size, monoid);
 		System.out.println("binary ops:             " + binaryOps.getDim(3));
+		binaryOps = sort(binaryOps);
+		printBinaryOps(binaryOps);
 
 		Tensor<Boolean> ternaryOps = getTernaryOps(solver, size, monoid);
 		System.out.println("ternary ops:            " + ternaryOps.getDim(4));
 
-		Tensor<Boolean> qaryOps = getQuaternaryOps(solver, size, monoid);
-		System.out.println("quaternary ops:         " + qaryOps.getDim(5));
+		// Tensor<Boolean> qaryOps = getQuaternaryOps(solver, size, monoid);
+		// System.out.println("quaternary ops:         " + qaryOps.getDim(5));
 
 		System.out.println("essential binary ops:   "
 				+ getEssentialBinaryOps(solver, size, monoid).getDim(3));
@@ -1014,16 +1048,20 @@ public class MonoidalInt {
 		Tensor<Boolean> compat, closed;
 
 		compat = getCompatibility22(BoolAlg.BOOLEAN, binaryRels, binaryOps);
-		closed = getClosedSubsets(solver, compat);
+		closed = getClosedSubsets(solver, transpose(compat));
 		System.out.println("clones (op 2 rel 2):    " + closed.getDim(1));
+		closed = sort(closed);
+		printMatrix("close binary op sets", closed);
 
 		compat = getCompatibility32(BoolAlg.BOOLEAN, ternaryRels, binaryOps);
-		closed = getClosedSubsets(solver, compat);
+		closed = getClosedSubsets(solver, transpose(compat));
 		System.out.println("clones (op 2 rel 3):    " + closed.getDim(1));
+		closed = sort(closed);
+		printMatrix("closed binary op sets", closed);
 
-		compat = getCompatibility42(BoolAlg.BOOLEAN, qaryRels, binaryOps);
-		closed = getClosedSubsets(solver, compat);
-		System.out.println("clones (op 2 rel 4):    " + closed.getDim(1));
+		// compat = getCompatibility42(BoolAlg.BOOLEAN, qaryRels, binaryOps);
+		// closed = getClosedSubsets(solver, compat);
+		// System.out.println("clones (op 2 rel 4):    " + closed.getDim(1));
 
 		compat = getCompatibility33(BoolAlg.BOOLEAN, ternaryRels, ternaryOps);
 		closed = getClosedSubsets(solver, compat);
@@ -1036,10 +1074,10 @@ public class MonoidalInt {
 
 	public static void main(String[] args) {
 		// for (String monoid : TWO_MONOIDS)
-		printStatistics(2, "01 00 11");
+		printStatistics(3, "000 002 012 102 111 112 222");
 	}
 
-	public static void main3(String[] args) {
+	public static void main2(String[] args) {
 		System.out.println("FINITE MONOIDS:");
 		for (String monoid : FINITE_MONOIDS)
 			printStatistics(3, monoid);
