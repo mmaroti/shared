@@ -1107,8 +1107,8 @@ public class MonoidalInt {
 		Tensor<Boolean> ternaryOps = getTernaryOps(solver, size, monoid);
 		System.out.println("ternary ops:            " + ternaryOps.getDim(4));
 
-		Tensor<Boolean> qaryOps = getQuaternaryOps(solver, size, monoid);
-		System.out.println("quaternary ops:         " + qaryOps.getDim(5));
+		// Tensor<Boolean> qaryOps = getQuaternaryOps(solver, size, monoid);
+		// System.out.println("quaternary ops:         " + qaryOps.getDim(5));
 
 		System.out.println("essential binary ops:   "
 				+ getEssentialBinaryOps(solver, size, monoid).getDim(3));
