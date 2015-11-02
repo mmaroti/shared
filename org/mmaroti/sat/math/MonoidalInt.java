@@ -1168,13 +1168,13 @@ public class MonoidalInt {
 				+ " seconds\n");
 	}
 
-	public static void main(String[] args) {
+	public static void main2(String[] args) {
 		printStatistics(3, "000 002 012 102 111 112 222");
 		// for (String monoid : TWO_MONOIDS)
 		// printStatistics(2, monoid);
 	}
 
-	public static void main2(String[] args) {
+	public static void main(String[] args) {
 		System.out.println("FINITE INTERVALS:");
 		for (String monoid : FINITE_MONOIDS)
 			printStatistics(3, monoid);
