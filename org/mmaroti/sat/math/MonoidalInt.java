@@ -1071,9 +1071,10 @@ public class MonoidalInt {
 		SatSolver<Integer> solver = new Sat4J();
 		solver.debugging = false;
 
-		long time = System.currentTimeMillis();
 		System.out.println("monoid: " + monoid);
 		checkMonoid(size, monoid);
+
+		long time = System.currentTimeMillis();
 
 		Tensor<Boolean> unaryRels = getUnaryRels(solver, size, monoid);
 		System.out.println("unary relations:        " + unaryRels.getDim(1));
@@ -1123,44 +1124,57 @@ public class MonoidalInt {
 
 		Tensor<Boolean> compat, closed;
 
-		compat = getCompatibility22(BoolAlg.BOOLEAN, binaryOps, binaryRels);
-		closed = getClosedSubsets(solver, compat);
-		System.out.println("clones (op 2 rel 2):    " + closed.getDim(1));
-		// printMatrix("close binary op sets", sort(closed));
+		if (binaryOps.getDim(3) != LIMIT && binaryRels.getDim(2) != LIMIT) {
+			compat = getCompatibility22(BoolAlg.BOOLEAN, binaryOps, binaryRels);
+			closed = getClosedSubsets(solver, compat);
+			System.out.println("clones (op 2 rel 2):    " + closed.getDim(1));
+			// printMatrix("close binary op sets", sort(closed));
+		}
 
-		compat = getCompatibility23(BoolAlg.BOOLEAN, binaryOps, ternaryRels);
-		closed = getClosedSubsets(solver, compat);
-		System.out.println("clones (op 2 rel 3):    " + closed.getDim(1));
-		// printMatrix("closed binary op sets", sort(closed));
+		if (binaryOps.getDim(3) != LIMIT && ternaryRels.getDim(3) != LIMIT) {
+			compat = getCompatibility23(BoolAlg.BOOLEAN, binaryOps, ternaryRels);
+			closed = getClosedSubsets(solver, compat);
+			System.out.println("clones (op 2 rel 3):    " + closed.getDim(1));
+			// printMatrix("closed binary op sets", sort(closed));
+		}
 
-		compat = getCompatibility24(BoolAlg.BOOLEAN, binaryOps, qaryRels);
-		closed = getClosedSubsets(solver, compat);
-		System.out.println("clones (op 2 rel 4):    " + closed.getDim(1));
+		if (binaryOps.getDim(3) != LIMIT && qaryRels.getDim(4) != LIMIT) {
+			compat = getCompatibility24(BoolAlg.BOOLEAN, binaryOps, qaryRels);
+			closed = getClosedSubsets(solver, compat);
+			System.out.println("clones (op 2 rel 4):    " + closed.getDim(1));
+		}
 
-		compat = getCompatibility32(BoolAlg.BOOLEAN, ternaryOps, binaryRels);
-		closed = getClosedSubsets(solver, compat);
-		System.out.println("clones (op 3 rel 2):    " + closed.getDim(1));
+		if (ternaryOps.getDim(4) != LIMIT && binaryRels.getDim(2) != LIMIT) {
+			compat = getCompatibility32(BoolAlg.BOOLEAN, ternaryOps, binaryRels);
+			closed = getClosedSubsets(solver, compat);
+			System.out.println("clones (op 3 rel 2):    " + closed.getDim(1));
+		}
 
-		compat = getCompatibility33(BoolAlg.BOOLEAN, ternaryOps, ternaryRels);
-		closed = getClosedSubsets(solver, compat);
-		System.out.println("clones (op 3 rel 3):    " + closed.getDim(1));
+		if (ternaryOps.getDim(4) != LIMIT && ternaryRels.getDim(3) != LIMIT) {
+			compat = getCompatibility33(BoolAlg.BOOLEAN, ternaryOps,
+					ternaryRels);
+			closed = getClosedSubsets(solver, compat);
+			System.out.println("clones (op 3 rel 3):    " + closed.getDim(1));
+		}
 
-		compat = getCompatibility34(BoolAlg.BOOLEAN, ternaryOps, qaryRels);
-		closed = getClosedSubsets(solver, compat);
-		System.out.println("clones (op 3 rel 4):    " + closed.getDim(1));
+		if (ternaryOps.getDim(4) != LIMIT && qaryRels.getDim(4) != LIMIT) {
+			compat = getCompatibility34(BoolAlg.BOOLEAN, ternaryOps, qaryRels);
+			closed = getClosedSubsets(solver, compat);
+			System.out.println("clones (op 3 rel 4):    " + closed.getDim(1));
+		}
 
 		time = System.currentTimeMillis() - time;
 		System.out.println("finished in " + TIME_FORMAT.format(0.001 * time)
 				+ " seconds\n");
 	}
 
-	public static void main2(String[] args) {
+	public static void main(String[] args) {
 		printStatistics(3, "000 002 012 102 111 112 222");
 		// for (String monoid : TWO_MONOIDS)
 		// printStatistics(2, monoid);
 	}
 
-	public static void main(String[] args) {
+	public static void main2(String[] args) {
 		System.out.println("FINITE INTERVALS:");
 		for (String monoid : FINITE_MONOIDS)
 			printStatistics(3, monoid);
@@ -1174,5 +1188,5 @@ public class MonoidalInt {
 			printStatistics(3, monoid);
 	}
 
-	public static final int LIMIT = 10000;
+	public static final int LIMIT = 50000;
 }

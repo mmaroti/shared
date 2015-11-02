@@ -357,11 +357,11 @@ public class Tensor<ELEM> implements Iterable<ELEM> {
 
 	private static class DimInfo {
 		public final int dim;
-		public final int idx;
+		public final int lev;
 
-		public DimInfo(int dim, int idx) {
+		public DimInfo(int dim, int lev) {
 			this.dim = dim;
-			this.idx = idx;
+			this.lev = lev;
 		}
 	}
 
