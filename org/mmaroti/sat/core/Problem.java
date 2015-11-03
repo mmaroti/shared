@@ -22,33 +22,33 @@ import java.util.*;
 import org.mmaroti.sat.solvers.*;
 
 public abstract class Problem {
-	protected final Map<String, int[]> shapes;
+	protected final Map<String, Tensor<Boolean>> masks;
 
-	public Map<String, int[]> getShapes() {
-		return shapes;
+	public Problem(Map<String, Tensor<Boolean>> masks) {
+		this.masks = masks;
 	}
 
-	public Problem(Map<String, int[]> shapes) {
-		this.shapes = shapes;
+	public Problem(String name, Tensor<Boolean> mask) {
+		masks = new TreeMap<String, Tensor<Boolean>>();
+		masks.put(name, mask);
 	}
 
 	public Problem(String name, int[] shape) {
-		shapes = new TreeMap<String, int[]>();
-		shapes.put(name, shape);
+		masks = new TreeMap<String, Tensor<Boolean>>();
+		masks.put(name, Tensor.constant(shape, Boolean.TRUE));
+	}
+
+	public Problem(String name1, Tensor<Boolean> mask1, String name2,
+			Tensor<Boolean> mask2) {
+		masks = new TreeMap<String, Tensor<Boolean>>();
+		masks.put(name1, mask1);
+		masks.put(name2, mask2);
 	}
 
 	public Problem(String name1, int[] shape1, String name2, int[] shape2) {
-		shapes = new TreeMap<String, int[]>();
-		shapes.put(name1, shape1);
-		shapes.put(name2, shape2);
-	}
-
-	public Problem(String name1, int[] shape1, String name2, int[] shape2,
-			String name3, int[] shape3) {
-		shapes = new TreeMap<String, int[]>();
-		shapes.put(name1, shape1);
-		shapes.put(name2, shape2);
-		shapes.put(name3, shape3);
+		masks = new TreeMap<String, Tensor<Boolean>>();
+		masks.put(name1, Tensor.constant(shape1, Boolean.TRUE));
+		masks.put(name2, Tensor.constant(shape2, Boolean.TRUE));
 	}
 
 	public abstract <BOOL> BOOL compute(BoolAlg<BOOL> alg,
@@ -62,8 +62,10 @@ public abstract class Problem {
 		solver.clear();
 
 		Map<String, Tensor<BOOL>> tensors = new TreeMap<String, Tensor<BOOL>>();
-		for (String key : shapes.keySet())
-			tensors.put(key, Tensor.generate(shapes.get(key), solver.VARIABLE));
+		for (String key : masks.keySet()) {
+			int[] shape = masks.get(key).getShape();
+			tensors.put(key, Tensor.generate(shape, solver.VARIABLE));
+		}
 
 		solver.clause(Arrays.asList(compute(solver, tensors)));
 
@@ -71,7 +73,7 @@ public abstract class Problem {
 			return null;
 
 		Map<String, Tensor<Boolean>> solution = new TreeMap<String, Tensor<Boolean>>();
-		for (String key : shapes.keySet())
+		for (String key : masks.keySet())
 			solution.put(key, Tensor.map(solver.DECODE, tensors.get(key)));
 
 		assert check(solution);
@@ -83,8 +85,10 @@ public abstract class Problem {
 		solver.clear();
 
 		Map<String, Tensor<BOOL>> tensors = new TreeMap<String, Tensor<BOOL>>();
-		for (String key : shapes.keySet())
-			tensors.put(key, Tensor.generate(shapes.get(key), solver.VARIABLE));
+		for (String key : masks.keySet()) {
+			int[] shape = masks.get(key).getShape();
+			tensors.put(key, Tensor.generate(shape, solver.VARIABLE));
+		}
 
 		solver.clause(Arrays.asList(compute(solver, tensors)));
 
@@ -93,14 +97,19 @@ public abstract class Problem {
 			ArrayList<BOOL> exclude = new ArrayList<BOOL>();
 
 			Map<String, Tensor<Boolean>> solution = new TreeMap<String, Tensor<Boolean>>();
-			for (String key : shapes.keySet()) {
+			for (String key : masks.keySet()) {
 				Tensor<BOOL> t = tensors.get(key);
 				Tensor<Boolean> s = Tensor.map(solver.DECODE, t);
 				solution.put(key, s);
 
 				t = Tensor.map2(solver.ADD, Tensor.map(solver.LIFT, s), t);
-				for (BOOL b : t)
-					exclude.add(b);
+
+				Iterator<Boolean> iter = masks.get(key).iterator();
+				for (BOOL b : t) {
+					if (iter.next())
+						exclude.add(b);
+				}
+				assert !iter.hasNext();
 			}
 
 			assert check(solution);
@@ -117,12 +126,13 @@ public abstract class Problem {
 		}
 
 		Map<String, Tensor<Boolean>> result = new HashMap<String, Tensor<Boolean>>();
-		for (String key : shapes.keySet()) {
+		for (String key : masks.keySet()) {
 			List<Tensor<Boolean>> list = new ArrayList<Tensor<Boolean>>();
 			for (Map<String, Tensor<Boolean>> solution : solutions)
 				list.add(solution.get(key));
 
-			result.put(key, Tensor.concat(shapes.get(key), list));
+			int[] shape = masks.get(key).getShape();
+			result.put(key, Tensor.concat(shape, list));
 		}
 
 		return result;

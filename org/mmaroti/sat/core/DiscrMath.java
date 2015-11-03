@@ -116,10 +116,7 @@ public class DiscrMath<BOOL> {
 	}
 
 	public static void main(String[] args) {
-		Map<String, int[]> shapes = new HashMap<String, int[]>();
-		shapes.put("f", new int[] { 3, 3 });
-
-		Problem problem = new Problem(shapes) {
+		Problem problem = new Problem("f", new int[] { 3, 3 }) {
 			@Override
 			public <BOOL> BOOL compute(BoolAlg<BOOL> alg,
 					Map<String, Tensor<BOOL>> tensors) {
@@ -129,8 +126,8 @@ public class DiscrMath<BOOL> {
 			}
 		};
 
-		Map<String, Tensor<Boolean>> solutions = problem.solveAll(
-				new Sat4J(), 2);
+		Map<String, Tensor<Boolean>> solutions = problem.solveAll(new Sat4J(),
+				2);
 		System.out.println(solutions.get("f"));
 		// for (Map<String, Tensor<Boolean>> solution : solutions)
 		// Tensor.print(solution, System.out);
