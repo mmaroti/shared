@@ -107,53 +107,55 @@ public class MonoidalInt {
 		return t;
 	}
 
-	public static <BOOL> BOOL isStabilizer2(BoolAlg<BOOL> alg,
+	public static <BOOL> BOOL isStabilizerOp2(BoolAlg<BOOL> alg,
 			Tensor<BOOL> func, Tensor<BOOL> monoid) {
 		assert func.getOrder() == 3 && monoid.getOrder() == 3;
 
-		Tensor<BOOL> t = Tensor.reduce(alg.ANY, "xytp", alg.AND,
-				func.named("xyz"), monoid.named("ztp"));
+		Tensor<BOOL> t;
+		t = Tensor.reduce(alg.ANY, "xytp", alg.AND, func.named("xyz"),
+				monoid.named("ztp")); // z
 		t = Tensor.reduce(alg.ANY, "xtpq", alg.AND, t.named("xytp"),
-				monoid.named("ytq"));
+				monoid.named("ytq")); // y
 		t = Tensor.reduce(alg.ALL, "rpq", alg.EQU, t.named("xtpq"),
-				monoid.named("xtr"));
+				monoid.named("xtr")); // xt
 		t = Tensor.fold(alg.ALL, 2, Tensor.fold(alg.ONE, 1, t));
 
 		return t.get();
 	}
 
-	public static <BOOL> BOOL isStabilizer3(BoolAlg<BOOL> alg,
+	public static <BOOL> BOOL isStabilizerOp3(BoolAlg<BOOL> alg,
 			Tensor<BOOL> func, Tensor<BOOL> monoid) {
 		assert func.getOrder() == 4 && monoid.getOrder() == 3;
 
-		Tensor<BOOL> t = Tensor.reduce(alg.ANY, "atpcd", alg.AND,
-				func.named("abcd"), monoid.named("btp"));
+		Tensor<BOOL> t;
+		t = Tensor.reduce(alg.ANY, "atpcd", alg.AND, func.named("abcd"),
+				monoid.named("btp")); // b
 		t = Tensor.reduce(alg.ANY, "atpqd", alg.AND, t.named("atpcd"),
-				monoid.named("ctq"));
+				monoid.named("ctq")); // c
 		t = Tensor.reduce(alg.ANY, "atpqr", alg.AND, t.named("atpqd"),
-				monoid.named("dtr"));
+				monoid.named("dtr")); // d
 		t = Tensor.reduce(alg.ALL, "spqr", alg.EQU, t.named("atpqr"),
-				monoid.named("ats"));
+				monoid.named("ats")); // at
 		t = Tensor.fold(alg.ALL, 3, Tensor.fold(alg.ONE, 1, t));
 
 		return t.get();
 	}
 
-	public static <BOOL> BOOL isStabilizer4(BoolAlg<BOOL> alg,
+	public static <BOOL> BOOL isStabilizerOp4(BoolAlg<BOOL> alg,
 			Tensor<BOOL> func, Tensor<BOOL> monoid) {
 		assert func.getOrder() == 5 && monoid.getOrder() == 3;
 
 		Tensor<BOOL> t;
-		t = Tensor.reduce(alg.ANY, "cdeaxq", alg.AND, monoid.named("bxq"),
-				func.named("abcde"));
+		t = Tensor.reduce(alg.ANY, "cdeaxq", alg.AND, func.named("abcde"),
+				monoid.named("bxq")); // b
 		t = Tensor.reduce(alg.ANY, "deaxqr", alg.AND, t.named("cdeaxq"),
-				monoid.named("cxr"));
+				monoid.named("cxr")); // c
 		t = Tensor.reduce(alg.ANY, "eaxqrs", alg.AND, t.named("deaxqr"),
-				monoid.named("dxs"));
+				monoid.named("dxs")); // d
 		t = Tensor.reduce(alg.ANY, "axqrst", alg.AND, t.named("eaxqrs"),
-				monoid.named("ext"));
-		t = Tensor.reduce(alg.ALL, "pqrst", alg.EQU, t.named("axqrst"),
-				monoid.named("axp"));
+				monoid.named("ext")); // e
+		t = Tensor.reduce(alg.ALL, "pqrst", alg.EQU, monoid.named("axp"),
+				t.named("axqrst")); // ax
 		t = Tensor.fold(alg.ALL, 4, Tensor.fold(alg.ONE, 1, t));
 
 		return t.get();
@@ -276,12 +278,12 @@ public class MonoidalInt {
 		assert rel.getOrder() == 3 && monoid.getOrder() == 3;
 
 		Tensor<BOOL> t;
-		t = Tensor.reduce(alg.ANY, "uyzp", alg.AND, rel.named("xyz"),
-				monoid.named("uxp"));
-		t = Tensor.reduce(alg.ANY, "uvzp", alg.AND, t.named("uyzp"),
-				monoid.named("vyp"));
-		t = Tensor.reduce(alg.ANY, "uvw", alg.AND, t.named("uvzp"),
-				monoid.named("wzp"));
+		t = Tensor.reduce(alg.ANY, "yzpu", alg.AND, rel.named("xyz"),
+				monoid.named("uxp")); // x
+		t = Tensor.reduce(alg.ANY, "zpuv", alg.AND, t.named("yzpu"),
+				monoid.named("vyp")); // y
+		t = Tensor.reduce(alg.ANY, "uvw", alg.AND, t.named("zpuv"),
+				monoid.named("wzp")); // zp
 
 		t = Tensor.map2(alg.LEQ, t, rel);
 		t = Tensor.fold(alg.ALL, 3, t);
@@ -484,7 +486,7 @@ public class MonoidalInt {
 				Tensor<BOOL> monoid = Tensor.map(alg.LIFT, mon);
 
 				BOOL res = isFunction(alg, func);
-				res = alg.and(res, isStabilizer2(alg, func, monoid));
+				res = alg.and(res, isStabilizerOp2(alg, func, monoid));
 
 				return res;
 			}
@@ -505,7 +507,7 @@ public class MonoidalInt {
 				Tensor<BOOL> monoid = Tensor.map(alg.LIFT, mon);
 
 				BOOL res = isFunction(alg, func);
-				res = alg.and(res, isStabilizer2(alg, func, monoid));
+				res = alg.and(res, isStabilizerOp2(alg, func, monoid));
 				res = alg.and(res, isEssentialOp2(alg, func));
 
 				return res;
@@ -527,7 +529,7 @@ public class MonoidalInt {
 				Tensor<BOOL> monoid = Tensor.map(alg.LIFT, mon);
 
 				BOOL res = isFunction(alg, func);
-				res = alg.and(res, isStabilizer3(alg, func, monoid));
+				res = alg.and(res, isStabilizerOp3(alg, func, monoid));
 
 				return res;
 			}
@@ -557,7 +559,7 @@ public class MonoidalInt {
 				Tensor<BOOL> monoid = Tensor.map(alg.LIFT, mon);
 
 				BOOL res = isFunction(alg, func);
-				res = alg.and(res, isStabilizer3(alg, func, monoid));
+				res = alg.and(res, isStabilizerOp3(alg, func, monoid));
 
 				return res;
 			}
@@ -579,7 +581,7 @@ public class MonoidalInt {
 				Tensor<BOOL> monoid = Tensor.map(alg.LIFT, mon);
 
 				BOOL res = isFunction(alg, func);
-				res = alg.and(res, isStabilizer4(alg, func, monoid));
+				res = alg.and(res, isStabilizerOp4(alg, func, monoid));
 
 				return res;
 			}
@@ -600,7 +602,7 @@ public class MonoidalInt {
 				Tensor<BOOL> monoid = Tensor.map(alg.LIFT, mon);
 
 				BOOL res = isFunction(alg, func);
-				res = alg.and(res, isStabilizer3(alg, func, monoid));
+				res = alg.and(res, isStabilizerOp3(alg, func, monoid));
 				res = alg.and(res, isEssentialOp3(alg, func));
 
 				return res;
@@ -622,7 +624,7 @@ public class MonoidalInt {
 				Tensor<BOOL> monoid = Tensor.map(alg.LIFT, mon);
 
 				BOOL res = isFunction(alg, func);
-				res = alg.and(res, isStabilizer3(alg, func, monoid));
+				res = alg.and(res, isStabilizerOp3(alg, func, monoid));
 				res = alg.and(res, isMajorityOp(alg, func));
 
 				return res;
@@ -644,7 +646,7 @@ public class MonoidalInt {
 				Tensor<BOOL> monoid = Tensor.map(alg.LIFT, mon);
 
 				BOOL res = isFunction(alg, func);
-				res = alg.and(res, isStabilizer3(alg, func, monoid));
+				res = alg.and(res, isStabilizerOp3(alg, func, monoid));
 				res = alg.and(res, isMaltsevOp(alg, func));
 
 				return res;
@@ -719,12 +721,12 @@ public class MonoidalInt {
 		assert ops.getOrder() == 4 && rels.getOrder() == 3;
 
 		Tensor<BOOL> t;
-		t = Tensor.reduce(alg.ANY, "bcxfr", alg.AND, rels.named("abr"),
-				ops.named("xacf"));
-		t = Tensor.reduce(alg.ANY, "cdxyfr", alg.AND, t.named("bcxfr"),
-				ops.named("ybdf"));
-		t = Tensor.reduce(alg.ANY, "xyfr", alg.AND, t.named("cdxyfr"),
-				rels.named("cdr"));
+		t = Tensor.reduce(alg.ANY, "cbxfr", alg.AND, rels.named("abr"),
+				ops.named("xacf")); // a
+		t = Tensor.reduce(alg.ANY, "bdxfr", alg.AND, t.named("cbxfr"),
+				rels.named("cdr")); // c
+		t = Tensor.reduce(alg.ANY, "xyfr", alg.AND, t.named("bdxfr"),
+				ops.named("ybdf")); // bd
 		t = Tensor.reduce(alg.ALL, "fr", alg.LEQ, t.named("xyfr"),
 				rels.named("xyr"));
 
@@ -736,14 +738,14 @@ public class MonoidalInt {
 		assert op.getOrder() == 3 && rel.getOrder() == 3;
 
 		Tensor<BOOL> t;
-		t = Tensor.reduce(alg.ANY, "bcdx", alg.AND, op.named("xad"),
-				rel.named("abc"));
-		t = Tensor.reduce(alg.ANY, "cdexy", alg.AND, t.named("bcdx"),
-				op.named("ybe"));
-		t = Tensor.reduce(alg.ANY, "defxyz", alg.AND, t.named("cdexy"),
-				op.named("zcf"));
-		t = Tensor.reduce(alg.ANY, "xyz", alg.AND, t.named("defxyz"),
-				rel.named("def"));
+		t = Tensor.reduce(alg.ANY, "bdcx", alg.AND, op.named("xad"),
+				rel.named("abc")); // a
+		t = Tensor.reduce(alg.ANY, "decxy", alg.AND, t.named("bdcx"),
+				op.named("ybe")); // b
+		t = Tensor.reduce(alg.ANY, "cfxy", alg.AND, t.named("decxy"),
+				rel.named("def")); // de
+		t = Tensor.reduce(alg.ANY, "xyz", alg.AND, t.named("cfxy"),
+				op.named("zcf")); // cf
 		t = Tensor.reduce(alg.ALL, "", alg.LEQ, t.named("xyz"),
 				rel.named("xyz"));
 
@@ -771,16 +773,16 @@ public class MonoidalInt {
 		assert op.getOrder() == 3 && rel.getOrder() == 4;
 
 		Tensor<BOOL> t;
-		t = Tensor.reduce(alg.ANY, "bcdex", alg.AND, rel.named("abcd"),
-				op.named("xae"));
-		t = Tensor.reduce(alg.ANY, "cdefxy", alg.AND, t.named("bcdex"),
-				op.named("ybf"));
-		t = Tensor.reduce(alg.ANY, "cdghxy", alg.AND, t.named("cdefxy"),
-				rel.named("efgh"));
-		t = Tensor.reduce(alg.ANY, "dhxyz", alg.AND, t.named("cdghxy"),
-				op.named("zcg"));
+		t = Tensor.reduce(alg.ANY, "becdx", alg.AND, rel.named("abcd"),
+				op.named("xae")); // a
+		t = Tensor.reduce(alg.ANY, "efcdxy", alg.AND, t.named("becdx"),
+				op.named("ybf")); // b
+		t = Tensor.reduce(alg.ANY, "cgdhxy", alg.AND, t.named("efcdxy"),
+				rel.named("efgh")); // ef
+		t = Tensor.reduce(alg.ANY, "dhxyz", alg.AND, t.named("cgdhxy"),
+				op.named("zcg")); // cg
 		t = Tensor.reduce(alg.ANY, "xyzu", alg.AND, t.named("dhxyz"),
-				op.named("udh"));
+				op.named("udh")); // dh
 		t = Tensor.reduce(alg.ALL, "", alg.LEQ, t.named("xyzu"),
 				rel.named("xyzu"));
 
@@ -808,14 +810,14 @@ public class MonoidalInt {
 		assert op.getOrder() == 4 && rel.getOrder() == 2;
 
 		Tensor<BOOL> t;
-		t = Tensor.reduce(alg.ANY, "acbd", alg.AND, rel.named("ab"),
-				rel.named("cd"));
-		t = Tensor.reduce(alg.ANY, "bdex", alg.AND, t.named("acbd"),
-				op.named("xace"));
-		t = Tensor.reduce(alg.ANY, "efxy", alg.AND, t.named("bdex"),
-				op.named("ybdf"));
-		t = Tensor.reduce(alg.ANY, "xy", alg.AND, t.named("efxy"),
-				rel.named("ef"));
+		t = Tensor.reduce(alg.ANY, "cebx", alg.AND, rel.named("ab"),
+				op.named("xace")); // a
+		t = Tensor.reduce(alg.ANY, "ebdx", alg.AND, t.named("cebx"),
+				rel.named("cd")); // c
+		t = Tensor.reduce(alg.ANY, "bdfx", alg.AND, t.named("ebdx"),
+				rel.named("ef")); // e
+		t = Tensor.reduce(alg.ANY, "xy", alg.AND, t.named("bdfx"),
+				op.named("ybdf")); // bdf
 		t = Tensor.reduce(alg.ALL, "", alg.LEQ, t.named("xy"), rel.named("xy"));
 
 		return t.get();
@@ -842,16 +844,16 @@ public class MonoidalInt {
 		assert op.getOrder() == 4 && rel.getOrder() == 3;
 
 		Tensor<BOOL> t;
-		t = Tensor.reduce(alg.ANY, "adbecf", alg.AND, rel.named("abc"),
-				rel.named("def"));
-		t = Tensor.reduce(alg.ANY, "becfgx", alg.AND, t.named("adbecf"),
-				op.named("xadg"));
-		t = Tensor.reduce(alg.ANY, "cfghxy", alg.AND, t.named("becfgx"),
-				op.named("ybeh"));
-		t = Tensor.reduce(alg.ANY, "ghixyz", alg.AND, t.named("cfghxy"),
-				op.named("zcfi"));
-		t = Tensor.reduce(alg.ANY, "xyz", alg.AND, t.named("ghixyz"),
-				rel.named("ghi"));
+		t = Tensor.reduce(alg.ANY, "dbgcx", alg.AND, rel.named("abc"),
+				op.named("xadg")); // a
+		t = Tensor.reduce(alg.ANY, "begcfx", alg.AND, t.named("dbgcx"),
+				rel.named("def")); // d
+		t = Tensor.reduce(alg.ANY, "ghcfxy", alg.AND, t.named("begcfx"),
+				op.named("ybeh")); // be
+		t = Tensor.reduce(alg.ANY, "cfixy", alg.AND, t.named("ghcfxy"),
+				rel.named("ghi")); // gh
+		t = Tensor.reduce(alg.ANY, "xyz", alg.AND, t.named("cfixy"),
+				op.named("zcfi")); // cfi
 		t = Tensor.reduce(alg.ALL, "", alg.LEQ, t.named("xyz"),
 				rel.named("xyz"));
 
@@ -879,18 +881,18 @@ public class MonoidalInt {
 		assert op.getOrder() == 4 && rel.getOrder() == 4;
 
 		Tensor<BOOL> t;
-		t = Tensor.reduce(alg.ANY, "aebfcgdh", alg.AND, rel.named("abcd"),
-				rel.named("efgh"));
-		t = Tensor.reduce(alg.ANY, "bfcgdhix", alg.AND, t.named("aebfcgdh"),
-				op.named("xaei"));
-		t = Tensor.reduce(alg.ANY, "cgdhijxy", alg.AND, t.named("bfcgdhix"),
-				op.named("ybfj"));
-		t = Tensor.reduce(alg.ANY, "dhijkxyz", alg.AND, t.named("cgdhijxy"),
-				op.named("zcgk"));
-		t = Tensor.reduce(alg.ANY, "ijklxyzu", alg.AND, t.named("dhijkxyz"),
-				op.named("udhl"));
-		t = Tensor.reduce(alg.ANY, "xyzu", alg.AND, t.named("ijklxyzu"),
-				rel.named("ijkl"));
+		t = Tensor.reduce(alg.ANY, "becidx", alg.AND, rel.named("abcd"),
+				op.named("xaei")); // a
+		t = Tensor.reduce(alg.ANY, "efcijdxy", alg.AND, t.named("becidx"),
+				op.named("ybfj")); // b
+		t = Tensor.reduce(alg.ANY, "cgijdhxy", alg.AND, t.named("efcijdxy"),
+				rel.named("efgh")); // ef
+		t = Tensor.reduce(alg.ANY, "ijkdhxyz", alg.AND, t.named("cgijdhxy"),
+				op.named("zcgk")); // cg
+		t = Tensor.reduce(alg.ANY, "dhlxyz", alg.AND, t.named("ijkdhxyz"),
+				rel.named("ijkl")); // ijk
+		t = Tensor.reduce(alg.ANY, "xyzu", alg.AND, t.named("dhlxyz"),
+				op.named("udhl")); // dhl
 		t = Tensor.reduce(alg.ALL, "", alg.LEQ, t.named("xyzu"),
 				rel.named("xyzu"));
 
@@ -1169,8 +1171,8 @@ public class MonoidalInt {
 		Tensor<Boolean> ternaryOps = getTernaryOps(solver, size, monoid);
 		System.out.println("ternary ops:            " + ternaryOps.getDim(4));
 
-		// Tensor<Boolean> qaryOps = getQuaternaryOps(solver, size, monoid);
-		// System.out.println("quaternary ops:         " + qaryOps.getDim(5));
+		Tensor<Boolean> qaryOps = getQuaternaryOps(solver, size, monoid);
+		System.out.println("quaternary ops:         " + qaryOps.getDim(5));
 
 		System.out.println("essential binary ops:   "
 				+ getEssentialBinaryOps(solver, size, monoid).getDim(3));
@@ -1191,21 +1193,21 @@ public class MonoidalInt {
 
 		Tensor<Boolean> compat, closed;
 
-		if (binaryOps.getDim(3) != LIMIT && binaryRels.getDim(2) != LIMIT) {
+		if (binaryOps.getDim(3) * binaryRels.getDim(2) <= GALOIS_LIMIT) {
 			compat = getCompatibility22(BoolAlg.BOOLEAN, binaryOps, binaryRels);
 			closed = getClosedSubsets(solver, compat);
 			System.out.println("clones (op 2 rel 2):    " + closed.getDim(1));
 			// printMatrix("close binary op sets", sort(closed));
 		}
 
-		if (binaryOps.getDim(3) != LIMIT && ternaryRels.getDim(3) != LIMIT) {
+		if (binaryOps.getDim(3) * ternaryRels.getDim(3) <= GALOIS_LIMIT) {
 			compat = getCompatibility23(BoolAlg.BOOLEAN, binaryOps, ternaryRels);
 			closed = getClosedSubsets(solver, compat);
 			System.out.println("clones (op 2 rel 3):    " + closed.getDim(1));
 			// printMatrix("closed binary op sets", sort(closed));
 		}
 
-		if (binaryOps.getDim(3) != LIMIT && selTernaryRels.getDim(3) != LIMIT) {
+		if (binaryOps.getDim(3) * selTernaryRels.getDim(3) <= GALOIS_LIMIT) {
 			compat = getCompatibility23(BoolAlg.BOOLEAN, binaryOps,
 					selTernaryRels);
 			closed = getClosedSubsets(solver, compat);
@@ -1213,62 +1215,61 @@ public class MonoidalInt {
 			// printMatrix("closed binary op sets", sort(closed));
 		}
 
-		if (binaryOps.getDim(3) != LIMIT && qaryRels.getDim(4) != LIMIT) {
+		if (binaryOps.getDim(3) * qaryRels.getDim(4) <= GALOIS_LIMIT) {
 			compat = getCompatibility24(BoolAlg.BOOLEAN, binaryOps, qaryRels);
 			closed = getClosedSubsets(solver, compat);
 			System.out.println("clones (op 2 rel 4):    " + closed.getDim(1));
 		}
 
-		if (selTernaryOps.getDim(4) != LIMIT && binaryRels.getDim(2) != LIMIT) {
+		if (selTernaryOps.getDim(4) * binaryRels.getDim(2) <= GALOIS_LIMIT) {
 			compat = getCompatibility32(BoolAlg.BOOLEAN, selTernaryOps,
 					binaryRels);
 			closed = getClosedSubsets(solver, compat);
 			System.out.println("clones (op s3 rel 2):   " + closed.getDim(1));
 		}
 
-		if (selTernaryOps.getDim(4) != LIMIT && ternaryRels.getDim(3) != LIMIT) {
+		if (selTernaryOps.getDim(4) * ternaryRels.getDim(3) <= GALOIS_LIMIT) {
 			compat = getCompatibility33(BoolAlg.BOOLEAN, selTernaryOps,
 					ternaryRels);
 			closed = getClosedSubsets(solver, compat);
 			System.out.println("clones (op s3 rel 3):   " + closed.getDim(1));
 		}
 
-		if (selTernaryOps.getDim(4) != LIMIT
-				&& selTernaryRels.getDim(3) != LIMIT) {
+		if (selTernaryOps.getDim(4) * selTernaryRels.getDim(3) <= GALOIS_LIMIT) {
 			compat = getCompatibility33(BoolAlg.BOOLEAN, selTernaryOps,
 					selTernaryRels);
 			closed = getClosedSubsets(solver, compat);
 			System.out.println("clones (op s3 rel s3):  " + closed.getDim(1));
 		}
 
-		if (selTernaryOps.getDim(4) != LIMIT && qaryRels.getDim(4) != LIMIT) {
+		if (selTernaryOps.getDim(4) * qaryRels.getDim(4) <= GALOIS_LIMIT) {
 			compat = getCompatibility34(BoolAlg.BOOLEAN, selTernaryOps,
 					qaryRels);
 			closed = getClosedSubsets(solver, compat);
 			System.out.println("clones (op s3 rel 4):   " + closed.getDim(1));
 		}
 
-		if (ternaryOps.getDim(4) != LIMIT && binaryRels.getDim(2) != LIMIT) {
+		if (ternaryOps.getDim(4) * binaryRels.getDim(2) <= GALOIS_LIMIT) {
 			compat = getCompatibility32(BoolAlg.BOOLEAN, ternaryOps, binaryRels);
 			closed = getClosedSubsets(solver, compat);
 			System.out.println("clones (op 3 rel 2):    " + closed.getDim(1));
 		}
 
-		if (ternaryOps.getDim(4) != LIMIT && ternaryRels.getDim(3) != LIMIT) {
+		if (ternaryOps.getDim(4) * ternaryRels.getDim(3) <= GALOIS_LIMIT) {
 			compat = getCompatibility33(BoolAlg.BOOLEAN, ternaryOps,
 					ternaryRels);
 			closed = getClosedSubsets(solver, compat);
 			System.out.println("clones (op 3 rel 3):    " + closed.getDim(1));
 		}
 
-		if (ternaryOps.getDim(4) != LIMIT && selTernaryRels.getDim(3) != LIMIT) {
+		if (ternaryOps.getDim(4) * selTernaryRels.getDim(3) <= GALOIS_LIMIT) {
 			compat = getCompatibility33(BoolAlg.BOOLEAN, ternaryOps,
 					selTernaryRels);
 			closed = getClosedSubsets(solver, compat);
 			System.out.println("clones (op 3 rel s3):   " + closed.getDim(1));
 		}
 
-		if (ternaryOps.getDim(4) != LIMIT && qaryRels.getDim(4) != LIMIT) {
+		if (ternaryOps.getDim(4) * qaryRels.getDim(4) <= GALOIS_LIMIT) {
 			compat = getCompatibility34(BoolAlg.BOOLEAN, ternaryOps, qaryRels);
 			closed = getClosedSubsets(solver, compat);
 			System.out.println("clones (op 3 rel 4):    " + closed.getDim(1));
@@ -1279,14 +1280,14 @@ public class MonoidalInt {
 				+ " seconds\n");
 	}
 
-	public static void main2(String[] args) {
-		// printStatistics(3, "000 002 012 102 111 112 222");
-		printStatistics(3, "000 002 012 022 200 210 220 222");
+	public static void main(String[] args) {
 		// for (String monoid : TWO_MONOIDS)
 		// printStatistics(2, monoid);
+		printStatistics(3, "000 002 012 102 111 112 222");
+		printStatistics(3, "000 002 012 111 112 222");
 	}
 
-	public static void main(String[] args) {
+	public static void main2(String[] args) {
 		System.out.println("FINITE INTERVALS:");
 		for (String monoid : FINITE_MONOIDS)
 			printStatistics(3, monoid);
@@ -1300,5 +1301,6 @@ public class MonoidalInt {
 			printStatistics(3, monoid);
 	}
 
-	public static final int LIMIT = 10000;
+	public static final int LIMIT = 70000;
+	public static final int GALOIS_LIMIT = 100 * LIMIT;
 }

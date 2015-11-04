@@ -194,6 +194,16 @@ public class Tensor<ELEM> implements Iterable<ELEM> {
 	public static <ELEM> Tensor<ELEM> reshape_old(final Tensor<ELEM> arg,
 			final int[] shape, final int[] map) {
 		assert arg.getOrder() == map.length;
+
+		if (Arrays.equals(arg.shape, shape) && map.length == shape.length) {
+			boolean b = true;
+			for (int i = 0; i < map.length; i++)
+				b &= map[i] == i;
+
+			if (b)
+				return arg;
+		}
+
 		final int[] index = new int[map.length];
 
 		return Tensor.generate(shape, new Func1<ELEM, int[]>() {
