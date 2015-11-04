@@ -1140,11 +1140,17 @@ public class MonoidalInt {
 
 		Tensor<Boolean> binaryRels = getBinaryRels(solver, size, monoid);
 		System.out.println("binary relations:       " + binaryRels.getDim(2));
-		// binaryRels = sort(binaryRels);
-		// printBinaryRels(binaryRels);
+		if (binaryRels.getDim(2) <= PRINT_LIMIT) {
+			binaryRels = sort(binaryRels);
+			printBinaryRels(binaryRels);
+		}
 
 		Tensor<Boolean> ternaryRels = getTernaryRels(solver, size, monoid);
 		System.out.println("ternary relations:      " + ternaryRels.getDim(3));
+		if (ternaryRels.getDim(3) <= PRINT_LIMIT) {
+			ternaryRels = sort(ternaryRels);
+			printTernaryRels(ternaryRels);
+		}
 
 		Tensor<Boolean> qaryRels = getQuaternaryRels(solver, size, monoid);
 		System.out.println("quaternary relations:   " + qaryRels.getDim(4));
@@ -1165,11 +1171,17 @@ public class MonoidalInt {
 
 		Tensor<Boolean> binaryOps = getBinaryOps(solver, size, monoid);
 		System.out.println("binary ops:             " + binaryOps.getDim(3));
-		// binaryOps = sort(binaryOps);
-		// printBinaryOps(binaryOps);
+		if (binaryOps.getDim(3) <= PRINT_LIMIT) {
+			binaryOps = sort(binaryOps);
+			printBinaryOps(binaryOps);
+		}
 
 		Tensor<Boolean> ternaryOps = getTernaryOps(solver, size, monoid);
 		System.out.println("ternary ops:            " + ternaryOps.getDim(4));
+		if (ternaryOps.getDim(4) <= PRINT_LIMIT) {
+			ternaryOps = sort(ternaryOps);
+			printTernaryOps(ternaryOps);
+		}
 
 		Tensor<Boolean> qaryOps = getQuaternaryOps(solver, size, monoid);
 		System.out.println("quaternary ops:         " + qaryOps.getDim(5));
@@ -1197,14 +1209,18 @@ public class MonoidalInt {
 			compat = getCompatibility22(BoolAlg.BOOLEAN, binaryOps, binaryRels);
 			closed = getClosedSubsets(solver, compat);
 			System.out.println("clones (op 2 rel 2):    " + closed.getDim(1));
-			// printMatrix("close binary op sets", sort(closed));
+			if (closed.getDim(0) <= PRINT_LIMIT
+					&& closed.getDim(1) <= PRINT_LIMIT)
+				printMatrix("close binary op sets", sort(closed));
 		}
 
 		if (binaryOps.getDim(3) * ternaryRels.getDim(3) <= GALOIS_LIMIT) {
 			compat = getCompatibility23(BoolAlg.BOOLEAN, binaryOps, ternaryRels);
 			closed = getClosedSubsets(solver, compat);
 			System.out.println("clones (op 2 rel 3):    " + closed.getDim(1));
-			// printMatrix("closed binary op sets", sort(closed));
+			if (closed.getDim(0) <= PRINT_LIMIT
+					&& closed.getDim(1) <= PRINT_LIMIT)
+				printMatrix("close binary op sets", sort(closed));
 		}
 
 		if (binaryOps.getDim(3) * selTernaryRels.getDim(3) <= GALOIS_LIMIT) {
@@ -1212,7 +1228,6 @@ public class MonoidalInt {
 					selTernaryRels);
 			closed = getClosedSubsets(solver, compat);
 			System.out.println("clones (op 2 rel s3):   " + closed.getDim(1));
-			// printMatrix("closed binary op sets", sort(closed));
 		}
 
 		if (binaryOps.getDim(3) * qaryRels.getDim(4) <= GALOIS_LIMIT) {
@@ -1253,6 +1268,9 @@ public class MonoidalInt {
 			compat = getCompatibility32(BoolAlg.BOOLEAN, ternaryOps, binaryRels);
 			closed = getClosedSubsets(solver, compat);
 			System.out.println("clones (op 3 rel 2):    " + closed.getDim(1));
+			if (closed.getDim(0) <= PRINT_LIMIT
+					&& closed.getDim(1) <= PRINT_LIMIT)
+				printMatrix("close ternary op sets", sort(closed));
 		}
 
 		if (ternaryOps.getDim(4) * ternaryRels.getDim(3) <= GALOIS_LIMIT) {
@@ -1260,6 +1278,9 @@ public class MonoidalInt {
 					ternaryRels);
 			closed = getClosedSubsets(solver, compat);
 			System.out.println("clones (op 3 rel 3):    " + closed.getDim(1));
+			if (closed.getDim(0) <= PRINT_LIMIT
+					&& closed.getDim(1) <= PRINT_LIMIT)
+				printMatrix("close ternary op sets", sort(closed));
 		}
 
 		if (ternaryOps.getDim(4) * selTernaryRels.getDim(3) <= GALOIS_LIMIT) {
@@ -1303,4 +1324,5 @@ public class MonoidalInt {
 
 	public static final int LIMIT = 70000;
 	public static final int GALOIS_LIMIT = 100 * LIMIT;
+	public static final int PRINT_LIMIT = 100;
 }
