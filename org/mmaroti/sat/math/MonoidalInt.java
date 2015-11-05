@@ -347,6 +347,19 @@ public class MonoidalInt {
 		return prob.solveAll(solver, LIMIT).get("rel");
 	}
 
+	public static <SBOOL> Tensor<Boolean> getAllBinaryRels(
+			SatSolver<SBOOL> solver, int size) {
+		Problem prob = new Problem("rel", new int[] { size, size }) {
+			@Override
+			public <BOOL> BOOL compute(BoolAlg<BOOL> alg,
+					Map<String, Tensor<BOOL>> tensors) {
+				return alg.TRUE;
+			}
+		};
+
+		return prob.solveAll(solver, LIMIT).get("rel");
+	}
+
 	public static <SBOOL> Tensor<Boolean> getEssentialBinaryRels(
 			SatSolver<SBOOL> solver, int size, String monoid) {
 		final Tensor<Boolean> mon = decodeMonoid(size, monoid);
@@ -489,6 +502,21 @@ public class MonoidalInt {
 				res = alg.and(res, isStabilizerOp2(alg, func, monoid));
 
 				return res;
+			}
+		};
+
+		return prob.solveAll(solver, LIMIT).get("func");
+	}
+
+	public static <SBOOL> Tensor<Boolean> getAllBinaryOps(
+			SatSolver<SBOOL> solver, int size) {
+
+		Problem prob = new Problem("func", new int[] { size, size, size }) {
+			@Override
+			public <BOOL> BOOL compute(BoolAlg<BOOL> alg,
+					Map<String, Tensor<BOOL>> tensors) {
+				Tensor<BOOL> func = tensors.get("func");
+				return isFunction(alg, func);
 			}
 		};
 
@@ -716,7 +744,39 @@ public class MonoidalInt {
 		}
 	}
 
-	public static <BOOL> Tensor<BOOL> getCompatibility22(BoolAlg<BOOL> alg,
+	public static <BOOL> BOOL isCompatible22(BoolAlg<BOOL> alg,
+			Tensor<BOOL> op, Tensor<BOOL> rel) {
+		assert op.getOrder() == 3 && rel.getOrder() == 2;
+
+		Tensor<BOOL> t;
+		t = Tensor.reduce(alg.ANY, "cbx", alg.AND, rel.named("ab"),
+				op.named("xac")); // a
+		t = Tensor.reduce(alg.ANY, "bdx", alg.AND, t.named("cbx"),
+				rel.named("cd")); // c
+		t = Tensor.reduce(alg.ANY, "xy", alg.AND, t.named("bdx"),
+				op.named("ybd")); // bd
+		t = Tensor.fold(alg.ALL, 2, Tensor.map2(alg.LEQ, t, rel));
+
+		return t.get();
+	}
+
+	public static <BOOL> Tensor<BOOL> getCompatibility22(
+			final BoolAlg<BOOL> alg, Tensor<BOOL> ops, Tensor<BOOL> rels) {
+		assert ops.getOrder() == 4 && rels.getOrder() == 3;
+
+		final List<Tensor<BOOL>> os = Tensor.unconcat(ops);
+		final List<Tensor<BOOL>> rs = Tensor.unconcat(rels);
+
+		return Tensor.generate(os.size(), rs.size(),
+				new Func2<BOOL, Integer, Integer>() {
+					@Override
+					public BOOL call(Integer a, Integer b) {
+						return isCompatible22(alg, os.get(a), rs.get(b));
+					}
+				});
+	}
+
+	public static <BOOL> Tensor<BOOL> getCompatibility22Old(BoolAlg<BOOL> alg,
 			Tensor<BOOL> ops, Tensor<BOOL> rels) {
 		assert ops.getOrder() == 4 && rels.getOrder() == 3;
 
@@ -1211,7 +1271,7 @@ public class MonoidalInt {
 			System.out.println("clones (op 2 rel 2):    " + closed.getDim(1));
 			if (closed.getDim(0) <= PRINT_LIMIT
 					&& closed.getDim(1) <= PRINT_LIMIT)
-				printMatrix("close binary op sets", sort(closed));
+				printMatrix("closed binary op subsets", sort(closed));
 		}
 
 		if (binaryOps.getDim(3) * ternaryRels.getDim(3) <= GALOIS_LIMIT) {
@@ -1220,7 +1280,7 @@ public class MonoidalInt {
 			System.out.println("clones (op 2 rel 3):    " + closed.getDim(1));
 			if (closed.getDim(0) <= PRINT_LIMIT
 					&& closed.getDim(1) <= PRINT_LIMIT)
-				printMatrix("close binary op sets", sort(closed));
+				printMatrix("closed binary op subsets", sort(closed));
 		}
 
 		if (binaryOps.getDim(3) * selTernaryRels.getDim(3) <= GALOIS_LIMIT) {
@@ -1270,7 +1330,7 @@ public class MonoidalInt {
 			System.out.println("clones (op 3 rel 2):    " + closed.getDim(1));
 			if (closed.getDim(0) <= PRINT_LIMIT
 					&& closed.getDim(1) <= PRINT_LIMIT)
-				printMatrix("close ternary op sets", sort(closed));
+				printMatrix("closed ternary op subsets", sort(closed));
 		}
 
 		if (ternaryOps.getDim(4) * ternaryRels.getDim(3) <= GALOIS_LIMIT) {
@@ -1280,7 +1340,7 @@ public class MonoidalInt {
 			System.out.println("clones (op 3 rel 3):    " + closed.getDim(1));
 			if (closed.getDim(0) <= PRINT_LIMIT
 					&& closed.getDim(1) <= PRINT_LIMIT)
-				printMatrix("close ternary op sets", sort(closed));
+				printMatrix("closed ternary op subsets", sort(closed));
 		}
 
 		if (ternaryOps.getDim(4) * selTernaryRels.getDim(3) <= GALOIS_LIMIT) {
@@ -1302,6 +1362,25 @@ public class MonoidalInt {
 	}
 
 	public static void main(String[] args) {
+		SatSolver<Integer> solver = new Sat4J();
+		int size = 3;
+
+		System.out.println("size:                " + size);
+
+		Tensor<Boolean> binaryOps = getAllBinaryOps(solver, size);
+		System.out.println("binary ops:          " + binaryOps.getDim(3));
+
+		Tensor<Boolean> binaryRels = getAllBinaryRels(solver, size);
+		System.out.println("binary rels:         " + binaryRels.getDim(2));
+
+		Tensor<Boolean> compat = getCompatibility22(BoolAlg.BOOLEAN, binaryOps,
+				binaryRels);
+		Tensor<Boolean> closed = getClosedSubsets(solver, compat);
+
+		System.out.println("clones (op 2 rel 2): " + closed.getDim(1));
+	}
+
+	public static void main3(String[] args) {
 		// for (String monoid : TWO_MONOIDS)
 		// printStatistics(2, monoid);
 		printStatistics(3, "000 002 012 102 111 112 222");
@@ -1309,15 +1388,15 @@ public class MonoidalInt {
 	}
 
 	public static void main2(String[] args) {
-		System.out.println("FINITE INTERVALS:");
+		System.out.println("*** FINITE INTERVALS:");
 		for (String monoid : FINITE_MONOIDS)
 			printStatistics(3, monoid);
 
-		System.out.println("INFINITE INTERVALS:");
+		System.out.println("*** INFINITE INTERVALS:");
 		for (String monoid : INFINITE_MONOIDS)
 			printStatistics(3, monoid);
 
-		System.out.println("UNKNOWN INTERVALS:");
+		System.out.println("*** UNKNOWN INTERVALS:");
 		for (String monoid : UNKNOWN_MONOIDS)
 			printStatistics(3, monoid);
 	}
