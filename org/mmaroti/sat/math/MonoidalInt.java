@@ -1375,7 +1375,7 @@ public class MonoidalInt {
 
 		Tensor<Boolean> compat = getCompatibility22(BoolAlg.BOOLEAN, binaryOps,
 				binaryRels);
-		Tensor<Boolean> closed = getClosedSubsets(solver, compat);
+		Tensor<Boolean> closed = getClosedSubsets(solver, transpose(compat));
 
 		System.out.println("clones (op 2 rel 2): " + closed.getDim(1));
 	}
