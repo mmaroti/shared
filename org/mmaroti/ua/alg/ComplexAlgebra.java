@@ -265,7 +265,7 @@ public class ComplexAlgebra implements Algebra
 
 			for(int i = 0; i < operations.length; ++i)
 			{
-				Subset[] args = new Subset[operations[i].getArity()];
+				Subset[] args = new Subset[operations[i].getRelArity()];
 				for(int j = 0; j < args.length; ++j)
 					args[j] = a;
 
@@ -288,7 +288,7 @@ public class ComplexAlgebra implements Algebra
 			for(;;)
 			{
 				Subset[] args = new Subset[
-					operations[index].getArity()];
+					operations[index].getRelArity()];
 					
 				for(int j = 0; j < args.length; ++j)
 					args[j] = a;
