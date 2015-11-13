@@ -18,9 +18,8 @@
 
 package org.mmaroti.sat.univalg;
 
-import java.text.DecimalFormat;
-import java.util.Map;
-
+import java.text.*;
+import java.util.*;
 import org.mmaroti.sat.core.*;
 import org.mmaroti.sat.solvers.*;
 
@@ -36,44 +35,44 @@ public class Validation {
 	}
 
 	void checkEquivalences() {
-		Problem problem = new Problem("rel", new int[] { 7, 7 }) {
+		Problem problem = new Problem(new int[] { 7, 7 }) {
 			@Override
 			public <BOOL> BOOL compute(BoolAlg<BOOL> alg,
-					Map<String, Tensor<BOOL>> tensors) {
-				Relation<BOOL> rel = new Relation<BOOL>(alg, tensors.get("rel"));
+					List<Tensor<BOOL>> tensors) {
+				Relation<BOOL> rel = new Relation<BOOL>(alg, tensors.get(0));
 				return rel.isEquivalence();
 			}
 		};
 
-		int count = problem.solveAll(new Sat4J()).get("rel").getDim(2);
+		int count = problem.solveAll(new Sat4J()).get(0).getDim(2);
 		verify("equivalences on a 7 element set", count, 877);
 	}
 
 	void checkPartialOrders() {
-		Problem problem = new Problem("rel", new int[] { 5, 5 }) {
+		Problem problem = new Problem(new int[] { 5, 5 }) {
 			@Override
 			public <BOOL> BOOL compute(BoolAlg<BOOL> alg,
-					Map<String, Tensor<BOOL>> tensors) {
-				Relation<BOOL> rel = new Relation<BOOL>(alg, tensors.get("rel"));
+					List<Tensor<BOOL>> tensors) {
+				Relation<BOOL> rel = new Relation<BOOL>(alg, tensors.get(0));
 				return rel.isPartialOrder();
 			}
 		};
 
-		int count = problem.solveAll(new Sat4J()).get("rel").getDim(2);
+		int count = problem.solveAll(new Sat4J()).get(0).getDim(2);
 		verify("partial orders on a 5 element set", count, 4231);
 	}
 
 	void checkPermutations() {
-		Problem problem = new Problem("op", new int[] { 7, 7 }) {
+		Problem problem = new Problem(new int[] { 7, 7 }) {
 			@Override
 			public <BOOL> BOOL compute(BoolAlg<BOOL> alg,
-					Map<String, Tensor<BOOL>> tensors) {
-				Operation<BOOL> op = new Operation<BOOL>(alg, tensors.get("op"));
+					List<Tensor<BOOL>> tensors) {
+				Operation<BOOL> op = new Operation<BOOL>(alg, tensors.get(0));
 				return alg.and(op.isFunction(), op.isPermutation());
 			}
 		};
 
-		int count = problem.solveAll(new Sat4J()).get("op").getDim(2);
+		int count = problem.solveAll(new Sat4J()).get(0).getDim(2);
 		verify("permutations on a 7 element set", count, 5040);
 	}
 

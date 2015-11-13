@@ -27,7 +27,7 @@ public class FanoPlane2 {
 		public Tensor<Boolean> pts;
 
 		public Planes() {
-			super("gen", new int[] { 7, 3 });
+			super(new int[] { 7, 3 });
 
 			pts = Tensor.matrix(new int[] { 3, 7 }, Arrays.asList(true, false,
 					false, false, true, false, false, false, true, true, true,
@@ -37,8 +37,8 @@ public class FanoPlane2 {
 
 		@Override
 		public <BOOL> BOOL compute(BoolAlg<BOOL> alg,
-				Map<String, Tensor<BOOL>> tensors) {
-			Tensor<BOOL> g = tensors.get("gen");
+				List<Tensor<BOOL>> tensors) {
+			Tensor<BOOL> g = tensors.get(0);
 			Tensor<BOOL> p = Tensor.map(alg.LIFT, pts);
 
 			Tensor<BOOL> t = Tensor.reduce(alg.SUM, "ik", alg.AND,

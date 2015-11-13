@@ -314,61 +314,61 @@ public class MonoidalInt {
 	public static <SBOOL> Tensor<Boolean> getUnaryRels(SatSolver<SBOOL> solver,
 			int size, String monoid) {
 		final Tensor<Boolean> mon = decodeMonoid(size, monoid);
-		Problem prob = new Problem("rel", new int[] { size }) {
+		Problem prob = new Problem(new int[] { size }) {
 			@Override
 			public <BOOL> BOOL compute(BoolAlg<BOOL> alg,
-					Map<String, Tensor<BOOL>> tensors) {
+					List<Tensor<BOOL>> tensors) {
 
-				Tensor<BOOL> rel = tensors.get("rel");
+				Tensor<BOOL> rel = tensors.get(0);
 				Tensor<BOOL> monoid = Tensor.map(alg.LIFT, mon);
 
 				return isCompatibleRel1(alg, rel, monoid);
 			}
 		};
 
-		return prob.solveAll(solver, LIMIT).get("rel");
+		return prob.solveAll(solver, LIMIT).get(0);
 	}
 
 	public static <SBOOL> Tensor<Boolean> getBinaryRels(
 			SatSolver<SBOOL> solver, int size, String monoid) {
 		final Tensor<Boolean> mon = decodeMonoid(size, monoid);
-		Problem prob = new Problem("rel", new int[] { size, size }) {
+		Problem prob = new Problem(new int[] { size, size }) {
 			@Override
 			public <BOOL> BOOL compute(BoolAlg<BOOL> alg,
-					Map<String, Tensor<BOOL>> tensors) {
+					List<Tensor<BOOL>> tensors) {
 
-				Tensor<BOOL> rel = tensors.get("rel");
+				Tensor<BOOL> rel = tensors.get(0);
 				Tensor<BOOL> monoid = Tensor.map(alg.LIFT, mon);
 
 				return isCompatibleRel2(alg, rel, monoid);
 			}
 		};
 
-		return prob.solveAll(solver, LIMIT).get("rel");
+		return prob.solveAll(solver, LIMIT).get(0);
 	}
 
 	public static <SBOOL> Tensor<Boolean> getAllBinaryRels(
 			SatSolver<SBOOL> solver, int size) {
-		Problem prob = new Problem("rel", new int[] { size, size }) {
+		Problem prob = new Problem(new int[] { size, size }) {
 			@Override
 			public <BOOL> BOOL compute(BoolAlg<BOOL> alg,
-					Map<String, Tensor<BOOL>> tensors) {
+					List<Tensor<BOOL>> tensors) {
 				return alg.TRUE;
 			}
 		};
 
-		return prob.solveAll(solver, LIMIT).get("rel");
+		return prob.solveAll(solver, LIMIT).get(0);
 	}
 
 	public static <SBOOL> Tensor<Boolean> getEssentialBinaryRels(
 			SatSolver<SBOOL> solver, int size, String monoid) {
 		final Tensor<Boolean> mon = decodeMonoid(size, monoid);
-		Problem prob = new Problem("rel", new int[] { size, size }) {
+		Problem prob = new Problem(new int[] { size, size }) {
 			@Override
 			public <BOOL> BOOL compute(BoolAlg<BOOL> alg,
-					Map<String, Tensor<BOOL>> tensors) {
+					List<Tensor<BOOL>> tensors) {
 
-				Tensor<BOOL> rel = tensors.get("rel");
+				Tensor<BOOL> rel = tensors.get(0);
 				Tensor<BOOL> monoid = Tensor.map(alg.LIFT, mon);
 
 				BOOL t = isCompatibleRel2(alg, rel, monoid);
@@ -378,18 +378,18 @@ public class MonoidalInt {
 			}
 		};
 
-		return prob.solveAll(solver, LIMIT).get("rel");
+		return prob.solveAll(solver, LIMIT).get(0);
 	}
 
 	public static <SBOOL> Tensor<Boolean> getQuasiorderRels(
 			SatSolver<SBOOL> solver, int size, String monoid) {
 		final Tensor<Boolean> mon = decodeMonoid(size, monoid);
-		Problem prob = new Problem("rel", new int[] { size, size }) {
+		Problem prob = new Problem(new int[] { size, size }) {
 			@Override
 			public <BOOL> BOOL compute(BoolAlg<BOOL> alg,
-					Map<String, Tensor<BOOL>> tensors) {
+					List<Tensor<BOOL>> tensors) {
 
-				Tensor<BOOL> rel = tensors.get("rel");
+				Tensor<BOOL> rel = tensors.get(0);
 				Tensor<BOOL> monoid = Tensor.map(alg.LIFT, mon);
 
 				BOOL t = isCompatibleRel2(alg, rel, monoid);
@@ -400,25 +400,25 @@ public class MonoidalInt {
 			}
 		};
 
-		return prob.solveAll(solver, LIMIT).get("rel");
+		return prob.solveAll(solver, LIMIT).get(0);
 	}
 
 	public static <SBOOL> Tensor<Boolean> getTernaryRels(
 			SatSolver<SBOOL> solver, int size, String monoid) {
 		final Tensor<Boolean> mon = decodeMonoid(size, monoid);
-		Problem prob = new Problem("rel", new int[] { size, size, size }) {
+		Problem prob = new Problem(new int[] { size, size, size }) {
 			@Override
 			public <BOOL> BOOL compute(BoolAlg<BOOL> alg,
-					Map<String, Tensor<BOOL>> tensors) {
+					List<Tensor<BOOL>> tensors) {
 
-				Tensor<BOOL> rel = tensors.get("rel");
+				Tensor<BOOL> rel = tensors.get(0);
 				Tensor<BOOL> monoid = Tensor.map(alg.LIFT, mon);
 
 				return isCompatibleRel3(alg, rel, monoid);
 			}
 		};
 
-		return prob.solveAll(solver, LIMIT).get("rel");
+		return prob.solveAll(solver, LIMIT).get(0);
 	}
 
 	public static <SBOOL> Tensor<Boolean> getSelectedTernaryRels(
@@ -433,30 +433,30 @@ public class MonoidalInt {
 			}
 		});
 
-		Problem prob = new Problem("rel", mask) {
+		Problem prob = new Problem(mask) {
 			@Override
 			public <BOOL> BOOL compute(BoolAlg<BOOL> alg,
-					Map<String, Tensor<BOOL>> tensors) {
+					List<Tensor<BOOL>> tensors) {
 
-				Tensor<BOOL> rel = tensors.get("rel");
+				Tensor<BOOL> rel = tensors.get(0);
 				Tensor<BOOL> monoid = Tensor.map(alg.LIFT, mon);
 
 				return isCompatibleRel3(alg, rel, monoid);
 			}
 		};
 
-		return prob.solveAll(solver, LIMIT).get("rel");
+		return prob.solveAll(solver, LIMIT).get(0);
 	}
 
 	public static <SBOOL> Tensor<Boolean> getEssentialTernaryRels(
 			SatSolver<SBOOL> solver, int size, String monoid) {
 		final Tensor<Boolean> mon = decodeMonoid(size, monoid);
-		Problem prob = new Problem("rel", new int[] { size, size, size }) {
+		Problem prob = new Problem(new int[] { size, size, size }) {
 			@Override
 			public <BOOL> BOOL compute(BoolAlg<BOOL> alg,
-					Map<String, Tensor<BOOL>> tensors) {
+					List<Tensor<BOOL>> tensors) {
 
-				Tensor<BOOL> rel = tensors.get("rel");
+				Tensor<BOOL> rel = tensors.get(0);
 				Tensor<BOOL> monoid = Tensor.map(alg.LIFT, mon);
 
 				BOOL b = isCompatibleRel3(alg, rel, monoid);
@@ -466,36 +466,36 @@ public class MonoidalInt {
 			}
 		};
 
-		return prob.solveAll(solver, LIMIT).get("rel");
+		return prob.solveAll(solver, LIMIT).get(0);
 	}
 
 	public static <SBOOL> Tensor<Boolean> getQuaternaryRels(
 			SatSolver<SBOOL> solver, int size, String monoid) {
 		final Tensor<Boolean> mon = decodeMonoid(size, monoid);
-		Problem prob = new Problem("rel", new int[] { size, size, size, size }) {
+		Problem prob = new Problem(new int[] { size, size, size, size }) {
 			@Override
 			public <BOOL> BOOL compute(BoolAlg<BOOL> alg,
-					Map<String, Tensor<BOOL>> tensors) {
+					List<Tensor<BOOL>> tensors) {
 
-				Tensor<BOOL> rel = tensors.get("rel");
+				Tensor<BOOL> rel = tensors.get(0);
 				Tensor<BOOL> monoid = Tensor.map(alg.LIFT, mon);
 
 				return isCompatibleRel4(alg, rel, monoid);
 			}
 		};
 
-		return prob.solveAll(solver, LIMIT).get("rel");
+		return prob.solveAll(solver, LIMIT).get(0);
 	}
 
 	public static <SBOOL> Tensor<Boolean> getBinaryOps(SatSolver<SBOOL> solver,
 			int size, String monoid) {
 		final Tensor<Boolean> mon = decodeMonoid(size, monoid);
-		Problem prob = new Problem("func", new int[] { size, size, size }) {
+		Problem prob = new Problem(new int[] { size, size, size }) {
 			@Override
 			public <BOOL> BOOL compute(BoolAlg<BOOL> alg,
-					Map<String, Tensor<BOOL>> tensors) {
+					List<Tensor<BOOL>> tensors) {
 
-				Tensor<BOOL> func = tensors.get("func");
+				Tensor<BOOL> func = tensors.get(0);
 				Tensor<BOOL> monoid = Tensor.map(alg.LIFT, mon);
 
 				BOOL res = isFunction(alg, func);
@@ -505,33 +505,33 @@ public class MonoidalInt {
 			}
 		};
 
-		return prob.solveAll(solver, LIMIT).get("func");
+		return prob.solveAll(solver, LIMIT).get(0);
 	}
 
 	public static <SBOOL> Tensor<Boolean> getAllBinaryOps(
 			SatSolver<SBOOL> solver, int size) {
 
-		Problem prob = new Problem("func", new int[] { size, size, size }) {
+		Problem prob = new Problem(new int[] { size, size, size }) {
 			@Override
 			public <BOOL> BOOL compute(BoolAlg<BOOL> alg,
-					Map<String, Tensor<BOOL>> tensors) {
-				Tensor<BOOL> func = tensors.get("func");
+					List<Tensor<BOOL>> tensors) {
+				Tensor<BOOL> func = tensors.get(0);
 				return isFunction(alg, func);
 			}
 		};
 
-		return prob.solveAll(solver, LIMIT).get("func");
+		return prob.solveAll(solver, LIMIT).get(0);
 	}
 
 	public static <SBOOL> Tensor<Boolean> getEssentialBinaryOps(
 			SatSolver<SBOOL> solver, int size, String monoid) {
 		final Tensor<Boolean> mon = decodeMonoid(size, monoid);
-		Problem prob = new Problem("func", new int[] { size, size, size }) {
+		Problem prob = new Problem(new int[] { size, size, size }) {
 			@Override
 			public <BOOL> BOOL compute(BoolAlg<BOOL> alg,
-					Map<String, Tensor<BOOL>> tensors) {
+					List<Tensor<BOOL>> tensors) {
 
-				Tensor<BOOL> func = tensors.get("func");
+				Tensor<BOOL> func = tensors.get(0);
 				Tensor<BOOL> monoid = Tensor.map(alg.LIFT, mon);
 
 				BOOL res = isFunction(alg, func);
@@ -542,18 +542,18 @@ public class MonoidalInt {
 			}
 		};
 
-		return prob.solveAll(solver, LIMIT).get("func");
+		return prob.solveAll(solver, LIMIT).get(0);
 	}
 
 	public static <SBOOL> Tensor<Boolean> getTernaryOps(
 			SatSolver<SBOOL> solver, int size, String monoid) {
 		final Tensor<Boolean> mon = decodeMonoid(size, monoid);
-		Problem prob = new Problem("func", new int[] { size, size, size, size }) {
+		Problem prob = new Problem(new int[] { size, size, size, size }) {
 			@Override
 			public <BOOL> BOOL compute(BoolAlg<BOOL> alg,
-					Map<String, Tensor<BOOL>> tensors) {
+					List<Tensor<BOOL>> tensors) {
 
-				Tensor<BOOL> func = tensors.get("func");
+				Tensor<BOOL> func = tensors.get(0);
 				Tensor<BOOL> monoid = Tensor.map(alg.LIFT, mon);
 
 				BOOL res = isFunction(alg, func);
@@ -563,7 +563,7 @@ public class MonoidalInt {
 			}
 		};
 
-		return prob.solveAll(solver, LIMIT).get("func");
+		return prob.solveAll(solver, LIMIT).get(0);
 	}
 
 	public static <SBOOL> Tensor<Boolean> getSelectedTernaryOps(
@@ -578,12 +578,12 @@ public class MonoidalInt {
 			}
 		});
 
-		Problem prob = new Problem("func", mask) {
+		Problem prob = new Problem(mask) {
 			@Override
 			public <BOOL> BOOL compute(BoolAlg<BOOL> alg,
-					Map<String, Tensor<BOOL>> tensors) {
+					List<Tensor<BOOL>> tensors) {
 
-				Tensor<BOOL> func = tensors.get("func");
+				Tensor<BOOL> func = tensors.get(0);
 				Tensor<BOOL> monoid = Tensor.map(alg.LIFT, mon);
 
 				BOOL res = isFunction(alg, func);
@@ -593,19 +593,18 @@ public class MonoidalInt {
 			}
 		};
 
-		return prob.solveAll(solver, LIMIT).get("func");
+		return prob.solveAll(solver, LIMIT).get(0);
 	}
 
 	public static <SBOOL> Tensor<Boolean> getQuaternaryOps(
 			SatSolver<SBOOL> solver, int size, String monoid) {
 		final Tensor<Boolean> mon = decodeMonoid(size, monoid);
-		Problem prob = new Problem("func", new int[] { size, size, size, size,
-				size }) {
+		Problem prob = new Problem(new int[] { size, size, size, size, size }) {
 			@Override
 			public <BOOL> BOOL compute(BoolAlg<BOOL> alg,
-					Map<String, Tensor<BOOL>> tensors) {
+					List<Tensor<BOOL>> tensors) {
 
-				Tensor<BOOL> func = tensors.get("func");
+				Tensor<BOOL> func = tensors.get(0);
 				Tensor<BOOL> monoid = Tensor.map(alg.LIFT, mon);
 
 				BOOL res = isFunction(alg, func);
@@ -615,18 +614,18 @@ public class MonoidalInt {
 			}
 		};
 
-		return prob.solveAll(solver, LIMIT).get("func");
+		return prob.solveAll(solver, LIMIT).get(0);
 	}
 
 	public static <SBOOL> Tensor<Boolean> getEssentialTernaryOps(
 			SatSolver<SBOOL> solver, int size, String monoid) {
 		final Tensor<Boolean> mon = decodeMonoid(size, monoid);
-		Problem prob = new Problem("func", new int[] { size, size, size, size }) {
+		Problem prob = new Problem(new int[] { size, size, size, size }) {
 			@Override
 			public <BOOL> BOOL compute(BoolAlg<BOOL> alg,
-					Map<String, Tensor<BOOL>> tensors) {
+					List<Tensor<BOOL>> tensors) {
 
-				Tensor<BOOL> func = tensors.get("func");
+				Tensor<BOOL> func = tensors.get(0);
 				Tensor<BOOL> monoid = Tensor.map(alg.LIFT, mon);
 
 				BOOL res = isFunction(alg, func);
@@ -637,18 +636,18 @@ public class MonoidalInt {
 			}
 		};
 
-		return prob.solveAll(solver, LIMIT).get("func");
+		return prob.solveAll(solver, LIMIT).get(0);
 	}
 
 	public static <SBOOL> Tensor<Boolean> getMajorityOps(
 			SatSolver<SBOOL> solver, int size, String monoid) {
 		final Tensor<Boolean> mon = decodeMonoid(size, monoid);
-		Problem prob = new Problem("func", new int[] { size, size, size, size }) {
+		Problem prob = new Problem(new int[] { size, size, size, size }) {
 			@Override
 			public <BOOL> BOOL compute(BoolAlg<BOOL> alg,
-					Map<String, Tensor<BOOL>> tensors) {
+					List<Tensor<BOOL>> tensors) {
 
-				Tensor<BOOL> func = tensors.get("func");
+				Tensor<BOOL> func = tensors.get(0);
 				Tensor<BOOL> monoid = Tensor.map(alg.LIFT, mon);
 
 				BOOL res = isFunction(alg, func);
@@ -659,18 +658,18 @@ public class MonoidalInt {
 			}
 		};
 
-		return prob.solveAll(solver, LIMIT).get("func");
+		return prob.solveAll(solver, LIMIT).get(0);
 	}
 
 	public static <SBOOL> Tensor<Boolean> getMaltsevOps(
 			SatSolver<SBOOL> solver, int size, String monoid) {
 		final Tensor<Boolean> mon = decodeMonoid(size, monoid);
-		Problem prob = new Problem("func", new int[] { size, size, size, size }) {
+		Problem prob = new Problem(new int[] { size, size, size, size }) {
 			@Override
 			public <BOOL> BOOL compute(BoolAlg<BOOL> alg,
-					Map<String, Tensor<BOOL>> tensors) {
+					List<Tensor<BOOL>> tensors) {
 
-				Tensor<BOOL> func = tensors.get("func");
+				Tensor<BOOL> func = tensors.get(0);
 				Tensor<BOOL> monoid = Tensor.map(alg.LIFT, mon);
 
 				BOOL res = isFunction(alg, func);
@@ -681,7 +680,7 @@ public class MonoidalInt {
 			}
 		};
 
-		return prob.solveAll(solver, LIMIT).get("func");
+		return prob.solveAll(solver, LIMIT).get(0);
 	}
 
 	public static void printBinaryRels(Tensor<Boolean> rels) {
@@ -1002,17 +1001,17 @@ public class MonoidalInt {
 
 	public static <SBOOL> Tensor<Boolean> getClosedSubsets(
 			SatSolver<SBOOL> solver, final Tensor<Boolean> galois) {
-		Problem prob = new Problem("sub", new int[] { galois.getDim(0) }) {
+		Problem prob = new Problem(new int[] { galois.getDim(0) }) {
 			@Override
 			public <BOOL> BOOL compute(BoolAlg<BOOL> alg,
-					Map<String, Tensor<BOOL>> tensors) {
-				Tensor<BOOL> sub = tensors.get("sub");
+					List<Tensor<BOOL>> tensors) {
+				Tensor<BOOL> sub = tensors.get(0);
 				Tensor<BOOL> rel = Tensor.map(alg.LIFT, galois);
 				return isClosedSubset(alg, sub, rel);
 			}
 		};
 
-		return prob.solveAll(solver, LIMIT).get("sub");
+		return prob.solveAll(solver, LIMIT).get(0);
 	}
 
 	public static <BOOL> Tensor<BOOL> transpose(Tensor<BOOL> matrix) {

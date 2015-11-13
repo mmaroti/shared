@@ -22,85 +22,81 @@ import java.util.*;
 import org.mmaroti.sat.solvers.*;
 
 public abstract class Problem {
-	protected final Map<String, Tensor<Boolean>> masks;
+	protected final List<Tensor<Boolean>> masks;
 
-	public Problem(Map<String, Tensor<Boolean>> masks) {
+	public Problem(List<Tensor<Boolean>> masks) {
 		this.masks = masks;
 	}
 
-	public Problem(String name, Tensor<Boolean> mask) {
-		masks = new TreeMap<String, Tensor<Boolean>>();
-		masks.put(name, mask);
+	public Problem(Tensor<Boolean> mask) {
+		masks = new ArrayList<Tensor<Boolean>>();
+		masks.add(mask);
 	}
 
-	public Problem(String name, int[] shape) {
-		masks = new TreeMap<String, Tensor<Boolean>>();
-		masks.put(name, Tensor.constant(shape, Boolean.TRUE));
+	public Problem(int[] shape) {
+		masks = new ArrayList<Tensor<Boolean>>();
+		masks.add(Tensor.constant(shape, Boolean.TRUE));
 	}
 
 	public Problem(String name1, Tensor<Boolean> mask1, String name2,
 			Tensor<Boolean> mask2) {
-		masks = new TreeMap<String, Tensor<Boolean>>();
-		masks.put(name1, mask1);
-		masks.put(name2, mask2);
+		masks = new ArrayList<Tensor<Boolean>>();
+		masks.add(mask1);
+		masks.add(mask2);
 	}
 
-	public Problem(String name1, int[] shape1, String name2, int[] shape2) {
-		masks = new TreeMap<String, Tensor<Boolean>>();
-		masks.put(name1, Tensor.constant(shape1, Boolean.TRUE));
-		masks.put(name2, Tensor.constant(shape2, Boolean.TRUE));
+	public Problem(int[] shape1, int[] shape2) {
+		masks = new ArrayList<Tensor<Boolean>>();
+		masks.add(Tensor.constant(shape1, Boolean.TRUE));
+		masks.add(Tensor.constant(shape2, Boolean.TRUE));
 	}
 
 	public abstract <BOOL> BOOL compute(BoolAlg<BOOL> alg,
-			Map<String, Tensor<BOOL>> tensors);
+			List<Tensor<BOOL>> tensors);
 
-	public boolean check(Map<String, Tensor<Boolean>> tensors) {
+	public boolean check(List<Tensor<Boolean>> tensors) {
 		return compute(BoolAlg.BOOLEAN, tensors);
 	}
 
-	public <BOOL> Map<String, Tensor<Boolean>> solveOne(SatSolver<BOOL> solver) {
+	public <BOOL> List<Tensor<Boolean>> solveOne(SatSolver<BOOL> solver) {
 		solver.clear();
 
-		Map<String, Tensor<BOOL>> tensors = new TreeMap<String, Tensor<BOOL>>();
-		for (String key : masks.keySet()) {
-			int[] shape = masks.get(key).getShape();
-			tensors.put(key, Tensor.generate(shape, solver.VARIABLE));
-		}
+		List<Tensor<BOOL>> tensors = new ArrayList<Tensor<BOOL>>();
+		for (Tensor<Boolean> mask : masks)
+			tensors.add(Tensor.generate(mask.getShape(), solver.VARIABLE));
 
 		solver.clause(Arrays.asList(compute(solver, tensors)));
 
 		if (!solver.solve())
 			return null;
 
-		Map<String, Tensor<Boolean>> solution = new TreeMap<String, Tensor<Boolean>>();
-		for (String key : masks.keySet())
-			solution.put(key, Tensor.map(solver.DECODE, tensors.get(key)));
+		List<Tensor<Boolean>> solution = new ArrayList<Tensor<Boolean>>();
+		for (Tensor<BOOL> tensor : tensors)
+			solution.add(Tensor.map(solver.DECODE, tensor));
 
 		assert check(solution);
 		return solution;
 	}
 
-	public <BOOL> Map<String, Tensor<Boolean>> solveAll(SatSolver<BOOL> solver,
+	public <BOOL> List<Tensor<Boolean>> solveAll(SatSolver<BOOL> solver,
 			int maxCount) {
 		solver.clear();
 
-		Map<String, Tensor<BOOL>> tensors = new TreeMap<String, Tensor<BOOL>>();
-		for (String key : masks.keySet()) {
-			int[] shape = masks.get(key).getShape();
-			tensors.put(key, Tensor.generate(shape, solver.VARIABLE));
-		}
+		List<Tensor<BOOL>> tensors = new ArrayList<Tensor<BOOL>>();
+		for (Tensor<Boolean> mask : masks)
+			tensors.add(Tensor.generate(mask.getShape(), solver.VARIABLE));
 
 		solver.clause(Arrays.asList(compute(solver, tensors)));
 
-		List<Map<String, Tensor<Boolean>>> solutions = new ArrayList<Map<String, Tensor<Boolean>>>();
+		List<List<Tensor<Boolean>>> solutions = new ArrayList<List<Tensor<Boolean>>>();
 		while (solver.solve()) {
-			ArrayList<BOOL> exclude = new ArrayList<BOOL>();
+			List<BOOL> exclude = new ArrayList<BOOL>();
 
-			Map<String, Tensor<Boolean>> solution = new TreeMap<String, Tensor<Boolean>>();
-			for (String key : masks.keySet()) {
+			List<Tensor<Boolean>> solution = new ArrayList<Tensor<Boolean>>();
+			for (int key = 0; key < masks.size(); key++) {
 				Tensor<BOOL> t = tensors.get(key);
 				Tensor<Boolean> s = Tensor.map(solver.DECODE, t);
-				solution.put(key, s);
+				solution.add(s);
 
 				t = Tensor.map2(solver.ADD, Tensor.map(solver.LIFT, s), t);
 
@@ -125,20 +121,20 @@ public abstract class Problem {
 						+ " solutions so far ...");
 		}
 
-		Map<String, Tensor<Boolean>> result = new HashMap<String, Tensor<Boolean>>();
-		for (String key : masks.keySet()) {
+		List<Tensor<Boolean>> result = new ArrayList<Tensor<Boolean>>();
+		for (int key = 0; key < masks.size(); key++) {
 			List<Tensor<Boolean>> list = new ArrayList<Tensor<Boolean>>();
-			for (Map<String, Tensor<Boolean>> solution : solutions)
+			for (List<Tensor<Boolean>> solution : solutions)
 				list.add(solution.get(key));
 
 			int[] shape = masks.get(key).getShape();
-			result.put(key, Tensor.concat(shape, list));
+			result.add(Tensor.concat(shape, list));
 		}
 
 		return result;
 	}
 
-	public <BOOL> Map<String, Tensor<Boolean>> solveAll(SatSolver<BOOL> solver) {
+	public <BOOL> List<Tensor<Boolean>> solveAll(SatSolver<BOOL> solver) {
 		return solveAll(solver, 0);
 	}
 }

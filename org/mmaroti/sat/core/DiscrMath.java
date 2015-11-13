@@ -116,21 +116,18 @@ public class DiscrMath<BOOL> {
 	}
 
 	public static void main(String[] args) {
-		Problem problem = new Problem("f", new int[] { 3, 3 }) {
+		Problem problem = new Problem(new int[] { 3, 3 }) {
 			@Override
 			public <BOOL> BOOL compute(BoolAlg<BOOL> alg,
-					Map<String, Tensor<BOOL>> tensors) {
+					List<Tensor<BOOL>> tensors) {
 
 				DiscrMath<BOOL> discr = new DiscrMath<BOOL>(alg);
-				return discr.isPermutation(tensors.get("f"));
+				return discr.isPermutation(tensors.get(0));
 			}
 		};
 
-		Map<String, Tensor<Boolean>> solutions = problem.solveAll(new Sat4J(),
-				2);
-		System.out.println(solutions.get("f"));
-		// for (Map<String, Tensor<Boolean>> solution : solutions)
-		// Tensor.print(solution, System.out);
+		List<Tensor<Boolean>> solutions = problem.solveAll(new Sat4J(), 2);
+		System.out.println(solutions.get(0));
 	}
 
 	public static void main2(String[] args) {
