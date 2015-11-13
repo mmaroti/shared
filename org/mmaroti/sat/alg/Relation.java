@@ -16,7 +16,7 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-package org.mmaroti.sat.univalg;
+package org.mmaroti.sat.alg;
 
 import org.mmaroti.sat.core.*;
 
@@ -42,6 +42,12 @@ public class Relation<ELEM> extends AlgObject<ELEM> {
 		size = tensor.getDim(0);
 		for (int i = 1; i < tensor.getOrder(); i++)
 			assert tensor.getDim(i) == size;
+	}
+
+	protected static AlgObject<Boolean> mask(int size, int arity) {
+		Tensor<Boolean> tensor;
+		tensor = Tensor.constant(createShape(size, arity), true);
+		return new AlgObject<Boolean>(BoolAlgebra.INSTANCE, tensor);
 	}
 
 	protected static int[] createShape(int size, int arity) {

@@ -16,7 +16,7 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-package org.mmaroti.sat.univalg;
+package org.mmaroti.sat.alg;
 
 import org.mmaroti.sat.core.*;
 
@@ -30,6 +30,10 @@ public class AlgObject<ELEM> {
 
 	public Tensor<ELEM> getTensor() {
 		return tensor;
+	}
+
+	public int getLastDim() {
+		return tensor.getDim(tensor.getOrder() - 1);
 	}
 
 	public AlgObject(AlgObject<ELEM> object) {
