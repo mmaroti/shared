@@ -20,68 +20,68 @@ package org.mmaroti.sat.core;
 
 import java.util.*;
 
-public abstract class BoolAlgebra<ELEM> {
-	public final ELEM FALSE;
-	public final ELEM TRUE;
+public abstract class BoolAlgebra<BOOL> {
+	public final BOOL FALSE;
+	public final BOOL TRUE;
 
-	public ELEM lift(boolean elem) {
+	public BOOL lift(boolean elem) {
 		return elem ? TRUE : FALSE;
 	}
 
-	public abstract ELEM not(ELEM elem);
+	public abstract BOOL not(BOOL elem);
 
-	public ELEM or(ELEM elem1, ELEM elem2) {
+	public BOOL or(BOOL elem1, BOOL elem2) {
 		return not(and(not(elem1), not(elem2)));
 	}
 
-	public ELEM and(ELEM elem1, ELEM elem2) {
+	public BOOL and(BOOL elem1, BOOL elem2) {
 		return not(or(not(elem1), not(elem2)));
 	}
 
-	public ELEM leq(ELEM elem1, ELEM elem2) {
+	public BOOL leq(BOOL elem1, BOOL elem2) {
 		return or(not(elem1), elem2);
 	}
 
-	public ELEM add(ELEM elem1, ELEM elem2) {
+	public BOOL add(BOOL elem1, BOOL elem2) {
 		return not(equ(elem1, elem2));
 	}
 
-	public ELEM equ(ELEM elem1, ELEM elem2) {
+	public BOOL equ(BOOL elem1, BOOL elem2) {
 		return not(add(elem1, elem2));
 	}
 
-	public ELEM all(Iterable<ELEM> elems) {
-		ELEM ret = TRUE;
+	public BOOL all(Iterable<BOOL> elems) {
+		BOOL ret = TRUE;
 
-		for (ELEM elem : elems)
+		for (BOOL elem : elems)
 			ret = and(ret, elem);
 
 		return ret;
 	}
 
-	public ELEM any(Iterable<ELEM> elems) {
-		ELEM ret = FALSE;
+	public BOOL any(Iterable<BOOL> elems) {
+		BOOL ret = FALSE;
 
-		for (ELEM elem : elems)
+		for (BOOL elem : elems)
 			ret = or(ret, elem);
 
 		return ret;
 	}
 
-	public ELEM sum(Iterable<ELEM> elems) {
-		ELEM ret = FALSE;
+	public BOOL sum(Iterable<BOOL> elems) {
+		BOOL ret = FALSE;
 
-		for (ELEM elem : elems)
+		for (BOOL elem : elems)
 			ret = add(ret, elem);
 
 		return ret;
 	}
 
-	public ELEM one(Iterable<ELEM> elems) {
-		ELEM any = FALSE;
-		ELEM err = FALSE;
+	public BOOL one(Iterable<BOOL> elems) {
+		BOOL any = FALSE;
+		BOOL err = FALSE;
 
-		for (ELEM elem : elems) {
+		for (BOOL elem : elems) {
 			err = or(err, and(any, elem));
 			any = or(any, elem);
 		}
@@ -89,17 +89,17 @@ public abstract class BoolAlgebra<ELEM> {
 		return and(any, not(err));
 	}
 
-	public ELEM lexless(Iterable<ELEM> elem1, Iterable<ELEM> elem2) {
-		ELEM less = FALSE;
-		ELEM equal = TRUE;
+	public BOOL lexless(Iterable<BOOL> elem1, Iterable<BOOL> elem2) {
+		BOOL less = FALSE;
+		BOOL equal = TRUE;
 
-		Iterator<ELEM> iter1 = elem1.iterator();
-		Iterator<ELEM> iter2 = elem2.iterator();
+		Iterator<BOOL> iter1 = elem1.iterator();
+		Iterator<BOOL> iter2 = elem2.iterator();
 		while (iter1.hasNext()) {
 			assert iter2.hasNext();
 
-			ELEM a = iter1.next();
-			ELEM b = iter2.next();
+			BOOL a = iter1.next();
+			BOOL b = iter2.next();
 
 			less = or(less, and(equal, and(not(a), b)));
 			equal = and(equal, equ(a, b));
@@ -109,126 +109,126 @@ public abstract class BoolAlgebra<ELEM> {
 		return less;
 	}
 
-	public final Func1<ELEM, ELEM> ID;
-	public final Func1<ELEM, ELEM> NOT;
-	public final Func2<ELEM, ELEM, ELEM> OR;
-	public final Func2<ELEM, ELEM, ELEM> AND;
-	public final Func2<ELEM, ELEM, ELEM> LEQ;
-	public final Func2<ELEM, ELEM, ELEM> ADD;
-	public final Func2<ELEM, ELEM, ELEM> EQU;
+	public final Func1<BOOL, BOOL> ID;
+	public final Func1<BOOL, BOOL> NOT;
+	public final Func2<BOOL, BOOL, BOOL> OR;
+	public final Func2<BOOL, BOOL, BOOL> AND;
+	public final Func2<BOOL, BOOL, BOOL> LEQ;
+	public final Func2<BOOL, BOOL, BOOL> ADD;
+	public final Func2<BOOL, BOOL, BOOL> EQU;
 
-	public final Func1<ELEM, Boolean> LIFT;
-	public final Func1<ELEM, Iterable<ELEM>> ALL;
-	public final Func1<ELEM, Iterable<ELEM>> ANY;
-	public final Func1<ELEM, Iterable<ELEM>> SUM;
-	public final Func1<ELEM, Iterable<ELEM>> ONE;
-	public final Func1<ELEM, Iterable<ELEM>> EQS;
+	public final Func1<BOOL, Boolean> LIFT;
+	public final Func1<BOOL, Iterable<BOOL>> ALL;
+	public final Func1<BOOL, Iterable<BOOL>> ANY;
+	public final Func1<BOOL, Iterable<BOOL>> SUM;
+	public final Func1<BOOL, Iterable<BOOL>> ONE;
+	public final Func1<BOOL, Iterable<BOOL>> EQS;
 
-	public BoolAlgebra(final ELEM FALSE, final ELEM TRUE) {
+	public BoolAlgebra(final BOOL FALSE, final BOOL TRUE) {
 		this.FALSE = FALSE;
 		this.TRUE = TRUE;
 
 		assert TRUE != null && FALSE != null && TRUE != FALSE;
 
-		ID = new Func1<ELEM, ELEM>() {
+		ID = new Func1<BOOL, BOOL>() {
 			@Override
-			public ELEM call(ELEM elem) {
+			public BOOL call(BOOL elem) {
 				return elem;
 			}
 		};
 
-		NOT = new Func1<ELEM, ELEM>() {
+		NOT = new Func1<BOOL, BOOL>() {
 			@Override
-			public ELEM call(ELEM elem) {
+			public BOOL call(BOOL elem) {
 				assert elem != null;
 				return not(elem);
 			}
 		};
 
-		OR = new Func2<ELEM, ELEM, ELEM>() {
+		OR = new Func2<BOOL, BOOL, BOOL>() {
 			@Override
-			public ELEM call(ELEM elem1, ELEM elem2) {
+			public BOOL call(BOOL elem1, BOOL elem2) {
 				assert elem1 != null && elem2 != null;
 				return or(elem1, elem2);
 			}
 		};
 
-		AND = new Func2<ELEM, ELEM, ELEM>() {
+		AND = new Func2<BOOL, BOOL, BOOL>() {
 			@Override
-			public ELEM call(ELEM elem1, ELEM elem2) {
+			public BOOL call(BOOL elem1, BOOL elem2) {
 				assert elem1 != null && elem2 != null;
 				return and(elem1, elem2);
 			}
 		};
 
-		LEQ = new Func2<ELEM, ELEM, ELEM>() {
+		LEQ = new Func2<BOOL, BOOL, BOOL>() {
 			@Override
-			public ELEM call(ELEM elem1, ELEM elem2) {
+			public BOOL call(BOOL elem1, BOOL elem2) {
 				assert elem1 != null && elem2 != null;
 				return leq(elem1, elem2);
 			}
 		};
 
-		ADD = new Func2<ELEM, ELEM, ELEM>() {
+		ADD = new Func2<BOOL, BOOL, BOOL>() {
 			@Override
-			public ELEM call(ELEM elem1, ELEM elem2) {
+			public BOOL call(BOOL elem1, BOOL elem2) {
 				assert elem1 != null && elem2 != null;
 				return add(elem1, elem2);
 			}
 		};
 
-		EQU = new Func2<ELEM, ELEM, ELEM>() {
+		EQU = new Func2<BOOL, BOOL, BOOL>() {
 			@Override
-			public ELEM call(ELEM elem1, ELEM elem2) {
+			public BOOL call(BOOL elem1, BOOL elem2) {
 				assert elem1 != null && elem2 != null;
 				return equ(elem1, elem2);
 			}
 		};
 
-		LIFT = new Func1<ELEM, Boolean>() {
+		LIFT = new Func1<BOOL, Boolean>() {
 			@Override
-			public ELEM call(Boolean elem) {
+			public BOOL call(Boolean elem) {
 				return lift(elem);
 			}
 		};
 
-		ALL = new Func1<ELEM, Iterable<ELEM>>() {
+		ALL = new Func1<BOOL, Iterable<BOOL>>() {
 			@Override
-			public ELEM call(Iterable<ELEM> elems) {
+			public BOOL call(Iterable<BOOL> elems) {
 				return all(elems);
 			}
 		};
 
-		ANY = new Func1<ELEM, Iterable<ELEM>>() {
+		ANY = new Func1<BOOL, Iterable<BOOL>>() {
 			@Override
-			public ELEM call(Iterable<ELEM> elems) {
+			public BOOL call(Iterable<BOOL> elems) {
 				return any(elems);
 			}
 		};
 
-		SUM = new Func1<ELEM, Iterable<ELEM>>() {
+		SUM = new Func1<BOOL, Iterable<BOOL>>() {
 			@Override
-			public ELEM call(Iterable<ELEM> elems) {
+			public BOOL call(Iterable<BOOL> elems) {
 				return sum(elems);
 			}
 		};
 
-		ONE = new Func1<ELEM, Iterable<ELEM>>() {
+		ONE = new Func1<BOOL, Iterable<BOOL>>() {
 			@Override
-			public ELEM call(Iterable<ELEM> elems) {
+			public BOOL call(Iterable<BOOL> elems) {
 				return one(elems);
 			}
 		};
 
-		EQS = new Func1<ELEM, Iterable<ELEM>>() {
+		EQS = new Func1<BOOL, Iterable<BOOL>>() {
 			@Override
-			public ELEM call(Iterable<ELEM> elems) {
-				Iterator<ELEM> iter = elems.iterator();
+			public BOOL call(Iterable<BOOL> elems) {
+				Iterator<BOOL> iter = elems.iterator();
 
 				assert iter.hasNext();
-				ELEM fst = iter.next();
+				BOOL fst = iter.next();
 
-				ELEM res = TRUE;
+				BOOL res = TRUE;
 				while (iter.hasNext())
 					res = and(res, equ(fst, iter.next()));
 

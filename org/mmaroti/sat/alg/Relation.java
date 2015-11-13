@@ -20,7 +20,7 @@ package org.mmaroti.sat.alg;
 
 import org.mmaroti.sat.core.*;
 
-public class Relation<ELEM> extends AlgObject<ELEM> {
+public class Relation<BOOL> extends AlgObject<BOOL> {
 	protected final int size;
 
 	public int getSize() {
@@ -31,11 +31,11 @@ public class Relation<ELEM> extends AlgObject<ELEM> {
 		return tensor.getOrder();
 	}
 
-	public Relation(AlgObject<ELEM> object) {
+	public Relation(AlgObject<BOOL> object) {
 		this(object.alg, object.tensor);
 	}
 
-	protected Relation(BoolAlgebra<ELEM> alg, Tensor<ELEM> tensor) {
+	protected Relation(BoolAlgebra<BOOL> alg, Tensor<BOOL> tensor) {
 		super(alg, tensor);
 		assert 1 <= tensor.getOrder();
 
@@ -59,101 +59,101 @@ public class Relation<ELEM> extends AlgObject<ELEM> {
 		return shape;
 	}
 
-	public static <ELEM> Relation<ELEM> makeEqual(final BoolAlgebra<ELEM> alg,
+	public static <BOOL> Relation<BOOL> makeEqual(final BoolAlgebra<BOOL> alg,
 			int size) {
-		Tensor<ELEM> tensor = Tensor.generate(size, size,
-				new Func2<ELEM, Integer, Integer>() {
+		Tensor<BOOL> tensor = Tensor.generate(size, size,
+				new Func2<BOOL, Integer, Integer>() {
 					@Override
-					public ELEM call(Integer elem1, Integer elem2) {
+					public BOOL call(Integer elem1, Integer elem2) {
 						return alg.lift(elem1.intValue() == elem2.intValue());
 					}
 				});
-		return new Relation<ELEM>(alg, tensor);
+		return new Relation<BOOL>(alg, tensor);
 	}
 
-	public static <ELEM> Relation<ELEM> makeNotEqual(
-			final BoolAlgebra<ELEM> alg, int size) {
-		Tensor<ELEM> tensor = Tensor.generate(size, size,
-				new Func2<ELEM, Integer, Integer>() {
+	public static <BOOL> Relation<BOOL> makeNotEqual(
+			final BoolAlgebra<BOOL> alg, int size) {
+		Tensor<BOOL> tensor = Tensor.generate(size, size,
+				new Func2<BOOL, Integer, Integer>() {
 					@Override
-					public ELEM call(Integer elem1, Integer elem2) {
+					public BOOL call(Integer elem1, Integer elem2) {
 						return alg.lift(elem1.intValue() != elem2.intValue());
 					}
 				});
-		return new Relation<ELEM>(alg, tensor);
+		return new Relation<BOOL>(alg, tensor);
 	}
 
-	public static <ELEM> Relation<ELEM> makeLessThan(
-			final BoolAlgebra<ELEM> alg, int size) {
-		Tensor<ELEM> tensor = Tensor.generate(size, size,
-				new Func2<ELEM, Integer, Integer>() {
+	public static <BOOL> Relation<BOOL> makeLessThan(
+			final BoolAlgebra<BOOL> alg, int size) {
+		Tensor<BOOL> tensor = Tensor.generate(size, size,
+				new Func2<BOOL, Integer, Integer>() {
 					@Override
-					public ELEM call(Integer elem1, Integer elem2) {
+					public BOOL call(Integer elem1, Integer elem2) {
 						return alg.lift(elem1.intValue() < elem2.intValue());
 					}
 				});
-		return new Relation<ELEM>(alg, tensor);
+		return new Relation<BOOL>(alg, tensor);
 	}
 
-	public static <ELEM> Relation<ELEM> makeLessThanOrEqual(
-			final BoolAlgebra<ELEM> alg, int size) {
-		Tensor<ELEM> tensor = Tensor.generate(size, size,
-				new Func2<ELEM, Integer, Integer>() {
+	public static <BOOL> Relation<BOOL> makeLessThanOrEqual(
+			final BoolAlgebra<BOOL> alg, int size) {
+		Tensor<BOOL> tensor = Tensor.generate(size, size,
+				new Func2<BOOL, Integer, Integer>() {
 					@Override
-					public ELEM call(Integer elem1, Integer elem2) {
+					public BOOL call(Integer elem1, Integer elem2) {
 						return alg.lift(elem1.intValue() <= elem2.intValue());
 					}
 				});
-		return new Relation<ELEM>(alg, tensor);
+		return new Relation<BOOL>(alg, tensor);
 	}
 
-	protected void checkSize(Relation<ELEM> rel) {
+	protected void checkSize(Relation<BOOL> rel) {
 		assert alg == rel.alg && size == rel.size;
 	}
 
-	protected void checkArity(Relation<ELEM> rel) {
+	protected void checkArity(Relation<BOOL> rel) {
 		checkSize(rel);
 		assert getRelArity() == rel.getRelArity();
 	}
 
-	public Relation<ELEM> intersection(Relation<ELEM> rel) {
+	public Relation<BOOL> intersection(Relation<BOOL> rel) {
 		checkArity(rel);
 
-		Tensor<ELEM> tmp = Tensor.map2(alg.AND, tensor, rel.tensor);
-		return new Relation<ELEM>(alg, tmp);
+		Tensor<BOOL> tmp = Tensor.map2(alg.AND, tensor, rel.tensor);
+		return new Relation<BOOL>(alg, tmp);
 	}
 
-	public Relation<ELEM> union(Relation<ELEM> rel) {
+	public Relation<BOOL> union(Relation<BOOL> rel) {
 		checkArity(rel);
 
-		Tensor<ELEM> tmp = Tensor.map2(alg.OR, tensor, rel.tensor);
-		return new Relation<ELEM>(alg, tmp);
+		Tensor<BOOL> tmp = Tensor.map2(alg.OR, tensor, rel.tensor);
+		return new Relation<BOOL>(alg, tmp);
 	}
 
-	public Relation<ELEM> inverse() {
+	public Relation<BOOL> inverse() {
 		int[] map = new int[getRelArity()];
 		for (int i = 0; i < map.length; i++)
 			map[i] = map.length - 1 - i;
 
-		Tensor<ELEM> tmp = Tensor.reshape(tensor, tensor.getShape(), map);
-		return new Relation<ELEM>(alg, tmp);
+		Tensor<BOOL> tmp = Tensor.reshape(tensor, tensor.getShape(), map);
+		return new Relation<BOOL>(alg, tmp);
 	}
 
-	public Relation<ELEM> rotated() {
+	public Relation<BOOL> rotated() {
 		int[] map = new int[getRelArity()];
 		for (int i = 0; i < map.length - 1; i++)
 			map[i] = i + 1;
 		map[map.length - 1] = 0;
 
-		Tensor<ELEM> tmp = Tensor.reshape(tensor, tensor.getShape(), map);
-		return new Relation<ELEM>(alg, tmp);
+		Tensor<BOOL> tmp = Tensor.reshape(tensor, tensor.getShape(), map);
+		return new Relation<BOOL>(alg, tmp);
 	}
 
-	public Relation<ELEM> composeRelation(Relation<ELEM> rel) {
+	public Relation<BOOL> composeRelation(Relation<BOOL> rel) {
 		return rotated().composeRelationHead(rel);
 	}
 
-	public Relation<ELEM> composeRelationHead(Relation<ELEM> rel) {
+	public Relation<BOOL> composeRelationHead(Relation<BOOL> rel) {
 		checkSize(rel);
 		assert getRelArity() + rel.getRelArity() >= 3;
 
@@ -163,7 +163,7 @@ public class Relation<ELEM> extends AlgObject<ELEM> {
 		for (int i = 1; i < map.length; i++)
 			map[i] = i;
 
-		Tensor<ELEM> tmp = Tensor.reshape(tensor, shape, map);
+		Tensor<BOOL> tmp = Tensor.reshape(tensor, shape, map);
 
 		map = new int[rel.getRelArity()];
 		for (int i = 1; i < map.length; i++)
@@ -172,85 +172,85 @@ public class Relation<ELEM> extends AlgObject<ELEM> {
 		tmp = Tensor.map2(alg.AND, tmp, Tensor.reshape(rel.tensor, shape, map));
 		tmp = Tensor.fold(alg.ANY, 1, tmp);
 
-		return new Relation<ELEM>(alg, tmp);
+		return new Relation<BOOL>(alg, tmp);
 	}
 
-	public Relation<ELEM> diagonal() {
+	public Relation<BOOL> diagonal() {
 		int[] shape = new int[] { size };
 		int[] map = new int[getRelArity()];
 
-		Tensor<ELEM> tmp = Tensor.reshape(tensor, shape, map);
-		return new Relation<ELEM>(alg, tmp);
+		Tensor<BOOL> tmp = Tensor.reshape(tensor, shape, map);
+		return new Relation<BOOL>(alg, tmp);
 	}
 
-	public ELEM isFull() {
-		Tensor<ELEM> tmp = Tensor.fold(alg.ALL, getRelArity(), tensor);
+	public BOOL isFull() {
+		Tensor<BOOL> tmp = Tensor.fold(alg.ALL, getRelArity(), tensor);
 		return tmp.get();
 	}
 
-	public ELEM isEmpty() {
-		Tensor<ELEM> tmp = Tensor.fold(alg.ANY, getRelArity(), tensor);
+	public BOOL isEmpty() {
+		Tensor<BOOL> tmp = Tensor.fold(alg.ANY, getRelArity(), tensor);
 		return alg.not(tmp.get());
 	}
 
-	public ELEM isEqual(Relation<ELEM> rel) {
+	public BOOL isEqual(Relation<BOOL> rel) {
 		checkArity(rel);
 
-		Tensor<ELEM> tmp = Tensor.map2(alg.EQU, tensor, rel.tensor);
+		Tensor<BOOL> tmp = Tensor.map2(alg.EQU, tensor, rel.tensor);
 		tmp = Tensor.fold(alg.ALL, getRelArity(), tmp);
 		return tmp.get();
 	}
 
-	public ELEM isSubset(Relation<ELEM> rel) {
+	public BOOL isSubset(Relation<BOOL> rel) {
 		checkArity(rel);
 
-		Tensor<ELEM> tmp = Tensor.map2(alg.LEQ, tensor, rel.tensor);
+		Tensor<BOOL> tmp = Tensor.map2(alg.LEQ, tensor, rel.tensor);
 		tmp = Tensor.fold(alg.ALL, getRelArity(), tmp);
 		return tmp.get();
 	}
 
-	public ELEM isFunction() {
-		Tensor<ELEM> rel = Tensor.fold(alg.ONE, 1, tensor);
+	public BOOL isFunction() {
+		Tensor<BOOL> rel = Tensor.fold(alg.ONE, 1, tensor);
 		return Tensor.fold(alg.ALL, rel.getOrder(), rel).get();
 	}
 
-	public ELEM isReflexive() {
+	public BOOL isReflexive() {
 		return diagonal().isFull();
 	}
 
-	public ELEM isSymmetric() {
+	public BOOL isSymmetric() {
 		return isSubset(rotated());
 	}
 
-	public ELEM isTransitive() {
+	public BOOL isTransitive() {
 		assert tensor.getOrder() == 2;
 		// mask out diagonal to get fewer literals
-		Relation<ELEM> rel = intersection(makeNotEqual(alg, size));
+		Relation<BOOL> rel = intersection(makeNotEqual(alg, size));
 		return rel.composeRelation(rel).isSubset(this);
 	}
 
-	public ELEM isAntiSymmetric() {
+	public BOOL isAntiSymmetric() {
 		assert tensor.getOrder() == 2;
-		Relation<ELEM> rel = intersection(makeNotEqual(alg, size));
+		Relation<BOOL> rel = intersection(makeNotEqual(alg, size));
 		rel = rel.intersection(rel.inverse());
 		return rel.isEmpty();
 	}
 
-	public ELEM isEquivalence() {
-		ELEM b = isReflexive();
+	public BOOL isEquivalence() {
+		BOOL b = isReflexive();
 		b = alg.and(b, isSymmetric());
 		return alg.and(b, isTransitive());
 	}
 
-	public ELEM isPartialOrder() {
-		ELEM b = isReflexive();
+	public BOOL isPartialOrder() {
+		BOOL b = isReflexive();
 		b = alg.and(b, isAntiSymmetric());
 		return alg.and(b, isTransitive());
 	}
 
-	public static <ELEM> Relation<ELEM> lift(BoolAlgebra<ELEM> alg,
+	public static <BOOL> Relation<BOOL> lift(BoolAlgebra<BOOL> alg,
 			Relation<Boolean> rel) {
-		Tensor<ELEM> tensor = Tensor.map(alg.LIFT, rel.tensor);
-		return new Relation<ELEM>(alg, tensor);
+		Tensor<BOOL> tensor = Tensor.map(alg.LIFT, rel.tensor);
+		return new Relation<BOOL>(alg, tensor);
 	}
 }

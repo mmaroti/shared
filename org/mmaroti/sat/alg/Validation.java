@@ -37,9 +37,9 @@ public class Validation {
 	void checkEquivalences() {
 		BoolProblem problem = new BoolProblem(new int[] { 7, 7 }) {
 			@Override
-			public <ELEM> ELEM compute(BoolAlgebra<ELEM> alg,
-					List<Tensor<ELEM>> tensors) {
-				Relation<ELEM> rel = new Relation<ELEM>(alg, tensors.get(0));
+			public <BOOL> BOOL compute(BoolAlgebra<BOOL> alg,
+					List<Tensor<BOOL>> tensors) {
+				Relation<BOOL> rel = new Relation<BOOL>(alg, tensors.get(0));
 				return rel.isEquivalence();
 			}
 		};
@@ -51,9 +51,9 @@ public class Validation {
 	void checkPartialOrders() {
 		BoolProblem problem = new BoolProblem(new int[] { 5, 5 }) {
 			@Override
-			public <ELEM> ELEM compute(BoolAlgebra<ELEM> alg,
-					List<Tensor<ELEM>> tensors) {
-				Relation<ELEM> rel = new Relation<ELEM>(alg, tensors.get(0));
+			public <BOOL> BOOL compute(BoolAlgebra<BOOL> alg,
+					List<Tensor<BOOL>> tensors) {
+				Relation<BOOL> rel = new Relation<BOOL>(alg, tensors.get(0));
 				return rel.isPartialOrder();
 			}
 		};
@@ -65,9 +65,9 @@ public class Validation {
 	void checkPermutations() {
 		BoolProblem problem = new BoolProblem(new int[] { 7, 7 }) {
 			@Override
-			public <ELEM> ELEM compute(BoolAlgebra<ELEM> alg,
-					List<Tensor<ELEM>> tensors) {
-				Operation<ELEM> op = new Operation<ELEM>(alg, tensors.get(0));
+			public <BOOL> BOOL compute(BoolAlgebra<BOOL> alg,
+					List<Tensor<BOOL>> tensors) {
+				Operation<BOOL> op = new Operation<BOOL>(alg, tensors.get(0));
 				return alg.and(op.isFunction(), op.isPermutation());
 			}
 		};

@@ -20,15 +20,15 @@ package org.mmaroti.sat.alg;
 
 import org.mmaroti.sat.core.*;
 
-public class AlgObject<ELEM> {
-	protected final BoolAlgebra<ELEM> alg;
-	protected final Tensor<ELEM> tensor;
+public class AlgObject<BOOL> {
+	protected final BoolAlgebra<BOOL> alg;
+	protected final Tensor<BOOL> tensor;
 
-	public BoolAlgebra<ELEM> getBoolAlg() {
+	public BoolAlgebra<BOOL> getBoolAlg() {
 		return alg;
 	}
 
-	public Tensor<ELEM> getTensor() {
+	public Tensor<BOOL> getTensor() {
 		return tensor;
 	}
 
@@ -36,12 +36,12 @@ public class AlgObject<ELEM> {
 		return tensor.getDim(tensor.getOrder() - 1);
 	}
 
-	public AlgObject(AlgObject<ELEM> object) {
+	public AlgObject(AlgObject<BOOL> object) {
 		this.alg = object.alg;
 		this.tensor = object.tensor;
 	}
 
-	protected AlgObject(BoolAlgebra<ELEM> alg, Tensor<ELEM> tensor) {
+	protected AlgObject(BoolAlgebra<BOOL> alg, Tensor<BOOL> tensor) {
 		this.alg = alg;
 		this.tensor = tensor;
 	}

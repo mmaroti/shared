@@ -51,17 +51,17 @@ public abstract class BoolProblem {
 		masks.add(Tensor.constant(shape2, Boolean.TRUE));
 	}
 
-	public abstract <ELEM> ELEM compute(BoolAlgebra<ELEM> alg,
-			List<Tensor<ELEM>> tensors);
+	public abstract <BOOL> BOOL compute(BoolAlgebra<BOOL> alg,
+			List<Tensor<BOOL>> tensors);
 
 	public boolean check(List<Tensor<Boolean>> tensors) {
 		return compute(BoolAlgebra.INSTANCE, tensors);
 	}
 
-	public <ELEM> List<Tensor<Boolean>> solveOne(SatSolver<ELEM> solver) {
+	public <BOOL> List<Tensor<Boolean>> solveOne(SatSolver<BOOL> solver) {
 		solver.clear();
 
-		List<Tensor<ELEM>> tensors = new ArrayList<Tensor<ELEM>>();
+		List<Tensor<BOOL>> tensors = new ArrayList<Tensor<BOOL>>();
 		for (Tensor<Boolean> mask : masks)
 			tensors.add(Tensor.generate(mask.getShape(), solver.VARIABLE));
 
@@ -71,18 +71,18 @@ public abstract class BoolProblem {
 			return null;
 
 		List<Tensor<Boolean>> solution = new ArrayList<Tensor<Boolean>>();
-		for (Tensor<ELEM> tensor : tensors)
+		for (Tensor<BOOL> tensor : tensors)
 			solution.add(Tensor.map(solver.DECODE, tensor));
 
 		assert check(solution);
 		return solution;
 	}
 
-	public <ELEM> List<Tensor<Boolean>> solveAll(SatSolver<ELEM> solver,
+	public <BOOL> List<Tensor<Boolean>> solveAll(SatSolver<BOOL> solver,
 			int maxCount) {
 		solver.clear();
 
-		List<Tensor<ELEM>> tensors = new ArrayList<Tensor<ELEM>>();
+		List<Tensor<BOOL>> tensors = new ArrayList<Tensor<BOOL>>();
 		for (Tensor<Boolean> mask : masks)
 			tensors.add(Tensor.generate(mask.getShape(), solver.VARIABLE));
 
@@ -90,18 +90,18 @@ public abstract class BoolProblem {
 
 		List<List<Tensor<Boolean>>> solutions = new ArrayList<List<Tensor<Boolean>>>();
 		while (solver.solve()) {
-			List<ELEM> exclude = new ArrayList<ELEM>();
+			List<BOOL> exclude = new ArrayList<BOOL>();
 
 			List<Tensor<Boolean>> solution = new ArrayList<Tensor<Boolean>>();
 			for (int key = 0; key < masks.size(); key++) {
-				Tensor<ELEM> t = tensors.get(key);
+				Tensor<BOOL> t = tensors.get(key);
 				Tensor<Boolean> s = Tensor.map(solver.DECODE, t);
 				solution.add(s);
 
 				t = Tensor.map2(solver.ADD, Tensor.map(solver.LIFT, s), t);
 
 				Iterator<Boolean> iter = masks.get(key).iterator();
-				for (ELEM b : t) {
+				for (BOOL b : t) {
 					if (iter.next())
 						exclude.add(b);
 				}
@@ -134,7 +134,7 @@ public abstract class BoolProblem {
 		return result;
 	}
 
-	public <ELEM> List<Tensor<Boolean>> solveAll(SatSolver<ELEM> solver) {
+	public <BOOL> List<Tensor<Boolean>> solveAll(SatSolver<BOOL> solver) {
 		return solveAll(solver, 0);
 	}
 }

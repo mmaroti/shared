@@ -20,26 +20,26 @@ package org.mmaroti.sat.alg;
 
 import org.mmaroti.sat.core.*;
 
-public class Operation<ELEM> extends Relation<ELEM> {
+public class Operation<BOOL> extends Relation<BOOL> {
 	public int getOpArity() {
 		return tensor.getOrder() - 1;
 	}
 
-	public Operation(AlgObject<ELEM> object) {
+	public Operation(AlgObject<BOOL> object) {
 		super(object);
 
 		if (getBoolAlg() == BoolAlgebra.INSTANCE)
 			assert (Boolean) isFunction();
 	}
 
-	public Operation(BoolAlgebra<ELEM> alg, Tensor<ELEM> tensor) {
-		this(new Relation<ELEM>(alg, tensor));
+	public Operation(BoolAlgebra<BOOL> alg, Tensor<BOOL> tensor) {
+		this(new Relation<BOOL>(alg, tensor));
 	}
 
-	public ELEM isPermutation() {
+	public BOOL isPermutation() {
 		assert getOpArity() == 1;
 
-		Tensor<ELEM> tmp;
+		Tensor<BOOL> tmp;
 		tmp = Tensor.reshape(tensor, tensor.getShape(), new int[] { 1, 0 });
 		tmp = Tensor.fold(alg.ANY, 1, tmp);
 		tmp = Tensor.fold(alg.ALL, 1, tmp);
@@ -47,22 +47,22 @@ public class Operation<ELEM> extends Relation<ELEM> {
 		return tmp.get();
 	}
 
-	public static <ELEM> Operation<ELEM> makeProjection(
-			final BoolAlgebra<ELEM> alg, int size, int arity, final int coord) {
+	public static <BOOL> Operation<BOOL> makeProjection(
+			final BoolAlgebra<BOOL> alg, int size, int arity, final int coord) {
 		assert 0 <= coord && coord < arity;
 
-		Tensor<ELEM> tensor = Tensor.generate(createShape(size, 1 + arity),
-				new Func1<ELEM, int[]>() {
+		Tensor<BOOL> tensor = Tensor.generate(createShape(size, 1 + arity),
+				new Func1<BOOL, int[]>() {
 					@Override
-					public ELEM call(int[] elem) {
+					public BOOL call(int[] elem) {
 						return alg.lift(elem[0] == elem[1 + coord]);
 					}
 				});
-		return new Operation<ELEM>(alg, tensor);
+		return new Operation<BOOL>(alg, tensor);
 	}
 
-	public Relation<ELEM> graph() {
-		return new Relation<ELEM>(alg, tensor);
+	public Relation<BOOL> graph() {
+		return new Relation<BOOL>(alg, tensor);
 	}
 
 	public static String getArityName(int arity) {
@@ -78,7 +78,7 @@ public class Operation<ELEM> extends Relation<ELEM> {
 			return "" + arity + "-ary";
 	}
 
-	public ELEM isSatisfied(int... identity) {
+	public BOOL isSatisfied(int... identity) {
 		assert getOpArity() == identity.length;
 
 		int[] map = new int[identity.length + 1];
@@ -89,47 +89,47 @@ public class Operation<ELEM> extends Relation<ELEM> {
 			map[1 + i] = identity[i];
 		}
 
-		Tensor<ELEM> tmp;
+		Tensor<BOOL> tmp;
 		tmp = Tensor.reshape(tensor, tensor.getShape(), map);
 		tmp = Tensor.fold(alg.ALL, vars, tmp);
 		return tmp.get();
 	}
 
-	public ELEM isIdempotent() {
+	public BOOL isIdempotent() {
 		return isSatisfied(new int[getOpArity()]);
 	}
 
-	public ELEM isIdentity() {
+	public BOOL isIdentity() {
 		return isSatisfied(0, 0);
 	}
 
-	public ELEM isMajority() {
-		ELEM b = isSatisfied(1, 0, 0);
+	public BOOL isMajority() {
+		BOOL b = isSatisfied(1, 0, 0);
 		b = alg.and(b, isSatisfied(0, 1, 0));
 		b = alg.and(b, isSatisfied(0, 0, 1));
 		return b;
 	}
 
-	public ELEM isMinority() {
-		ELEM b = isSatisfied(0, 1, 1);
+	public BOOL isMinority() {
+		BOOL b = isSatisfied(0, 1, 1);
 		b = alg.and(b, isSatisfied(1, 0, 1));
 		b = alg.and(b, isSatisfied(1, 1, 0));
 		return b;
 	}
 
-	public ELEM isMaltsev() {
-		ELEM b = isSatisfied(0, 1, 1);
+	public BOOL isMaltsev() {
+		BOOL b = isSatisfied(0, 1, 1);
 		b = alg.and(b, isSatisfied(1, 1, 0));
 		return b;
 	}
 
-	public Operation<ELEM> composeOperation(Operation<ELEM> op) {
+	public Operation<BOOL> composeOperation(Operation<BOOL> op) {
 		checkSize(op);
 		assert getOpArity() == 1;
 
 		int[] shape = createShape(size, op.getOpArity() + 2);
 
-		Tensor<ELEM> tmp = Tensor.reshape(tensor, shape, new int[] { 1, 0 });
+		Tensor<BOOL> tmp = Tensor.reshape(tensor, shape, new int[] { 1, 0 });
 
 		int[] map = new int[op.getOpArity() + 1];
 		for (int i = 0; i < map.length; i++)
@@ -138,7 +138,7 @@ public class Operation<ELEM> extends Relation<ELEM> {
 		tmp = Tensor.map2(alg.AND, tmp, Tensor.reshape(op.tensor, shape, map));
 		tmp = Tensor.fold(alg.ANY, 1, tmp);
 
-		return new Operation<ELEM>(alg, tmp);
+		return new Operation<BOOL>(alg, tmp);
 	}
 
 	public static <BOOL> Operation<BOOL> lift(BoolAlgebra<BOOL> alg,
