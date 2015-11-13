@@ -44,7 +44,7 @@ public class Validation {
 			}
 		};
 
-		int count = problem.solveAll(new Sat4J()).get(0).getDim(2);
+		int count = problem.solveAll(new Sat4J()).get(0).getLastDim();
 		verify("equivalences on a 7 element set", count, 877);
 	}
 
@@ -58,7 +58,7 @@ public class Validation {
 			}
 		};
 
-		int count = problem.solveAll(new Sat4J()).get(0).getDim(2);
+		int count = problem.solveAll(new Sat4J()).get(0).getLastDim();
 		verify("partial orders on a 5 element set", count, 4231);
 	}
 
@@ -72,7 +72,7 @@ public class Validation {
 			}
 		};
 
-		int count = problem.solveAll(new Sat4J()).get(0).getDim(2);
+		int count = problem.solveAll(new Sat4J()).get(0).getLastDim();
 		verify("permutations on a 7 element set", count, 5040);
 	}
 

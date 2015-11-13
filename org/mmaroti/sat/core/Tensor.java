@@ -37,6 +37,10 @@ public class Tensor<ELEM> implements Iterable<ELEM> {
 		return shape[index];
 	}
 
+	public int getLastDim() {
+		return shape[shape.length - 1];
+	}
+
 	private static class Iter<ELEM> implements Iterator<ELEM> {
 		private final ELEM[] elems;
 		private int index;
