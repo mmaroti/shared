@@ -20,37 +20,38 @@ package org.mmaroti.sat.alg;
 
 import org.mmaroti.sat.core.*;
 
-public class Relation<BOOL> extends AlgObject<BOOL> {
-	protected final int size;
+public final class Relation<BOOL> {
+	protected final BoolAlgebra<BOOL> alg;
+	protected final Tensor<BOOL> tensor;
 
-	public int getSize() {
-		return size;
+	public BoolAlgebra<BOOL> getAlg() {
+		return alg;
 	}
 
-	public final int getRelArity() {
+	public Tensor<BOOL> getTensor() {
+		return tensor;
+	}
+
+	public int getSize() {
+		return tensor.getDim(0);
+	}
+
+	public int getArity() {
 		return tensor.getOrder();
 	}
 
-	public Relation(AlgObject<BOOL> object) {
-		this(object.alg, object.tensor);
-	}
-
-	protected Relation(BoolAlgebra<BOOL> alg, Tensor<BOOL> tensor) {
-		super(alg, tensor);
+	public Relation(BoolAlgebra<BOOL> alg, Tensor<BOOL> tensor) {
 		assert 1 <= tensor.getOrder();
 
-		size = tensor.getDim(0);
+		int size = tensor.getDim(0);
 		for (int i = 1; i < tensor.getOrder(); i++)
 			assert tensor.getDim(i) == size;
+
+		this.alg = alg;
+		this.tensor = tensor;
 	}
 
-	protected static AlgObject<Boolean> mask(int size, int arity) {
-		Tensor<Boolean> tensor;
-		tensor = Tensor.constant(createShape(size, arity), true);
-		return new AlgObject<Boolean>(BoolAlgebra.INSTANCE, tensor);
-	}
-
-	protected static int[] createShape(int size, int arity) {
+	private static int[] createShape(int size, int arity) {
 		assert size > 1 && arity >= 0;
 
 		int[] shape = new int[arity];
@@ -107,16 +108,17 @@ public class Relation<BOOL> extends AlgObject<BOOL> {
 		return new Relation<BOOL>(alg, tensor);
 	}
 
-	protected void checkSize(Relation<BOOL> rel) {
-		assert alg == rel.alg && size == rel.size;
+	private void checkSize(Relation<BOOL> rel) {
+		assert getAlg() == rel.getAlg();
+		assert getSize() == rel.getSize();
 	}
 
 	protected void checkArity(Relation<BOOL> rel) {
 		checkSize(rel);
-		assert getRelArity() == rel.getRelArity();
+		assert getArity() == rel.getArity();
 	}
 
-	public Relation<BOOL> intersection(Relation<BOOL> rel) {
+	public Relation<BOOL> intersect(Relation<BOOL> rel) {
 		checkArity(rel);
 
 		Tensor<BOOL> tmp = Tensor.map2(alg.AND, tensor, rel.tensor);
@@ -130,8 +132,16 @@ public class Relation<BOOL> extends AlgObject<BOOL> {
 		return new Relation<BOOL>(alg, tmp);
 	}
 
-	public Relation<BOOL> inverse() {
-		int[] map = new int[getRelArity()];
+	public Relation<BOOL> subtract(Relation<BOOL> rel) {
+		checkArity(rel);
+
+		Tensor<BOOL> tmp = Tensor.map(alg.NOT, rel.tensor);
+		tmp = Tensor.map2(alg.AND, tensor, tmp);
+		return new Relation<BOOL>(alg, tmp);
+	}
+
+	public Relation<BOOL> invert() {
+		int[] map = new int[getArity()];
 		for (int i = 0; i < map.length; i++)
 			map[i] = map.length - 1 - i;
 
@@ -139,8 +149,8 @@ public class Relation<BOOL> extends AlgObject<BOOL> {
 		return new Relation<BOOL>(alg, tmp);
 	}
 
-	public Relation<BOOL> rotated() {
-		int[] map = new int[getRelArity()];
+	public Relation<BOOL> rotate() {
+		int[] map = new int[getArity()];
 		for (int i = 0; i < map.length - 1; i++)
 			map[i] = i + 1;
 		map[map.length - 1] = 0;
@@ -149,25 +159,25 @@ public class Relation<BOOL> extends AlgObject<BOOL> {
 		return new Relation<BOOL>(alg, tmp);
 	}
 
-	public Relation<BOOL> composeRelation(Relation<BOOL> rel) {
-		return rotated().composeRelationHead(rel);
+	public Relation<BOOL> compose(Relation<BOOL> rel) {
+		return rotate().composeHead(rel);
 	}
 
-	public Relation<BOOL> composeRelationHead(Relation<BOOL> rel) {
+	public Relation<BOOL> composeHead(Relation<BOOL> rel) {
 		checkSize(rel);
-		assert getRelArity() + rel.getRelArity() >= 3;
+		assert getArity() + rel.getArity() >= 3;
 
-		int[] shape = createShape(size, getRelArity() + rel.getRelArity() - 1);
+		int[] shape = createShape(getSize(), getArity() + rel.getArity() - 1);
 
-		int[] map = new int[getRelArity()];
+		int[] map = new int[getArity()];
 		for (int i = 1; i < map.length; i++)
 			map[i] = i;
 
 		Tensor<BOOL> tmp = Tensor.reshape(tensor, shape, map);
 
-		map = new int[rel.getRelArity()];
+		map = new int[rel.getArity()];
 		for (int i = 1; i < map.length; i++)
-			map[i] = getRelArity() + i - 1;
+			map[i] = getArity() + i - 1;
 
 		tmp = Tensor.map2(alg.AND, tmp, Tensor.reshape(rel.tensor, shape, map));
 		tmp = Tensor.fold(alg.ANY, 1, tmp);
@@ -176,20 +186,20 @@ public class Relation<BOOL> extends AlgObject<BOOL> {
 	}
 
 	public Relation<BOOL> diagonal() {
-		int[] shape = new int[] { size };
-		int[] map = new int[getRelArity()];
+		int[] shape = new int[] { getSize() };
+		int[] map = new int[getArity()];
 
 		Tensor<BOOL> tmp = Tensor.reshape(tensor, shape, map);
 		return new Relation<BOOL>(alg, tmp);
 	}
 
 	public BOOL isFull() {
-		Tensor<BOOL> tmp = Tensor.fold(alg.ALL, getRelArity(), tensor);
+		Tensor<BOOL> tmp = Tensor.fold(alg.ALL, getArity(), tensor);
 		return tmp.get();
 	}
 
 	public BOOL isEmpty() {
-		Tensor<BOOL> tmp = Tensor.fold(alg.ANY, getRelArity(), tensor);
+		Tensor<BOOL> tmp = Tensor.fold(alg.ANY, getArity(), tensor);
 		return alg.not(tmp.get());
 	}
 
@@ -197,7 +207,7 @@ public class Relation<BOOL> extends AlgObject<BOOL> {
 		checkArity(rel);
 
 		Tensor<BOOL> tmp = Tensor.map2(alg.EQU, tensor, rel.tensor);
-		tmp = Tensor.fold(alg.ALL, getRelArity(), tmp);
+		tmp = Tensor.fold(alg.ALL, getArity(), tmp);
 		return tmp.get();
 	}
 
@@ -205,7 +215,7 @@ public class Relation<BOOL> extends AlgObject<BOOL> {
 		checkArity(rel);
 
 		Tensor<BOOL> tmp = Tensor.map2(alg.LEQ, tensor, rel.tensor);
-		tmp = Tensor.fold(alg.ALL, getRelArity(), tmp);
+		tmp = Tensor.fold(alg.ALL, getArity(), tmp);
 		return tmp.get();
 	}
 
@@ -219,20 +229,20 @@ public class Relation<BOOL> extends AlgObject<BOOL> {
 	}
 
 	public BOOL isSymmetric() {
-		return isSubset(rotated());
+		return isSubset(rotate());
 	}
 
 	public BOOL isTransitive() {
 		assert tensor.getOrder() == 2;
 		// mask out diagonal to get fewer literals
-		Relation<BOOL> rel = intersection(makeNotEqual(alg, size));
-		return rel.composeRelation(rel).isSubset(this);
+		Relation<BOOL> rel = intersect(makeNotEqual(alg, getSize()));
+		return rel.compose(rel).isSubset(this);
 	}
 
 	public BOOL isAntiSymmetric() {
 		assert tensor.getOrder() == 2;
-		Relation<BOOL> rel = intersection(makeNotEqual(alg, size));
-		rel = rel.intersection(rel.inverse());
+		Relation<BOOL> rel = intersect(makeNotEqual(alg, getSize()));
+		rel = rel.intersect(rel.invert());
 		return rel.isEmpty();
 	}
 
@@ -248,9 +258,90 @@ public class Relation<BOOL> extends AlgObject<BOOL> {
 		return alg.and(b, isTransitive());
 	}
 
+	public PartialOrder<BOOL> asPartialOrder() {
+		return new PartialOrder<BOOL>(alg, tensor);
+	}
+
 	public static <BOOL> Relation<BOOL> lift(BoolAlgebra<BOOL> alg,
 			Relation<Boolean> rel) {
 		Tensor<BOOL> tensor = Tensor.map(alg.LIFT, rel.tensor);
 		return new Relation<BOOL>(alg, tensor);
+	}
+
+	public static char formatCoord(int elem) {
+		if (0 <= elem && elem < 10)
+			return (char) ('0' + elem);
+		else if (10 <= elem && elem < 36)
+			return (char) ('a' + elem - 10);
+		else
+			throw new IllegalArgumentException();
+	}
+
+	public static int parseCoord(int size, char c) {
+		int i;
+		if ('0' <= c && c <= '9')
+			i = c - '0';
+		else if ('a' <= c && c <= 'z')
+			i = c - 'a' + 10;
+		else
+			i = size;
+
+		if (i < size)
+			return i;
+		else
+			throw new IllegalArgumentException("invalid coordinate: " + c);
+	}
+
+	public static String formatMembers(Relation<Boolean> rel) {
+		String s = "";
+
+		Tensor<Boolean> tensor = rel.getTensor();
+		int[] index = new int[tensor.getOrder()];
+		outer: for (;;) {
+			if (tensor.getElem(index)) {
+				if (s.length() != 0)
+					s += ' ';
+				for (int i = 0; i < index.length; i++)
+					s += formatCoord(index[i]);
+			}
+
+			for (int i = index.length - 1; i >= 0; i--) {
+				if (++index[i] >= tensor.getDim(i))
+					index[i] = 0;
+				else
+					continue outer;
+			}
+			break;
+		}
+
+		return s;
+	}
+
+	public static Relation<Boolean> parseMembers(int size, int arity, String str) {
+		Tensor<Boolean> tensor;
+		tensor = Tensor.constant(createShape(size, arity), false);
+
+		int[] index = new int[arity];
+		int p = 0;
+
+		for (int i = 0; i <= str.length(); i++) {
+			if (i == str.length() || str.charAt(i) == ' ') {
+				if (p == 0)
+					continue;
+				else if (p != index.length)
+					throw new IllegalArgumentException("too few dims: " + p);
+
+				tensor.setElem(true, index);
+				p = 0;
+			} else {
+				if (p > index.length)
+					throw new IllegalArgumentException("too many dims: " + p);
+
+				index[p++] = parseCoord(size, str.charAt(i));
+			}
+		}
+		assert p == 0;
+
+		return new Relation<Boolean>(BoolAlgebra.INSTANCE, tensor);
 	}
 }

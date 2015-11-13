@@ -76,12 +76,11 @@ public class Validation {
 		verify("permutations on a 7 element set", count, 5040);
 	}
 
-	private static DecimalFormat TIME_FORMAT = new DecimalFormat("0.00");
-
 	void check() {
 		failed = false;
 
 		long time = System.currentTimeMillis();
+		parseRelations();
 		checkEquivalences();
 		checkPartialOrders();
 		checkPermutations();
@@ -94,7 +93,34 @@ public class Validation {
 			System.out.println("*** SOME TESTS HAVE FAILED ***");
 	}
 
+	void verify(String msg, String printout, String expected) {
+		String passed;
+		if (printout.equals(expected))
+			passed = "passed";
+		else {
+			passed = "FAILED with " + printout;
+			failed = true;
+		}
+
+		System.out.println(msg + " has " + passed + ".");
+	}
+
+	void parseRelations() {
+		String a = "00 01 02 03 04 11 12 13 22 23 33 44 43";
+		Relation<Boolean> rel = Relation.parseMembers(5, 2, a);
+		String b = Relation.formatMembers(rel.asPartialOrder().covers());
+		verify("Parsing the N5 poset relation and printing its covers", b,
+				"01 04 12 23 43");
+	}
+
+	void parse() {
+		parseRelations();
+	}
+
+	private static DecimalFormat TIME_FORMAT = new DecimalFormat("0.00");
+
 	public static void main(String[] args) {
-		new Validation().check();
+		Validation v = new Validation();
+		v.check();
 	}
 }

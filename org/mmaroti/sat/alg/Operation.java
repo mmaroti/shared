@@ -20,24 +20,50 @@ package org.mmaroti.sat.alg;
 
 import org.mmaroti.sat.core.*;
 
-public class Operation<BOOL> extends Relation<BOOL> {
-	public int getOpArity() {
+public class Operation<BOOL> {
+	protected final BoolAlgebra<BOOL> alg;
+	protected final Tensor<BOOL> tensor;
+
+	public BoolAlgebra<BOOL> getAlg() {
+		return alg;
+	}
+
+	public Tensor<BOOL> getTensor() {
+		return tensor;
+	}
+
+	public int getSize() {
+		return tensor.getDim(0);
+	}
+
+	public int getArity() {
 		return tensor.getOrder() - 1;
 	}
 
-	public Operation(AlgObject<BOOL> object) {
-		super(object);
+	public Operation(BoolAlgebra<BOOL> alg, Tensor<BOOL> tensor) {
+		assert 1 <= tensor.getOrder();
 
-		if (getBoolAlg() == BoolAlgebra.INSTANCE)
+		int size = tensor.getDim(0);
+		for (int i = 1; i < tensor.getOrder(); i++)
+			assert tensor.getDim(i) == size;
+
+		this.alg = alg;
+		this.tensor = tensor;
+
+		if (getAlg() == BoolAlgebra.INSTANCE)
 			assert (Boolean) isFunction();
 	}
 
-	public Operation(BoolAlgebra<BOOL> alg, Tensor<BOOL> tensor) {
-		this(new Relation<BOOL>(alg, tensor));
+	public Relation<BOOL> asRelation() {
+		return new Relation<BOOL>(alg, tensor);
+	}
+
+	public BOOL isFunction() {
+		return asRelation().isFunction();
 	}
 
 	public BOOL isPermutation() {
-		assert getOpArity() == 1;
+		assert getArity() == 1;
 
 		Tensor<BOOL> tmp;
 		tmp = Tensor.reshape(tensor, tensor.getShape(), new int[] { 1, 0 });
@@ -45,6 +71,15 @@ public class Operation<BOOL> extends Relation<BOOL> {
 		tmp = Tensor.fold(alg.ALL, 1, tmp);
 
 		return tmp.get();
+	}
+
+	private static int[] createShape(int size, int arity) {
+		assert size > 1 && arity >= 0;
+
+		int[] shape = new int[arity];
+		for (int i = 0; i < arity; i++)
+			shape[i] = size;
+		return shape;
 	}
 
 	public static <BOOL> Operation<BOOL> makeProjection(
@@ -65,21 +100,8 @@ public class Operation<BOOL> extends Relation<BOOL> {
 		return new Relation<BOOL>(alg, tensor);
 	}
 
-	public static String getArityName(int arity) {
-		if (arity == 0)
-			return "nullary";
-		else if (arity == 1)
-			return "unary";
-		else if (arity == 2)
-			return "binary";
-		else if (arity == 3)
-			return "ternary";
-		else
-			return "" + arity + "-ary";
-	}
-
 	public BOOL isSatisfied(int... identity) {
-		assert getOpArity() == identity.length;
+		assert getArity() == identity.length;
 
 		int[] map = new int[identity.length + 1];
 
@@ -96,7 +118,7 @@ public class Operation<BOOL> extends Relation<BOOL> {
 	}
 
 	public BOOL isIdempotent() {
-		return isSatisfied(new int[getOpArity()]);
+		return isSatisfied(new int[getArity()]);
 	}
 
 	public BOOL isIdentity() {
@@ -123,15 +145,20 @@ public class Operation<BOOL> extends Relation<BOOL> {
 		return b;
 	}
 
-	public Operation<BOOL> composeOperation(Operation<BOOL> op) {
-		checkSize(op);
-		assert getOpArity() == 1;
+	private void checkSize(Operation<BOOL> op) {
+		assert getAlg() == op.getAlg();
+		assert getSize() == op.getSize();
+	}
 
-		int[] shape = createShape(size, op.getOpArity() + 2);
+	public Operation<BOOL> compose(Operation<BOOL> op) {
+		checkSize(op);
+		assert getArity() == 1;
+
+		int[] shape = createShape(getSize(), op.getArity() + 2);
 
 		Tensor<BOOL> tmp = Tensor.reshape(tensor, shape, new int[] { 1, 0 });
 
-		int[] map = new int[op.getOpArity() + 1];
+		int[] map = new int[op.getArity() + 1];
 		for (int i = 0; i < map.length; i++)
 			map[i] = i + 1;
 

@@ -84,6 +84,19 @@ public class Tensor<ELEM> implements Iterable<ELEM> {
 		return elems[pos];
 	}
 
+	public void setElem(ELEM elem, int... index) {
+		assert index.length == shape.length;
+
+		int pos = 0;
+		int size = 1;
+		for (int i = 0; i < shape.length; i++) {
+			pos += size * index[i];
+			size *= shape[i];
+		}
+
+		elems[pos] = elem;
+	}
+
 	public ELEM get() {
 		assert elems.length == 1;
 		return elems[0];
@@ -539,27 +552,6 @@ public class Tensor<ELEM> implements Iterable<ELEM> {
 			stream.println("Null");
 		else
 			stream.println(tensor);
-	}
-
-	public static <ELEM> void print(Map<String, Tensor<ELEM>> tensors,
-			PrintStream stream) {
-		if (tensors == null)
-			stream.println("Null");
-		else {
-			if (!(tensors instanceof TreeMap))
-				tensors = new TreeMap<String, Tensor<ELEM>>(tensors);
-
-			for (String key : tensors.keySet()) {
-				stream.print(key + " = ");
-				stream.println(tensors.get(key));
-			}
-		}
-	}
-
-	public static <ELEM> void print(List<Map<String, Tensor<ELEM>>> list,
-			PrintStream stream) {
-		for (Map<String, Tensor<ELEM>> elem : list)
-			print(elem, stream);
 	}
 
 	public static void main(String[] args) {
