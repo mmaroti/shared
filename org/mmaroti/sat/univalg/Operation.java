@@ -21,22 +21,55 @@ package org.mmaroti.sat.univalg;
 import org.mmaroti.sat.core.*;
 
 public class Operation<BOOL> {
-	public final BoolAlg<BOOL> alg;
-	public final Tensor<BOOL> tensor;
-	public final int size;
-	public final int arity;
+	private final BoolAlg<BOOL> alg;
+	private final Tensor<BOOL> tensor;
+	private final int size;
+	private final int arity;
+
+	public BoolAlg<BOOL> getBoolAlg() {
+		return alg;
+	}
+
+	public Tensor<BOOL> getTensor() {
+		return tensor;
+	}
+
+	public int getSize() {
+		return size;
+	}
+
+	public int getArity() {
+		return arity;
+	}
+
+	public Operation(Relation<BOOL> relation) {
+		alg = relation.getBoolAlg();
+		if (alg == BoolAlg.BOOLEAN)
+			assert (Boolean) relation.isFunction();
+
+		tensor = relation.getTensor();
+		size = relation.getSize();
+		arity = relation.getArity() - 1;
+	}
 
 	public Operation(BoolAlg<BOOL> alg, Tensor<BOOL> tensor) {
-		arity = tensor.getOrder() - 1;
-		assert arity >= 0;
+		this(new Relation<BOOL>(alg, tensor));
+	}
 
-		size = tensor.getDim(0);
-		assert size >= 1;
-		for (int i = 1; i < arity; i++)
-			assert tensor.getDim(i) == size;
+	public BOOL isFunction() {
+		Tensor<BOOL> rel = Tensor.fold(alg.ONE, 1, tensor);
+		return Tensor.fold(alg.ALL, rel.getOrder(), rel).get();
+	}
 
-		this.tensor = tensor;
-		this.alg = alg;
+	public BOOL isPermutation() {
+		assert arity == 1;
+
+		Tensor<BOOL> tmp;
+		tmp = Tensor.reshape(tensor, tensor.getShape(), new int[] { 1, 0 });
+		tmp = Tensor.fold(alg.ANY, 1, tmp);
+		tmp = Tensor.fold(alg.ALL, 1, tmp);
+
+		return tmp.get();
 	}
 
 	private static int[] createShape(int size, int arity) {
@@ -48,8 +81,8 @@ public class Operation<BOOL> {
 		return shape;
 	}
 
-	public static <BOOL> Operation<BOOL> createProjection(
-			final BoolAlg<BOOL> alg, int size, int arity, final int coord) {
+	public static <BOOL> Operation<BOOL> opProjection(final BoolAlg<BOOL> alg,
+			int size, int arity, final int coord) {
 		assert 0 <= coord && coord < arity;
 
 		Tensor<BOOL> tensor = Tensor.generate(createShape(size, arity),
@@ -59,7 +92,6 @@ public class Operation<BOOL> {
 						return alg.lift(elem[0] == elem[1 + coord]);
 					}
 				});
-
 		return new Operation<BOOL>(alg, tensor);
 	}
 
@@ -154,5 +186,11 @@ public class Operation<BOOL> {
 		tmp = Tensor.fold(alg.ANY, 1, tmp);
 
 		return new Operation<BOOL>(alg, tmp);
+	}
+
+	public static <BOOL> Operation<BOOL> lift(BoolAlg<BOOL> alg,
+			Operation<Boolean> op) {
+		Tensor<BOOL> tensor = Tensor.map(alg.LIFT, op.tensor);
+		return new Operation<BOOL>(alg, tensor);
 	}
 }
