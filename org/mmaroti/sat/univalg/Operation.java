@@ -20,17 +20,17 @@ package org.mmaroti.sat.univalg;
 
 import org.mmaroti.sat.core.*;
 
-public class Operation<BOOL> {
-	private final BoolAlg<BOOL> alg;
-	private final Tensor<BOOL> tensor;
+public class Operation<ELEM> {
+	private final BoolAlgebra<ELEM> alg;
+	private final Tensor<ELEM> tensor;
 	private final int size;
 	private final int arity;
 
-	public BoolAlg<BOOL> getBoolAlg() {
+	public BoolAlgebra<ELEM> getBoolAlg() {
 		return alg;
 	}
 
-	public Tensor<BOOL> getTensor() {
+	public Tensor<ELEM> getTensor() {
 		return tensor;
 	}
 
@@ -42,9 +42,9 @@ public class Operation<BOOL> {
 		return arity;
 	}
 
-	public Operation(Relation<BOOL> relation) {
+	public Operation(Relation<ELEM> relation) {
 		alg = relation.getBoolAlg();
-		if (alg == BoolAlg.BOOLEAN)
+		if (alg == BoolAlgebra.INSTANCE)
 			assert (Boolean) relation.isFunction();
 
 		tensor = relation.getTensor();
@@ -52,19 +52,19 @@ public class Operation<BOOL> {
 		arity = relation.getArity() - 1;
 	}
 
-	public Operation(BoolAlg<BOOL> alg, Tensor<BOOL> tensor) {
-		this(new Relation<BOOL>(alg, tensor));
+	public Operation(BoolAlgebra<ELEM> alg, Tensor<ELEM> tensor) {
+		this(new Relation<ELEM>(alg, tensor));
 	}
 
-	public BOOL isFunction() {
-		Tensor<BOOL> rel = Tensor.fold(alg.ONE, 1, tensor);
+	public ELEM isFunction() {
+		Tensor<ELEM> rel = Tensor.fold(alg.ONE, 1, tensor);
 		return Tensor.fold(alg.ALL, rel.getOrder(), rel).get();
 	}
 
-	public BOOL isPermutation() {
+	public ELEM isPermutation() {
 		assert arity == 1;
 
-		Tensor<BOOL> tmp;
+		Tensor<ELEM> tmp;
 		tmp = Tensor.reshape(tensor, tensor.getShape(), new int[] { 1, 0 });
 		tmp = Tensor.fold(alg.ANY, 1, tmp);
 		tmp = Tensor.fold(alg.ALL, 1, tmp);
@@ -81,22 +81,22 @@ public class Operation<BOOL> {
 		return shape;
 	}
 
-	public static <BOOL> Operation<BOOL> opProjection(final BoolAlg<BOOL> alg,
+	public static <ELEM> Operation<ELEM> opProjection(final BoolAlgebra<ELEM> alg,
 			int size, int arity, final int coord) {
 		assert 0 <= coord && coord < arity;
 
-		Tensor<BOOL> tensor = Tensor.generate(createShape(size, arity),
-				new Func1<BOOL, int[]>() {
+		Tensor<ELEM> tensor = Tensor.generate(createShape(size, arity),
+				new Func1<ELEM, int[]>() {
 					@Override
-					public BOOL call(int[] elem) {
+					public ELEM call(int[] elem) {
 						return alg.lift(elem[0] == elem[1 + coord]);
 					}
 				});
-		return new Operation<BOOL>(alg, tensor);
+		return new Operation<ELEM>(alg, tensor);
 	}
 
-	public Relation<BOOL> graph() {
-		return new Relation<BOOL>(alg, tensor);
+	public Relation<ELEM> graph() {
+		return new Relation<ELEM>(alg, tensor);
 	}
 
 	public static String getArityName(int arity) {
@@ -112,16 +112,16 @@ public class Operation<BOOL> {
 			return "" + arity + "-ary";
 	}
 
-	public BOOL isEqual(Operation<BOOL> op) {
+	public ELEM isEqual(Operation<ELEM> op) {
 		checkSize(op);
 		assert arity == op.arity;
 
-		Tensor<BOOL> tmp = Tensor.map2(alg.LEQ, tensor, op.tensor);
+		Tensor<ELEM> tmp = Tensor.map2(alg.LEQ, tensor, op.tensor);
 		tmp = Tensor.fold(alg.ALL, arity, tmp);
 		return tmp.get();
 	}
 
-	public BOOL isSatisfied(int... identity) {
+	public ELEM isSatisfied(int... identity) {
 		assert arity == identity.length;
 
 		int[] map = new int[identity.length + 1];
@@ -132,51 +132,51 @@ public class Operation<BOOL> {
 			map[1 + i] = identity[i];
 		}
 
-		Tensor<BOOL> tmp;
+		Tensor<ELEM> tmp;
 		tmp = Tensor.reshape(tensor, createShape(size, vars), map);
 		tmp = Tensor.fold(alg.ALL, vars, tmp);
 		return tmp.get();
 	}
 
-	public BOOL isIdempotent() {
+	public ELEM isIdempotent() {
 		return isSatisfied(new int[arity]);
 	}
 
-	public BOOL isIdentity() {
+	public ELEM isIdentity() {
 		return isSatisfied(0, 0);
 	}
 
-	public BOOL isMajority() {
-		BOOL b = isSatisfied(1, 0, 0);
+	public ELEM isMajority() {
+		ELEM b = isSatisfied(1, 0, 0);
 		b = alg.and(b, isSatisfied(0, 1, 0));
 		b = alg.and(b, isSatisfied(0, 0, 1));
 		return b;
 	}
 
-	public BOOL isMinority() {
-		BOOL b = isSatisfied(0, 1, 1);
+	public ELEM isMinority() {
+		ELEM b = isSatisfied(0, 1, 1);
 		b = alg.and(b, isSatisfied(1, 0, 1));
 		b = alg.and(b, isSatisfied(1, 1, 0));
 		return b;
 	}
 
-	public BOOL isMaltsev() {
-		BOOL b = isSatisfied(0, 1, 1);
+	public ELEM isMaltsev() {
+		ELEM b = isSatisfied(0, 1, 1);
 		b = alg.and(b, isSatisfied(1, 1, 0));
 		return b;
 	}
 
-	private void checkSize(Operation<BOOL> op) {
+	private void checkSize(Operation<ELEM> op) {
 		assert alg == op.alg && size == op.size;
 	}
 
-	public Operation<BOOL> compose(Operation<BOOL> op) {
+	public Operation<ELEM> compose(Operation<ELEM> op) {
 		checkSize(op);
 		assert arity == 1;
 
 		int[] shape = createShape(size, op.arity + 2);
 
-		Tensor<BOOL> tmp = Tensor.reshape(tensor, shape, new int[] { 1, 0 });
+		Tensor<ELEM> tmp = Tensor.reshape(tensor, shape, new int[] { 1, 0 });
 
 		int[] map = new int[op.arity + 1];
 		for (int i = 0; i < map.length; i++)
@@ -185,10 +185,10 @@ public class Operation<BOOL> {
 		tmp = Tensor.map2(alg.AND, tmp, Tensor.reshape(op.tensor, shape, map));
 		tmp = Tensor.fold(alg.ANY, 1, tmp);
 
-		return new Operation<BOOL>(alg, tmp);
+		return new Operation<ELEM>(alg, tmp);
 	}
 
-	public static <BOOL> Operation<BOOL> lift(BoolAlg<BOOL> alg,
+	public static <BOOL> Operation<BOOL> lift(BoolAlgebra<BOOL> alg,
 			Operation<Boolean> op) {
 		Tensor<BOOL> tensor = Tensor.map(alg.LIFT, op.tensor);
 		return new Operation<BOOL>(alg, tensor);

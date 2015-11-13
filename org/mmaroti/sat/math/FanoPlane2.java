@@ -23,7 +23,7 @@ import org.mmaroti.sat.core.*;
 import org.mmaroti.sat.solvers.*;
 
 public class FanoPlane2 {
-	public static class Planes extends Problem {
+	public static class Planes extends BoolProblem {
 		public Tensor<Boolean> pts;
 
 		public Planes() {
@@ -36,16 +36,16 @@ public class FanoPlane2 {
 		}
 
 		@Override
-		public <BOOL> BOOL compute(BoolAlg<BOOL> alg,
-				List<Tensor<BOOL>> tensors) {
-			Tensor<BOOL> g = tensors.get(0);
-			Tensor<BOOL> p = Tensor.map(alg.LIFT, pts);
+		public <ELEM> ELEM compute(BoolAlgebra<ELEM> alg,
+				List<Tensor<ELEM>> tensors) {
+			Tensor<ELEM> g = tensors.get(0);
+			Tensor<ELEM> p = Tensor.map(alg.LIFT, pts);
 
-			Tensor<BOOL> t = Tensor.reduce(alg.SUM, "ik", alg.AND,
+			Tensor<ELEM> t = Tensor.reduce(alg.SUM, "ik", alg.AND,
 					g.named("ij"), p.named("jk"));
-			BOOL b = Tensor.fold(alg.ALL, 1, Tensor.fold(alg.ANY, 1, t)).get();
+			ELEM b = Tensor.fold(alg.ALL, 1, Tensor.fold(alg.ANY, 1, t)).get();
 
-			List<Tensor<BOOL>> xs = Tensor.unconcat(t);
+			List<Tensor<ELEM>> xs = Tensor.unconcat(t);
 
 			b = alg.and(b, alg.lexless(xs.get(0), xs.get(1)));
 			b = alg.and(b, alg.lexless(xs.get(0), xs.get(2)));

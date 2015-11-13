@@ -48,36 +48,36 @@ public class MonoidalInt {
 				});
 	}
 
-	public static <BOOL> BOOL isFunction(BoolAlg<BOOL> alg, Tensor<BOOL> func) {
+	public static <ELEM> ELEM isFunction(BoolAlgebra<ELEM> alg, Tensor<ELEM> func) {
 		func = Tensor.fold(alg.ONE, 1, func);
 		func = Tensor.fold(alg.ALL, func.getOrder(), func);
 		return func.get();
 	}
 
-	public static <BOOL> BOOL isReflexiveRel(BoolAlg<BOOL> alg, Tensor<BOOL> rel) {
+	public static <ELEM> ELEM isReflexiveRel(BoolAlgebra<ELEM> alg, Tensor<ELEM> rel) {
 		assert rel.getOrder() == 2 && rel.getDim(0) == rel.getDim(1);
 
-		Tensor<BOOL> t = Tensor.reshape(rel, new int[] { rel.getDim(0) },
+		Tensor<ELEM> t = Tensor.reshape(rel, new int[] { rel.getDim(0) },
 				new int[] { 0, 0 });
 		t = Tensor.fold(alg.ALL, 1, t);
 
 		return t.get();
 	}
 
-	public static <BOOL> BOOL isSymmetricRel(BoolAlg<BOOL> alg, Tensor<BOOL> rel) {
+	public static <ELEM> ELEM isSymmetricRel(BoolAlgebra<ELEM> alg, Tensor<ELEM> rel) {
 		assert rel.getOrder() == 2 && rel.getDim(0) == rel.getDim(1);
 
-		Tensor<BOOL> t = Tensor.reduce(alg.ALL, "", alg.EQU, rel.named("xy"),
+		Tensor<ELEM> t = Tensor.reduce(alg.ALL, "", alg.EQU, rel.named("xy"),
 				rel.named("yx"));
 
 		return t.get();
 	}
 
-	public static <BOOL> BOOL isTransitiveRel(BoolAlg<BOOL> alg,
-			Tensor<BOOL> rel) {
+	public static <ELEM> ELEM isTransitiveRel(BoolAlgebra<ELEM> alg,
+			Tensor<ELEM> rel) {
 		assert rel.getOrder() == 2 && rel.getDim(0) == rel.getDim(1);
 
-		Tensor<BOOL> t = Tensor.reduce(alg.ANY, "xz", alg.AND, rel.named("xy"),
+		Tensor<ELEM> t = Tensor.reduce(alg.ANY, "xz", alg.AND, rel.named("xy"),
 				rel.named("yz"));
 		t = Tensor.map2(alg.LEQ, t, rel);
 		t = Tensor.fold(alg.ALL, 2, t);
@@ -85,10 +85,10 @@ public class MonoidalInt {
 		return t.get();
 	}
 
-	public static <BOOL> BOOL isMajorityOp(BoolAlg<BOOL> alg, Tensor<BOOL> op) {
+	public static <ELEM> ELEM isMajorityOp(BoolAlgebra<ELEM> alg, Tensor<ELEM> op) {
 		assert op.getOrder() == 4;
 
-		BOOL t = Tensor.reduce(alg.ALL, "", alg.ID, op.named("xxxy")).get();
+		ELEM t = Tensor.reduce(alg.ALL, "", alg.ID, op.named("xxxy")).get();
 		t = alg.and(t, Tensor.reduce(alg.ALL, "", alg.ID, op.named("xxyx"))
 				.get());
 		t = alg.and(t, Tensor.reduce(alg.ALL, "", alg.ID, op.named("xyxx"))
@@ -97,21 +97,21 @@ public class MonoidalInt {
 		return t;
 	}
 
-	public static <BOOL> BOOL isMaltsevOp(BoolAlg<BOOL> alg, Tensor<BOOL> op) {
+	public static <ELEM> ELEM isMaltsevOp(BoolAlgebra<ELEM> alg, Tensor<ELEM> op) {
 		assert op.getOrder() == 4;
 
-		BOOL t = Tensor.reduce(alg.ALL, "", alg.ID, op.named("yxxy")).get();
+		ELEM t = Tensor.reduce(alg.ALL, "", alg.ID, op.named("yxxy")).get();
 		t = alg.and(t, Tensor.reduce(alg.ALL, "", alg.ID, op.named("yyxx"))
 				.get());
 
 		return t;
 	}
 
-	public static <BOOL> BOOL isStabilizerOp2(BoolAlg<BOOL> alg,
-			Tensor<BOOL> func, Tensor<BOOL> monoid) {
+	public static <ELEM> ELEM isStabilizerOp2(BoolAlgebra<ELEM> alg,
+			Tensor<ELEM> func, Tensor<ELEM> monoid) {
 		assert func.getOrder() == 3 && monoid.getOrder() == 3;
 
-		Tensor<BOOL> t;
+		Tensor<ELEM> t;
 		t = Tensor.reduce(alg.ANY, "xytp", alg.AND, func.named("xyz"),
 				monoid.named("ztp")); // z
 		t = Tensor.reduce(alg.ANY, "xtpq", alg.AND, t.named("xytp"),
@@ -123,11 +123,11 @@ public class MonoidalInt {
 		return t.get();
 	}
 
-	public static <BOOL> BOOL isStabilizerOp3(BoolAlg<BOOL> alg,
-			Tensor<BOOL> func, Tensor<BOOL> monoid) {
+	public static <ELEM> ELEM isStabilizerOp3(BoolAlgebra<ELEM> alg,
+			Tensor<ELEM> func, Tensor<ELEM> monoid) {
 		assert func.getOrder() == 4 && monoid.getOrder() == 3;
 
-		Tensor<BOOL> t;
+		Tensor<ELEM> t;
 		t = Tensor.reduce(alg.ANY, "atpcd", alg.AND, func.named("abcd"),
 				monoid.named("btp")); // b
 		t = Tensor.reduce(alg.ANY, "atpqd", alg.AND, t.named("atpcd"),
@@ -141,11 +141,11 @@ public class MonoidalInt {
 		return t.get();
 	}
 
-	public static <BOOL> BOOL isStabilizerOp4(BoolAlg<BOOL> alg,
-			Tensor<BOOL> func, Tensor<BOOL> monoid) {
+	public static <ELEM> ELEM isStabilizerOp4(BoolAlgebra<ELEM> alg,
+			Tensor<ELEM> func, Tensor<ELEM> monoid) {
 		assert func.getOrder() == 5 && monoid.getOrder() == 3;
 
-		Tensor<BOOL> t;
+		Tensor<ELEM> t;
 		t = Tensor.reduce(alg.ANY, "cdeaxq", alg.AND, func.named("abcde"),
 				monoid.named("bxq")); // b
 		t = Tensor.reduce(alg.ANY, "deaxqr", alg.AND, t.named("cdeaxq"),
@@ -161,20 +161,20 @@ public class MonoidalInt {
 		return t.get();
 	}
 
-	public static <BOOL> BOOL isEssentialRel2(BoolAlg<BOOL> alg,
-			Tensor<BOOL> rel) {
+	public static <ELEM> ELEM isEssentialRel2(BoolAlgebra<ELEM> alg,
+			Tensor<ELEM> rel) {
 		assert rel.getOrder() == 2;
 
-		Tensor<BOOL> t1;
+		Tensor<ELEM> t1;
 		t1 = Tensor.fold(alg.ANY, 1, rel);
 		t1 = Tensor.reshape(t1, rel.getShape(), new int[] { 1 });
 
-		Tensor<BOOL> t2;
+		Tensor<ELEM> t2;
 		t2 = Tensor.reshape(rel, rel.getShape(), new int[] { 1, 0 });
 		t2 = Tensor.fold(alg.ANY, 1, t2);
 		t2 = Tensor.reshape(t2, rel.getShape(), new int[] { 0 });
 
-		Tensor<BOOL> t;
+		Tensor<ELEM> t;
 		t = Tensor.map2(alg.AND, t1, t2);
 		t = Tensor.map2(alg.AND, t, Tensor.map(alg.NOT, rel));
 		t = Tensor.fold(alg.ANY, 2, t);
@@ -182,25 +182,25 @@ public class MonoidalInt {
 		return t.get();
 	}
 
-	public static <BOOL> BOOL isEssentialRel3(BoolAlg<BOOL> alg,
-			Tensor<BOOL> rel) {
+	public static <ELEM> ELEM isEssentialRel3(BoolAlgebra<ELEM> alg,
+			Tensor<ELEM> rel) {
 		assert rel.getOrder() == 3;
 
-		Tensor<BOOL> t0;
+		Tensor<ELEM> t0;
 		t0 = Tensor.fold(alg.ANY, 1, rel);
 		t0 = Tensor.reshape(t0, rel.getShape(), new int[] { 1, 2 });
 
-		Tensor<BOOL> t1;
+		Tensor<ELEM> t1;
 		t1 = Tensor.reshape(rel, rel.getShape(), new int[] { 1, 0, 2 });
 		t1 = Tensor.fold(alg.ANY, 1, t1);
 		t1 = Tensor.reshape(t1, rel.getShape(), new int[] { 0, 2 });
 
-		Tensor<BOOL> t2;
+		Tensor<ELEM> t2;
 		t2 = Tensor.reshape(rel, rel.getShape(), new int[] { 2, 0, 1 });
 		t2 = Tensor.fold(alg.ANY, 1, t2);
 		t2 = Tensor.reshape(t2, rel.getShape(), new int[] { 0, 1 });
 
-		Tensor<BOOL> t;
+		Tensor<ELEM> t;
 		t = Tensor.map2(alg.AND, t0, t1);
 		t = Tensor.map2(alg.AND, t, t2);
 		t = Tensor.map2(alg.AND, t, Tensor.map(alg.NOT, rel));
@@ -209,14 +209,14 @@ public class MonoidalInt {
 		return t.get();
 	}
 
-	public static <BOOL> BOOL isEssentialOp2(BoolAlg<BOOL> alg,
-			Tensor<BOOL> func) {
+	public static <ELEM> ELEM isEssentialOp2(BoolAlgebra<ELEM> alg,
+			Tensor<ELEM> func) {
 		assert func.getOrder() == 3;
 
-		Tensor<BOOL> t;
+		Tensor<ELEM> t;
 		t = Tensor.reshape(func, func.getShape(), new int[] { 1, 0, 2 });
 		t = Tensor.fold(alg.ALL, 2, Tensor.fold(alg.EQS, 1, t));
-		BOOL proj = t.get();
+		ELEM proj = t.get();
 
 		t = Tensor.reshape(func, func.getShape(), new int[] { 1, 2, 0 });
 		t = Tensor.fold(alg.ALL, 2, Tensor.fold(alg.EQS, 1, t));
@@ -225,14 +225,14 @@ public class MonoidalInt {
 		return alg.not(proj);
 	}
 
-	public static <BOOL> BOOL isEssentialOp3(BoolAlg<BOOL> alg,
-			Tensor<BOOL> func) {
+	public static <ELEM> ELEM isEssentialOp3(BoolAlgebra<ELEM> alg,
+			Tensor<ELEM> func) {
 		assert func.getOrder() == 4;
 
-		Tensor<BOOL> t;
+		Tensor<ELEM> t;
 		t = Tensor.reshape(func, func.getShape(), new int[] { 1, 0, 2, 3 });
 		t = Tensor.fold(alg.ALL, 3, Tensor.fold(alg.EQS, 1, t));
-		BOOL proj = t.get();
+		ELEM proj = t.get();
 
 		t = Tensor.reshape(func, func.getShape(), new int[] { 1, 2, 0, 3 });
 		t = Tensor.fold(alg.ALL, 3, Tensor.fold(alg.EQS, 1, t));
@@ -245,11 +245,11 @@ public class MonoidalInt {
 		return alg.not(proj);
 	}
 
-	public static <BOOL> BOOL isCompatibleRel1(BoolAlg<BOOL> alg,
-			Tensor<BOOL> rel, Tensor<BOOL> monoid) {
+	public static <ELEM> ELEM isCompatibleRel1(BoolAlgebra<ELEM> alg,
+			Tensor<ELEM> rel, Tensor<ELEM> monoid) {
 		assert rel.getOrder() == 1 && monoid.getOrder() == 3;
 
-		Tensor<BOOL> t;
+		Tensor<ELEM> t;
 		t = Tensor.reduce(alg.ANY, "y", alg.AND, rel.named("x"),
 				monoid.named("yxp"));
 		t = Tensor.map2(alg.LEQ, t, rel);
@@ -258,11 +258,11 @@ public class MonoidalInt {
 		return t.get();
 	}
 
-	public static <BOOL> BOOL isCompatibleRel2(BoolAlg<BOOL> alg,
-			Tensor<BOOL> rel, Tensor<BOOL> monoid) {
+	public static <ELEM> ELEM isCompatibleRel2(BoolAlgebra<ELEM> alg,
+			Tensor<ELEM> rel, Tensor<ELEM> monoid) {
 		assert rel.getOrder() == 2 && monoid.getOrder() == 3;
 
-		Tensor<BOOL> t;
+		Tensor<ELEM> t;
 		t = Tensor.reduce(alg.ANY, "uyp", alg.AND, rel.named("xy"),
 				monoid.named("uxp"));
 		t = Tensor.reduce(alg.ANY, "uv", alg.AND, t.named("uyp"),
@@ -273,11 +273,11 @@ public class MonoidalInt {
 		return t.get();
 	}
 
-	public static <BOOL> BOOL isCompatibleRel3(BoolAlg<BOOL> alg,
-			Tensor<BOOL> rel, Tensor<BOOL> monoid) {
+	public static <ELEM> ELEM isCompatibleRel3(BoolAlgebra<ELEM> alg,
+			Tensor<ELEM> rel, Tensor<ELEM> monoid) {
 		assert rel.getOrder() == 3 && monoid.getOrder() == 3;
 
-		Tensor<BOOL> t;
+		Tensor<ELEM> t;
 		t = Tensor.reduce(alg.ANY, "yzpu", alg.AND, rel.named("xyz"),
 				monoid.named("uxp")); // x
 		t = Tensor.reduce(alg.ANY, "zpuv", alg.AND, t.named("yzpu"),
@@ -291,11 +291,11 @@ public class MonoidalInt {
 		return t.get();
 	}
 
-	public static <BOOL> BOOL isCompatibleRel4(BoolAlg<BOOL> alg,
-			Tensor<BOOL> rel, Tensor<BOOL> monoid) {
+	public static <ELEM> ELEM isCompatibleRel4(BoolAlgebra<ELEM> alg,
+			Tensor<ELEM> rel, Tensor<ELEM> monoid) {
 		assert rel.getOrder() == 4 && monoid.getOrder() == 3;
 
-		Tensor<BOOL> t;
+		Tensor<ELEM> t;
 		t = Tensor.reduce(alg.ANY, "bcdxm", alg.AND, rel.named("abcd"),
 				monoid.named("xam"));
 		t = Tensor.reduce(alg.ANY, "cdxym", alg.AND, t.named("bcdxm"),
@@ -311,12 +311,12 @@ public class MonoidalInt {
 		return t.get();
 	}
 
-	public static <SBOOL> Tensor<Boolean> getUnaryRels(SatSolver<SBOOL> solver,
+	public static <ELEM> Tensor<Boolean> getUnaryRels(SatSolver<ELEM> solver,
 			int size, String monoid) {
 		final Tensor<Boolean> mon = decodeMonoid(size, monoid);
-		Problem prob = new Problem(new int[] { size }) {
+		BoolProblem prob = new BoolProblem(new int[] { size }) {
 			@Override
-			public <BOOL> BOOL compute(BoolAlg<BOOL> alg,
+			public <BOOL> BOOL compute(BoolAlgebra<BOOL> alg,
 					List<Tensor<BOOL>> tensors) {
 
 				Tensor<BOOL> rel = tensors.get(0);
@@ -329,12 +329,12 @@ public class MonoidalInt {
 		return prob.solveAll(solver, LIMIT).get(0);
 	}
 
-	public static <SBOOL> Tensor<Boolean> getBinaryRels(
-			SatSolver<SBOOL> solver, int size, String monoid) {
+	public static <ELEM> Tensor<Boolean> getBinaryRels(
+			SatSolver<ELEM> solver, int size, String monoid) {
 		final Tensor<Boolean> mon = decodeMonoid(size, monoid);
-		Problem prob = new Problem(new int[] { size, size }) {
+		BoolProblem prob = new BoolProblem(new int[] { size, size }) {
 			@Override
-			public <BOOL> BOOL compute(BoolAlg<BOOL> alg,
+			public <BOOL> BOOL compute(BoolAlgebra<BOOL> alg,
 					List<Tensor<BOOL>> tensors) {
 
 				Tensor<BOOL> rel = tensors.get(0);
@@ -347,11 +347,11 @@ public class MonoidalInt {
 		return prob.solveAll(solver, LIMIT).get(0);
 	}
 
-	public static <SBOOL> Tensor<Boolean> getAllBinaryRels(
-			SatSolver<SBOOL> solver, int size) {
-		Problem prob = new Problem(new int[] { size, size }) {
+	public static <ELEM> Tensor<Boolean> getAllBinaryRels(
+			SatSolver<ELEM> solver, int size) {
+		BoolProblem prob = new BoolProblem(new int[] { size, size }) {
 			@Override
-			public <BOOL> BOOL compute(BoolAlg<BOOL> alg,
+			public <BOOL> BOOL compute(BoolAlgebra<BOOL> alg,
 					List<Tensor<BOOL>> tensors) {
 				return alg.TRUE;
 			}
@@ -360,12 +360,12 @@ public class MonoidalInt {
 		return prob.solveAll(solver, LIMIT).get(0);
 	}
 
-	public static <SBOOL> Tensor<Boolean> getEssentialBinaryRels(
-			SatSolver<SBOOL> solver, int size, String monoid) {
+	public static <ELEM> Tensor<Boolean> getEssentialBinaryRels(
+			SatSolver<ELEM> solver, int size, String monoid) {
 		final Tensor<Boolean> mon = decodeMonoid(size, monoid);
-		Problem prob = new Problem(new int[] { size, size }) {
+		BoolProblem prob = new BoolProblem(new int[] { size, size }) {
 			@Override
-			public <BOOL> BOOL compute(BoolAlg<BOOL> alg,
+			public <BOOL> BOOL compute(BoolAlgebra<BOOL> alg,
 					List<Tensor<BOOL>> tensors) {
 
 				Tensor<BOOL> rel = tensors.get(0);
@@ -381,12 +381,12 @@ public class MonoidalInt {
 		return prob.solveAll(solver, LIMIT).get(0);
 	}
 
-	public static <SBOOL> Tensor<Boolean> getQuasiorderRels(
-			SatSolver<SBOOL> solver, int size, String monoid) {
+	public static <ELEM> Tensor<Boolean> getQuasiorderRels(
+			SatSolver<ELEM> solver, int size, String monoid) {
 		final Tensor<Boolean> mon = decodeMonoid(size, monoid);
-		Problem prob = new Problem(new int[] { size, size }) {
+		BoolProblem prob = new BoolProblem(new int[] { size, size }) {
 			@Override
-			public <BOOL> BOOL compute(BoolAlg<BOOL> alg,
+			public <BOOL> BOOL compute(BoolAlgebra<BOOL> alg,
 					List<Tensor<BOOL>> tensors) {
 
 				Tensor<BOOL> rel = tensors.get(0);
@@ -403,12 +403,12 @@ public class MonoidalInt {
 		return prob.solveAll(solver, LIMIT).get(0);
 	}
 
-	public static <SBOOL> Tensor<Boolean> getTernaryRels(
-			SatSolver<SBOOL> solver, int size, String monoid) {
+	public static <ELEM> Tensor<Boolean> getTernaryRels(
+			SatSolver<ELEM> solver, int size, String monoid) {
 		final Tensor<Boolean> mon = decodeMonoid(size, monoid);
-		Problem prob = new Problem(new int[] { size, size, size }) {
+		BoolProblem prob = new BoolProblem(new int[] { size, size, size }) {
 			@Override
-			public <BOOL> BOOL compute(BoolAlg<BOOL> alg,
+			public <BOOL> BOOL compute(BoolAlgebra<BOOL> alg,
 					List<Tensor<BOOL>> tensors) {
 
 				Tensor<BOOL> rel = tensors.get(0);
@@ -421,8 +421,8 @@ public class MonoidalInt {
 		return prob.solveAll(solver, LIMIT).get(0);
 	}
 
-	public static <SBOOL> Tensor<Boolean> getSelectedTernaryRels(
-			SatSolver<SBOOL> solver, int size, String monoid) {
+	public static <ELEM> Tensor<Boolean> getSelectedTernaryRels(
+			SatSolver<ELEM> solver, int size, String monoid) {
 		final Tensor<Boolean> mon = decodeMonoid(size, monoid);
 		final Tensor<Boolean> mask = Tensor.generate(new int[] { size, size,
 				size }, new Func1<Boolean, int[]>() {
@@ -433,9 +433,9 @@ public class MonoidalInt {
 			}
 		});
 
-		Problem prob = new Problem(mask) {
+		BoolProblem prob = new BoolProblem(mask) {
 			@Override
-			public <BOOL> BOOL compute(BoolAlg<BOOL> alg,
+			public <BOOL> BOOL compute(BoolAlgebra<BOOL> alg,
 					List<Tensor<BOOL>> tensors) {
 
 				Tensor<BOOL> rel = tensors.get(0);
@@ -448,12 +448,12 @@ public class MonoidalInt {
 		return prob.solveAll(solver, LIMIT).get(0);
 	}
 
-	public static <SBOOL> Tensor<Boolean> getEssentialTernaryRels(
-			SatSolver<SBOOL> solver, int size, String monoid) {
+	public static <ELEM> Tensor<Boolean> getEssentialTernaryRels(
+			SatSolver<ELEM> solver, int size, String monoid) {
 		final Tensor<Boolean> mon = decodeMonoid(size, monoid);
-		Problem prob = new Problem(new int[] { size, size, size }) {
+		BoolProblem prob = new BoolProblem(new int[] { size, size, size }) {
 			@Override
-			public <BOOL> BOOL compute(BoolAlg<BOOL> alg,
+			public <BOOL> BOOL compute(BoolAlgebra<BOOL> alg,
 					List<Tensor<BOOL>> tensors) {
 
 				Tensor<BOOL> rel = tensors.get(0);
@@ -469,12 +469,12 @@ public class MonoidalInt {
 		return prob.solveAll(solver, LIMIT).get(0);
 	}
 
-	public static <SBOOL> Tensor<Boolean> getQuaternaryRels(
-			SatSolver<SBOOL> solver, int size, String monoid) {
+	public static <ELEM> Tensor<Boolean> getQuaternaryRels(
+			SatSolver<ELEM> solver, int size, String monoid) {
 		final Tensor<Boolean> mon = decodeMonoid(size, monoid);
-		Problem prob = new Problem(new int[] { size, size, size, size }) {
+		BoolProblem prob = new BoolProblem(new int[] { size, size, size, size }) {
 			@Override
-			public <BOOL> BOOL compute(BoolAlg<BOOL> alg,
+			public <BOOL> BOOL compute(BoolAlgebra<BOOL> alg,
 					List<Tensor<BOOL>> tensors) {
 
 				Tensor<BOOL> rel = tensors.get(0);
@@ -487,12 +487,12 @@ public class MonoidalInt {
 		return prob.solveAll(solver, LIMIT).get(0);
 	}
 
-	public static <SBOOL> Tensor<Boolean> getBinaryOps(SatSolver<SBOOL> solver,
+	public static <ELEM> Tensor<Boolean> getBinaryOps(SatSolver<ELEM> solver,
 			int size, String monoid) {
 		final Tensor<Boolean> mon = decodeMonoid(size, monoid);
-		Problem prob = new Problem(new int[] { size, size, size }) {
+		BoolProblem prob = new BoolProblem(new int[] { size, size, size }) {
 			@Override
-			public <BOOL> BOOL compute(BoolAlg<BOOL> alg,
+			public <BOOL> BOOL compute(BoolAlgebra<BOOL> alg,
 					List<Tensor<BOOL>> tensors) {
 
 				Tensor<BOOL> func = tensors.get(0);
@@ -508,12 +508,12 @@ public class MonoidalInt {
 		return prob.solveAll(solver, LIMIT).get(0);
 	}
 
-	public static <SBOOL> Tensor<Boolean> getAllBinaryOps(
-			SatSolver<SBOOL> solver, int size) {
+	public static <ELEM> Tensor<Boolean> getAllBinaryOps(
+			SatSolver<ELEM> solver, int size) {
 
-		Problem prob = new Problem(new int[] { size, size, size }) {
+		BoolProblem prob = new BoolProblem(new int[] { size, size, size }) {
 			@Override
-			public <BOOL> BOOL compute(BoolAlg<BOOL> alg,
+			public <BOOL> BOOL compute(BoolAlgebra<BOOL> alg,
 					List<Tensor<BOOL>> tensors) {
 				Tensor<BOOL> func = tensors.get(0);
 				return isFunction(alg, func);
@@ -523,12 +523,12 @@ public class MonoidalInt {
 		return prob.solveAll(solver, LIMIT).get(0);
 	}
 
-	public static <SBOOL> Tensor<Boolean> getEssentialBinaryOps(
-			SatSolver<SBOOL> solver, int size, String monoid) {
+	public static <ELEM> Tensor<Boolean> getEssentialBinaryOps(
+			SatSolver<ELEM> solver, int size, String monoid) {
 		final Tensor<Boolean> mon = decodeMonoid(size, monoid);
-		Problem prob = new Problem(new int[] { size, size, size }) {
+		BoolProblem prob = new BoolProblem(new int[] { size, size, size }) {
 			@Override
-			public <BOOL> BOOL compute(BoolAlg<BOOL> alg,
+			public <BOOL> BOOL compute(BoolAlgebra<BOOL> alg,
 					List<Tensor<BOOL>> tensors) {
 
 				Tensor<BOOL> func = tensors.get(0);
@@ -545,12 +545,12 @@ public class MonoidalInt {
 		return prob.solveAll(solver, LIMIT).get(0);
 	}
 
-	public static <SBOOL> Tensor<Boolean> getTernaryOps(
-			SatSolver<SBOOL> solver, int size, String monoid) {
+	public static <ELEM> Tensor<Boolean> getTernaryOps(
+			SatSolver<ELEM> solver, int size, String monoid) {
 		final Tensor<Boolean> mon = decodeMonoid(size, monoid);
-		Problem prob = new Problem(new int[] { size, size, size, size }) {
+		BoolProblem prob = new BoolProblem(new int[] { size, size, size, size }) {
 			@Override
-			public <BOOL> BOOL compute(BoolAlg<BOOL> alg,
+			public <BOOL> BOOL compute(BoolAlgebra<BOOL> alg,
 					List<Tensor<BOOL>> tensors) {
 
 				Tensor<BOOL> func = tensors.get(0);
@@ -566,8 +566,8 @@ public class MonoidalInt {
 		return prob.solveAll(solver, LIMIT).get(0);
 	}
 
-	public static <SBOOL> Tensor<Boolean> getSelectedTernaryOps(
-			SatSolver<SBOOL> solver, int size, String monoid) {
+	public static <ELEM> Tensor<Boolean> getSelectedTernaryOps(
+			SatSolver<ELEM> solver, int size, String monoid) {
 		final Tensor<Boolean> mon = decodeMonoid(size, monoid);
 		final Tensor<Boolean> mask = Tensor.generate(new int[] { size, size,
 				size, size }, new Func1<Boolean, int[]>() {
@@ -578,9 +578,9 @@ public class MonoidalInt {
 			}
 		});
 
-		Problem prob = new Problem(mask) {
+		BoolProblem prob = new BoolProblem(mask) {
 			@Override
-			public <BOOL> BOOL compute(BoolAlg<BOOL> alg,
+			public <BOOL> BOOL compute(BoolAlgebra<BOOL> alg,
 					List<Tensor<BOOL>> tensors) {
 
 				Tensor<BOOL> func = tensors.get(0);
@@ -596,12 +596,12 @@ public class MonoidalInt {
 		return prob.solveAll(solver, LIMIT).get(0);
 	}
 
-	public static <SBOOL> Tensor<Boolean> getQuaternaryOps(
-			SatSolver<SBOOL> solver, int size, String monoid) {
+	public static <ELEM> Tensor<Boolean> getQuaternaryOps(
+			SatSolver<ELEM> solver, int size, String monoid) {
 		final Tensor<Boolean> mon = decodeMonoid(size, monoid);
-		Problem prob = new Problem(new int[] { size, size, size, size, size }) {
+		BoolProblem prob = new BoolProblem(new int[] { size, size, size, size, size }) {
 			@Override
-			public <BOOL> BOOL compute(BoolAlg<BOOL> alg,
+			public <BOOL> BOOL compute(BoolAlgebra<BOOL> alg,
 					List<Tensor<BOOL>> tensors) {
 
 				Tensor<BOOL> func = tensors.get(0);
@@ -617,12 +617,12 @@ public class MonoidalInt {
 		return prob.solveAll(solver, LIMIT).get(0);
 	}
 
-	public static <SBOOL> Tensor<Boolean> getEssentialTernaryOps(
-			SatSolver<SBOOL> solver, int size, String monoid) {
+	public static <ELEM> Tensor<Boolean> getEssentialTernaryOps(
+			SatSolver<ELEM> solver, int size, String monoid) {
 		final Tensor<Boolean> mon = decodeMonoid(size, monoid);
-		Problem prob = new Problem(new int[] { size, size, size, size }) {
+		BoolProblem prob = new BoolProblem(new int[] { size, size, size, size }) {
 			@Override
-			public <BOOL> BOOL compute(BoolAlg<BOOL> alg,
+			public <BOOL> BOOL compute(BoolAlgebra<BOOL> alg,
 					List<Tensor<BOOL>> tensors) {
 
 				Tensor<BOOL> func = tensors.get(0);
@@ -639,12 +639,12 @@ public class MonoidalInt {
 		return prob.solveAll(solver, LIMIT).get(0);
 	}
 
-	public static <SBOOL> Tensor<Boolean> getMajorityOps(
-			SatSolver<SBOOL> solver, int size, String monoid) {
+	public static <ELEM> Tensor<Boolean> getMajorityOps(
+			SatSolver<ELEM> solver, int size, String monoid) {
 		final Tensor<Boolean> mon = decodeMonoid(size, monoid);
-		Problem prob = new Problem(new int[] { size, size, size, size }) {
+		BoolProblem prob = new BoolProblem(new int[] { size, size, size, size }) {
 			@Override
-			public <BOOL> BOOL compute(BoolAlg<BOOL> alg,
+			public <BOOL> BOOL compute(BoolAlgebra<BOOL> alg,
 					List<Tensor<BOOL>> tensors) {
 
 				Tensor<BOOL> func = tensors.get(0);
@@ -661,12 +661,12 @@ public class MonoidalInt {
 		return prob.solveAll(solver, LIMIT).get(0);
 	}
 
-	public static <SBOOL> Tensor<Boolean> getMaltsevOps(
-			SatSolver<SBOOL> solver, int size, String monoid) {
+	public static <ELEM> Tensor<Boolean> getMaltsevOps(
+			SatSolver<ELEM> solver, int size, String monoid) {
 		final Tensor<Boolean> mon = decodeMonoid(size, monoid);
-		Problem prob = new Problem(new int[] { size, size, size, size }) {
+		BoolProblem prob = new BoolProblem(new int[] { size, size, size, size }) {
 			@Override
-			public <BOOL> BOOL compute(BoolAlg<BOOL> alg,
+			public <BOOL> BOOL compute(BoolAlgebra<BOOL> alg,
 					List<Tensor<BOOL>> tensors) {
 
 				Tensor<BOOL> func = tensors.get(0);
@@ -743,11 +743,11 @@ public class MonoidalInt {
 		}
 	}
 
-	public static <BOOL> BOOL isCompatible22(BoolAlg<BOOL> alg,
-			Tensor<BOOL> op, Tensor<BOOL> rel) {
+	public static <ELEM> ELEM isCompatible22(BoolAlgebra<ELEM> alg,
+			Tensor<ELEM> op, Tensor<ELEM> rel) {
 		assert op.getOrder() == 3 && rel.getOrder() == 2;
 
-		Tensor<BOOL> t;
+		Tensor<ELEM> t;
 		t = Tensor.reduce(alg.ANY, "cbx", alg.AND, rel.named("ab"),
 				op.named("xac")); // a
 		t = Tensor.reduce(alg.ANY, "bdx", alg.AND, t.named("cbx"),
@@ -759,27 +759,27 @@ public class MonoidalInt {
 		return t.get();
 	}
 
-	public static <BOOL> Tensor<BOOL> getCompatibility22(
-			final BoolAlg<BOOL> alg, Tensor<BOOL> ops, Tensor<BOOL> rels) {
+	public static <ELEM> Tensor<ELEM> getCompatibility22(
+			final BoolAlgebra<ELEM> alg, Tensor<ELEM> ops, Tensor<ELEM> rels) {
 		assert ops.getOrder() == 4 && rels.getOrder() == 3;
 
-		final List<Tensor<BOOL>> os = Tensor.unconcat(ops);
-		final List<Tensor<BOOL>> rs = Tensor.unconcat(rels);
+		final List<Tensor<ELEM>> os = Tensor.unconcat(ops);
+		final List<Tensor<ELEM>> rs = Tensor.unconcat(rels);
 
 		return Tensor.generate(os.size(), rs.size(),
-				new Func2<BOOL, Integer, Integer>() {
+				new Func2<ELEM, Integer, Integer>() {
 					@Override
-					public BOOL call(Integer a, Integer b) {
+					public ELEM call(Integer a, Integer b) {
 						return isCompatible22(alg, os.get(a), rs.get(b));
 					}
 				});
 	}
 
-	public static <BOOL> Tensor<BOOL> getCompatibility22Old(BoolAlg<BOOL> alg,
-			Tensor<BOOL> ops, Tensor<BOOL> rels) {
+	public static <ELEM> Tensor<ELEM> getCompatibility22Old(BoolAlgebra<ELEM> alg,
+			Tensor<ELEM> ops, Tensor<ELEM> rels) {
 		assert ops.getOrder() == 4 && rels.getOrder() == 3;
 
-		Tensor<BOOL> t;
+		Tensor<ELEM> t;
 		t = Tensor.reduce(alg.ANY, "cbxfr", alg.AND, rels.named("abr"),
 				ops.named("xacf")); // a
 		t = Tensor.reduce(alg.ANY, "bdxfr", alg.AND, t.named("cbxfr"),
@@ -792,11 +792,11 @@ public class MonoidalInt {
 		return t;
 	}
 
-	public static <BOOL> BOOL isCompatible23(BoolAlg<BOOL> alg,
-			Tensor<BOOL> op, Tensor<BOOL> rel) {
+	public static <ELEM> ELEM isCompatible23(BoolAlgebra<ELEM> alg,
+			Tensor<ELEM> op, Tensor<ELEM> rel) {
 		assert op.getOrder() == 3 && rel.getOrder() == 3;
 
-		Tensor<BOOL> t;
+		Tensor<ELEM> t;
 		t = Tensor.reduce(alg.ANY, "bdcx", alg.AND, op.named("xad"),
 				rel.named("abc")); // a
 		t = Tensor.reduce(alg.ANY, "decxy", alg.AND, t.named("bdcx"),
@@ -811,27 +811,27 @@ public class MonoidalInt {
 		return t.get();
 	}
 
-	public static <BOOL> Tensor<BOOL> getCompatibility23(
-			final BoolAlg<BOOL> alg, Tensor<BOOL> ops, Tensor<BOOL> rels) {
+	public static <ELEM> Tensor<ELEM> getCompatibility23(
+			final BoolAlgebra<ELEM> alg, Tensor<ELEM> ops, Tensor<ELEM> rels) {
 		assert ops.getOrder() == 4 && rels.getOrder() == 4;
 
-		final List<Tensor<BOOL>> os = Tensor.unconcat(ops);
-		final List<Tensor<BOOL>> rs = Tensor.unconcat(rels);
+		final List<Tensor<ELEM>> os = Tensor.unconcat(ops);
+		final List<Tensor<ELEM>> rs = Tensor.unconcat(rels);
 
 		return Tensor.generate(os.size(), rs.size(),
-				new Func2<BOOL, Integer, Integer>() {
+				new Func2<ELEM, Integer, Integer>() {
 					@Override
-					public BOOL call(Integer a, Integer b) {
+					public ELEM call(Integer a, Integer b) {
 						return isCompatible23(alg, os.get(a), rs.get(b));
 					}
 				});
 	}
 
-	public static <BOOL> BOOL isCompatible24(BoolAlg<BOOL> alg,
-			Tensor<BOOL> op, Tensor<BOOL> rel) {
+	public static <ELEM> ELEM isCompatible24(BoolAlgebra<ELEM> alg,
+			Tensor<ELEM> op, Tensor<ELEM> rel) {
 		assert op.getOrder() == 3 && rel.getOrder() == 4;
 
-		Tensor<BOOL> t;
+		Tensor<ELEM> t;
 		t = Tensor.reduce(alg.ANY, "becdx", alg.AND, rel.named("abcd"),
 				op.named("xae")); // a
 		t = Tensor.reduce(alg.ANY, "efcdxy", alg.AND, t.named("becdx"),
@@ -848,27 +848,27 @@ public class MonoidalInt {
 		return t.get();
 	}
 
-	public static <BOOL> Tensor<BOOL> getCompatibility24(
-			final BoolAlg<BOOL> alg, Tensor<BOOL> ops, Tensor<BOOL> rels) {
+	public static <ELEM> Tensor<ELEM> getCompatibility24(
+			final BoolAlgebra<ELEM> alg, Tensor<ELEM> ops, Tensor<ELEM> rels) {
 		assert ops.getOrder() == 4 && rels.getOrder() == 5;
 
-		final List<Tensor<BOOL>> os = Tensor.unconcat(ops);
-		final List<Tensor<BOOL>> rs = Tensor.unconcat(rels);
+		final List<Tensor<ELEM>> os = Tensor.unconcat(ops);
+		final List<Tensor<ELEM>> rs = Tensor.unconcat(rels);
 
 		return Tensor.generate(os.size(), rs.size(),
-				new Func2<BOOL, Integer, Integer>() {
+				new Func2<ELEM, Integer, Integer>() {
 					@Override
-					public BOOL call(Integer a, Integer b) {
+					public ELEM call(Integer a, Integer b) {
 						return isCompatible24(alg, os.get(a), rs.get(b));
 					}
 				});
 	}
 
-	public static <BOOL> BOOL isCompatible32(BoolAlg<BOOL> alg,
-			Tensor<BOOL> op, Tensor<BOOL> rel) {
+	public static <ELEM> ELEM isCompatible32(BoolAlgebra<ELEM> alg,
+			Tensor<ELEM> op, Tensor<ELEM> rel) {
 		assert op.getOrder() == 4 && rel.getOrder() == 2;
 
-		Tensor<BOOL> t;
+		Tensor<ELEM> t;
 		t = Tensor.reduce(alg.ANY, "cebx", alg.AND, rel.named("ab"),
 				op.named("xace")); // a
 		t = Tensor.reduce(alg.ANY, "ebdx", alg.AND, t.named("cebx"),
@@ -882,27 +882,27 @@ public class MonoidalInt {
 		return t.get();
 	}
 
-	public static <BOOL> Tensor<BOOL> getCompatibility32(
-			final BoolAlg<BOOL> alg, Tensor<BOOL> ops, Tensor<BOOL> rels) {
+	public static <ELEM> Tensor<ELEM> getCompatibility32(
+			final BoolAlgebra<ELEM> alg, Tensor<ELEM> ops, Tensor<ELEM> rels) {
 		assert ops.getOrder() == 5 && rels.getOrder() == 3;
 
-		final List<Tensor<BOOL>> os = Tensor.unconcat(ops);
-		final List<Tensor<BOOL>> rs = Tensor.unconcat(rels);
+		final List<Tensor<ELEM>> os = Tensor.unconcat(ops);
+		final List<Tensor<ELEM>> rs = Tensor.unconcat(rels);
 
 		return Tensor.generate(os.size(), rs.size(),
-				new Func2<BOOL, Integer, Integer>() {
+				new Func2<ELEM, Integer, Integer>() {
 					@Override
-					public BOOL call(Integer a, Integer b) {
+					public ELEM call(Integer a, Integer b) {
 						return isCompatible32(alg, os.get(a), rs.get(b));
 					}
 				});
 	}
 
-	public static <BOOL> BOOL isCompatible33(BoolAlg<BOOL> alg,
-			Tensor<BOOL> op, Tensor<BOOL> rel) {
+	public static <ELEM> ELEM isCompatible33(BoolAlgebra<ELEM> alg,
+			Tensor<ELEM> op, Tensor<ELEM> rel) {
 		assert op.getOrder() == 4 && rel.getOrder() == 3;
 
-		Tensor<BOOL> t;
+		Tensor<ELEM> t;
 		t = Tensor.reduce(alg.ANY, "dbgcx", alg.AND, rel.named("abc"),
 				op.named("xadg")); // a
 		t = Tensor.reduce(alg.ANY, "begcfx", alg.AND, t.named("dbgcx"),
@@ -919,27 +919,27 @@ public class MonoidalInt {
 		return t.get();
 	}
 
-	public static <BOOL> Tensor<BOOL> getCompatibility33(
-			final BoolAlg<BOOL> alg, Tensor<BOOL> ops, Tensor<BOOL> rels) {
+	public static <ELEM> Tensor<ELEM> getCompatibility33(
+			final BoolAlgebra<ELEM> alg, Tensor<ELEM> ops, Tensor<ELEM> rels) {
 		assert ops.getOrder() == 5 && rels.getOrder() == 4;
 
-		final List<Tensor<BOOL>> os = Tensor.unconcat(ops);
-		final List<Tensor<BOOL>> rs = Tensor.unconcat(rels);
+		final List<Tensor<ELEM>> os = Tensor.unconcat(ops);
+		final List<Tensor<ELEM>> rs = Tensor.unconcat(rels);
 
 		return Tensor.generate(os.size(), rs.size(),
-				new Func2<BOOL, Integer, Integer>() {
+				new Func2<ELEM, Integer, Integer>() {
 					@Override
-					public BOOL call(Integer a, Integer b) {
+					public ELEM call(Integer a, Integer b) {
 						return isCompatible33(alg, os.get(a), rs.get(b));
 					}
 				});
 	}
 
-	public static <BOOL> BOOL isCompatible34(BoolAlg<BOOL> alg,
-			Tensor<BOOL> op, Tensor<BOOL> rel) {
+	public static <ELEM> ELEM isCompatible34(BoolAlgebra<ELEM> alg,
+			Tensor<ELEM> op, Tensor<ELEM> rel) {
 		assert op.getOrder() == 4 && rel.getOrder() == 4;
 
-		Tensor<BOOL> t;
+		Tensor<ELEM> t;
 		t = Tensor.reduce(alg.ANY, "becidx", alg.AND, rel.named("abcd"),
 				op.named("xaei")); // a
 		t = Tensor.reduce(alg.ANY, "efcijdxy", alg.AND, t.named("becidx"),
@@ -958,17 +958,17 @@ public class MonoidalInt {
 		return t.get();
 	}
 
-	public static <BOOL> Tensor<BOOL> getCompatibility34(
-			final BoolAlg<BOOL> alg, Tensor<BOOL> ops, Tensor<BOOL> rels) {
+	public static <ELEM> Tensor<ELEM> getCompatibility34(
+			final BoolAlgebra<ELEM> alg, Tensor<ELEM> ops, Tensor<ELEM> rels) {
 		assert ops.getOrder() == 5 && rels.getOrder() == 5;
 
-		final List<Tensor<BOOL>> os = Tensor.unconcat(ops);
-		final List<Tensor<BOOL>> rs = Tensor.unconcat(rels);
+		final List<Tensor<ELEM>> os = Tensor.unconcat(ops);
+		final List<Tensor<ELEM>> rs = Tensor.unconcat(rels);
 
 		return Tensor.generate(os.size(), rs.size(),
-				new Func2<BOOL, Integer, Integer>() {
+				new Func2<ELEM, Integer, Integer>() {
 					@Override
-					public BOOL call(Integer a, Integer b) {
+					public ELEM call(Integer a, Integer b) {
 						return isCompatible34(alg, os.get(a), rs.get(b));
 					}
 				});
@@ -985,9 +985,9 @@ public class MonoidalInt {
 		}
 	}
 
-	public static <BOOL> BOOL isClosedSubset(BoolAlg<BOOL> alg,
-			Tensor<BOOL> subset, Tensor<BOOL> galois) {
-		Tensor<BOOL> t;
+	public static <ELEM> ELEM isClosedSubset(BoolAlgebra<ELEM> alg,
+			Tensor<ELEM> subset, Tensor<ELEM> galois) {
+		Tensor<ELEM> t;
 
 		t = Tensor.reduce(alg.ALL, "y", alg.LEQ, subset.named("x"),
 				galois.named("xy"));
@@ -999,11 +999,11 @@ public class MonoidalInt {
 		return t.get();
 	}
 
-	public static <SBOOL> Tensor<Boolean> getClosedSubsets(
-			SatSolver<SBOOL> solver, final Tensor<Boolean> galois) {
-		Problem prob = new Problem(new int[] { galois.getDim(0) }) {
+	public static <ELEM> Tensor<Boolean> getClosedSubsets(
+			SatSolver<ELEM> solver, final Tensor<Boolean> galois) {
+		BoolProblem prob = new BoolProblem(new int[] { galois.getDim(0) }) {
 			@Override
-			public <BOOL> BOOL compute(BoolAlg<BOOL> alg,
+			public <BOOL> BOOL compute(BoolAlgebra<BOOL> alg,
 					List<Tensor<BOOL>> tensors) {
 				Tensor<BOOL> sub = tensors.get(0);
 				Tensor<BOOL> rel = Tensor.map(alg.LIFT, galois);
@@ -1014,17 +1014,17 @@ public class MonoidalInt {
 		return prob.solveAll(solver, LIMIT).get(0);
 	}
 
-	public static <BOOL> Tensor<BOOL> transpose(Tensor<BOOL> matrix) {
+	public static <ELEM> Tensor<ELEM> transpose(Tensor<ELEM> matrix) {
 		assert matrix.getOrder() == 2;
 		return Tensor.reshape(matrix,
 				new int[] { matrix.getDim(1), matrix.getDim(0) }, new int[] {
 						1, 0 });
 	}
 
-	public static <BOOL> BOOL isMonoid(BoolAlg<BOOL> alg, Tensor<BOOL> monoid) {
+	public static <ELEM> ELEM isMonoid(BoolAlgebra<ELEM> alg, Tensor<ELEM> monoid) {
 		assert monoid.getOrder() == 3;
 
-		Tensor<BOOL> t;
+		Tensor<ELEM> t;
 		t = Tensor.reduce(alg.ANY, "xzij", alg.AND, monoid.named("xyi"),
 				monoid.named("yzj"));
 		t = Tensor.reduce(alg.ALL, "kij", alg.EQU, t.named("xzij"),
@@ -1035,7 +1035,7 @@ public class MonoidalInt {
 
 	public static void checkMonoid(int size, String monoid) {
 		final Tensor<Boolean> mon = decodeMonoid(size, monoid);
-		if (!isMonoid(BoolAlg.BOOLEAN, mon))
+		if (!isMonoid(BoolAlgebra.INSTANCE, mon))
 			throw new RuntimeException("This is not a monoid: " + monoid);
 	}
 
@@ -1265,7 +1265,7 @@ public class MonoidalInt {
 		Tensor<Boolean> compat, closed;
 
 		if (binaryOps.getDim(3) * binaryRels.getDim(2) <= GALOIS_LIMIT) {
-			compat = getCompatibility22(BoolAlg.BOOLEAN, binaryOps, binaryRels);
+			compat = getCompatibility22(BoolAlgebra.INSTANCE, binaryOps, binaryRels);
 			closed = getClosedSubsets(solver, compat);
 			System.out.println("clones (op 2 rel 2):    " + closed.getDim(1));
 			if (closed.getDim(0) <= PRINT_LIMIT
@@ -1274,7 +1274,7 @@ public class MonoidalInt {
 		}
 
 		if (binaryOps.getDim(3) * ternaryRels.getDim(3) <= GALOIS_LIMIT) {
-			compat = getCompatibility23(BoolAlg.BOOLEAN, binaryOps, ternaryRels);
+			compat = getCompatibility23(BoolAlgebra.INSTANCE, binaryOps, ternaryRels);
 			closed = getClosedSubsets(solver, compat);
 			System.out.println("clones (op 2 rel 3):    " + closed.getDim(1));
 			if (closed.getDim(0) <= PRINT_LIMIT
@@ -1283,48 +1283,48 @@ public class MonoidalInt {
 		}
 
 		if (binaryOps.getDim(3) * selTernaryRels.getDim(3) <= GALOIS_LIMIT) {
-			compat = getCompatibility23(BoolAlg.BOOLEAN, binaryOps,
+			compat = getCompatibility23(BoolAlgebra.INSTANCE, binaryOps,
 					selTernaryRels);
 			closed = getClosedSubsets(solver, compat);
 			System.out.println("clones (op 2 rel s3):   " + closed.getDim(1));
 		}
 
 		if (binaryOps.getDim(3) * qaryRels.getDim(4) <= GALOIS_LIMIT) {
-			compat = getCompatibility24(BoolAlg.BOOLEAN, binaryOps, qaryRels);
+			compat = getCompatibility24(BoolAlgebra.INSTANCE, binaryOps, qaryRels);
 			closed = getClosedSubsets(solver, compat);
 			System.out.println("clones (op 2 rel 4):    " + closed.getDim(1));
 		}
 
 		if (selTernaryOps.getDim(4) * binaryRels.getDim(2) <= GALOIS_LIMIT) {
-			compat = getCompatibility32(BoolAlg.BOOLEAN, selTernaryOps,
+			compat = getCompatibility32(BoolAlgebra.INSTANCE, selTernaryOps,
 					binaryRels);
 			closed = getClosedSubsets(solver, compat);
 			System.out.println("clones (op s3 rel 2):   " + closed.getDim(1));
 		}
 
 		if (selTernaryOps.getDim(4) * ternaryRels.getDim(3) <= GALOIS_LIMIT) {
-			compat = getCompatibility33(BoolAlg.BOOLEAN, selTernaryOps,
+			compat = getCompatibility33(BoolAlgebra.INSTANCE, selTernaryOps,
 					ternaryRels);
 			closed = getClosedSubsets(solver, compat);
 			System.out.println("clones (op s3 rel 3):   " + closed.getDim(1));
 		}
 
 		if (selTernaryOps.getDim(4) * selTernaryRels.getDim(3) <= GALOIS_LIMIT) {
-			compat = getCompatibility33(BoolAlg.BOOLEAN, selTernaryOps,
+			compat = getCompatibility33(BoolAlgebra.INSTANCE, selTernaryOps,
 					selTernaryRels);
 			closed = getClosedSubsets(solver, compat);
 			System.out.println("clones (op s3 rel s3):  " + closed.getDim(1));
 		}
 
 		if (selTernaryOps.getDim(4) * qaryRels.getDim(4) <= GALOIS_LIMIT) {
-			compat = getCompatibility34(BoolAlg.BOOLEAN, selTernaryOps,
+			compat = getCompatibility34(BoolAlgebra.INSTANCE, selTernaryOps,
 					qaryRels);
 			closed = getClosedSubsets(solver, compat);
 			System.out.println("clones (op s3 rel 4):   " + closed.getDim(1));
 		}
 
 		if (ternaryOps.getDim(4) * binaryRels.getDim(2) <= GALOIS_LIMIT) {
-			compat = getCompatibility32(BoolAlg.BOOLEAN, ternaryOps, binaryRels);
+			compat = getCompatibility32(BoolAlgebra.INSTANCE, ternaryOps, binaryRels);
 			closed = getClosedSubsets(solver, compat);
 			System.out.println("clones (op 3 rel 2):    " + closed.getDim(1));
 			if (closed.getDim(0) <= PRINT_LIMIT
@@ -1333,7 +1333,7 @@ public class MonoidalInt {
 		}
 
 		if (ternaryOps.getDim(4) * ternaryRels.getDim(3) <= GALOIS_LIMIT) {
-			compat = getCompatibility33(BoolAlg.BOOLEAN, ternaryOps,
+			compat = getCompatibility33(BoolAlgebra.INSTANCE, ternaryOps,
 					ternaryRels);
 			closed = getClosedSubsets(solver, compat);
 			System.out.println("clones (op 3 rel 3):    " + closed.getDim(1));
@@ -1343,14 +1343,14 @@ public class MonoidalInt {
 		}
 
 		if (ternaryOps.getDim(4) * selTernaryRels.getDim(3) <= GALOIS_LIMIT) {
-			compat = getCompatibility33(BoolAlg.BOOLEAN, ternaryOps,
+			compat = getCompatibility33(BoolAlgebra.INSTANCE, ternaryOps,
 					selTernaryRels);
 			closed = getClosedSubsets(solver, compat);
 			System.out.println("clones (op 3 rel s3):   " + closed.getDim(1));
 		}
 
 		if (ternaryOps.getDim(4) * qaryRels.getDim(4) <= GALOIS_LIMIT) {
-			compat = getCompatibility34(BoolAlg.BOOLEAN, ternaryOps, qaryRels);
+			compat = getCompatibility34(BoolAlgebra.INSTANCE, ternaryOps, qaryRels);
 			closed = getClosedSubsets(solver, compat);
 			System.out.println("clones (op 3 rel 4):    " + closed.getDim(1));
 		}
@@ -1372,7 +1372,7 @@ public class MonoidalInt {
 		Tensor<Boolean> binaryRels = getAllBinaryRels(solver, size);
 		System.out.println("binary rels:         " + binaryRels.getDim(2));
 
-		Tensor<Boolean> compat = getCompatibility22(BoolAlg.BOOLEAN, binaryOps,
+		Tensor<Boolean> compat = getCompatibility22(BoolAlgebra.INSTANCE, binaryOps,
 				binaryRels);
 		Tensor<Boolean> closed = getClosedSubsets(solver, transpose(compat));
 

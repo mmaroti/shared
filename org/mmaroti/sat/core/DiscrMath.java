@@ -22,9 +22,9 @@ import java.util.*;
 import org.mmaroti.sat.solvers.*;
 
 public class DiscrMath<BOOL> {
-	public final BoolAlg<BOOL> alg;
+	public final BoolAlgebra<BOOL> alg;
 
-	public DiscrMath(BoolAlg<BOOL> alg) {
+	public DiscrMath(BoolAlgebra<BOOL> alg) {
 		this.alg = alg;
 	}
 
@@ -116,9 +116,9 @@ public class DiscrMath<BOOL> {
 	}
 
 	public static void main(String[] args) {
-		Problem problem = new Problem(new int[] { 3, 3 }) {
+		BoolProblem problem = new BoolProblem(new int[] { 3, 3 }) {
 			@Override
-			public <BOOL> BOOL compute(BoolAlg<BOOL> alg,
+			public <BOOL> BOOL compute(BoolAlgebra<BOOL> alg,
 					List<Tensor<BOOL>> tensors) {
 
 				DiscrMath<BOOL> discr = new DiscrMath<BOOL>(alg);
@@ -131,16 +131,16 @@ public class DiscrMath<BOOL> {
 	}
 
 	public static void main2(String[] args) {
-		DiscrMath<Boolean> discr = new DiscrMath<Boolean>(BoolAlg.BOOLEAN);
+		DiscrMath<Boolean> discr = new DiscrMath<Boolean>(BoolAlgebra.INSTANCE);
 
 		Tensor<Integer> f = Tensor.matrix(new int[] { 3, 2 },
 				Arrays.asList(0, 1, 2, 0, 2, 1));
 		Tensor<Boolean> g = discr.graph(f, 3);
 
-		Tensor<Boolean> h = Tensor.reduce(BoolAlg.BOOLEAN.ANY, "xzpq",
-				BoolAlg.BOOLEAN.AND, g.named("xyp"), g.named("yzq"));
-		Tensor<Boolean> m = Tensor.reduce(BoolAlg.BOOLEAN.ALL, "pqr",
-				BoolAlg.BOOLEAN.EQU, h.named("xypq"), g.named("xyr"));
+		Tensor<Boolean> h = Tensor.reduce(BoolAlgebra.INSTANCE.ANY, "xzpq",
+				BoolAlgebra.INSTANCE.AND, g.named("xyp"), g.named("yzq"));
+		Tensor<Boolean> m = Tensor.reduce(BoolAlgebra.INSTANCE.ALL, "pqr",
+				BoolAlgebra.INSTANCE.EQU, h.named("xypq"), g.named("xyr"));
 
 		Tensor.print(m, System.out);
 	}

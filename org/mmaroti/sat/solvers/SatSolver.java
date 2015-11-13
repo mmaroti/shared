@@ -22,33 +22,33 @@ import java.text.*;
 import java.util.*;
 import org.mmaroti.sat.core.*;
 
-public abstract class SatSolver<BOOL> extends BoolAlg<BOOL> {
+public abstract class SatSolver<ELEM> extends BoolAlgebra<ELEM> {
 	public boolean debugging = false;
 
-	public SatSolver(BOOL FALSE, BOOL TRUE) {
+	public SatSolver(ELEM FALSE, ELEM TRUE) {
 		super(FALSE, TRUE);
 	}
 
 	public abstract void clear();
 
-	public abstract BOOL variable();
+	public abstract ELEM variable();
 
-	public abstract void clause(List<BOOL> clause);
+	public abstract void clause(List<ELEM> clause);
 
 	public abstract boolean solve();
 
-	public abstract boolean decode(BOOL term);
+	public abstract boolean decode(ELEM term);
 
-	public final Func0<BOOL> VARIABLE = new Func0<BOOL>() {
+	public final Func0<ELEM> VARIABLE = new Func0<ELEM>() {
 		@Override
-		public BOOL call() {
+		public ELEM call() {
 			return variable();
 		}
 	};
 
-	public final Func1<Boolean, BOOL> DECODE = new Func1<Boolean, BOOL>() {
+	public final Func1<Boolean, ELEM> DECODE = new Func1<Boolean, ELEM>() {
 		@Override
-		public Boolean call(BOOL elem) {
+		public Boolean call(ELEM elem) {
 			return decode(elem);
 		}
 	};
@@ -56,7 +56,7 @@ public abstract class SatSolver<BOOL> extends BoolAlg<BOOL> {
 	protected static DecimalFormat TIME_FORMAT = new DecimalFormat("0.00");
 
 	@Override
-	public BOOL and(BOOL a, BOOL b) {
+	public ELEM and(ELEM a, ELEM b) {
 		if (a == FALSE || b == FALSE)
 			return FALSE;
 		else if (a == TRUE)
@@ -68,7 +68,7 @@ public abstract class SatSolver<BOOL> extends BoolAlg<BOOL> {
 		else if (a == not(b))
 			return FALSE;
 
-		BOOL var = variable();
+		ELEM var = variable();
 		clause(Arrays.asList(a, not(var)));
 		clause(Arrays.asList(b, not(var)));
 		clause(Arrays.asList(not(a), not(b), var));
@@ -76,9 +76,9 @@ public abstract class SatSolver<BOOL> extends BoolAlg<BOOL> {
 	}
 
 	@Override
-	public BOOL all(Iterable<BOOL> elems) {
-		ArrayList<BOOL> list = new ArrayList<BOOL>();
-		for (BOOL a : elems) {
+	public ELEM all(Iterable<ELEM> elems) {
+		ArrayList<ELEM> list = new ArrayList<ELEM>();
+		for (ELEM a : elems) {
 			if (a == FALSE)
 				return FALSE;
 			else if (a != TRUE)
@@ -90,8 +90,8 @@ public abstract class SatSolver<BOOL> extends BoolAlg<BOOL> {
 		else if (list.size() == 1)
 			return list.get(0);
 
-		BOOL var = variable();
-		for (BOOL a : list)
+		ELEM var = variable();
+		for (ELEM a : list)
 			clause(Arrays.asList(a, not(var)));
 
 		for (int i = 0; i < list.size(); i++)
@@ -104,7 +104,7 @@ public abstract class SatSolver<BOOL> extends BoolAlg<BOOL> {
 	}
 
 	@Override
-	public BOOL or(BOOL a, BOOL b) {
+	public ELEM or(ELEM a, ELEM b) {
 		if (a == TRUE || b == TRUE)
 			return TRUE;
 		else if (a == FALSE)
@@ -116,7 +116,7 @@ public abstract class SatSolver<BOOL> extends BoolAlg<BOOL> {
 		else if (a == not(b))
 			return TRUE;
 
-		BOOL var = variable();
+		ELEM var = variable();
 		clause(Arrays.asList(not(a), var));
 		clause(Arrays.asList(not(b), var));
 		clause(Arrays.asList(a, b, not(var)));
@@ -124,9 +124,9 @@ public abstract class SatSolver<BOOL> extends BoolAlg<BOOL> {
 	}
 
 	@Override
-	public BOOL any(Iterable<BOOL> elems) {
-		ArrayList<BOOL> list = new ArrayList<BOOL>();
-		for (BOOL a : elems) {
+	public ELEM any(Iterable<ELEM> elems) {
+		ArrayList<ELEM> list = new ArrayList<ELEM>();
+		for (ELEM a : elems) {
 			if (a == TRUE)
 				return TRUE;
 			else if (a != FALSE)
@@ -138,8 +138,8 @@ public abstract class SatSolver<BOOL> extends BoolAlg<BOOL> {
 		else if (list.size() == 1)
 			return list.get(0);
 
-		BOOL var = variable();
-		for (BOOL a : list)
+		ELEM var = variable();
+		for (ELEM a : list)
 			clause(Arrays.asList(not(a), var));
 
 		list.add(not(var));
@@ -149,7 +149,7 @@ public abstract class SatSolver<BOOL> extends BoolAlg<BOOL> {
 	}
 
 	@Override
-	public BOOL add(BOOL a, BOOL b) {
+	public ELEM add(ELEM a, ELEM b) {
 		if (a == TRUE)
 			return not(b);
 		else if (a == FALSE)
@@ -159,7 +159,7 @@ public abstract class SatSolver<BOOL> extends BoolAlg<BOOL> {
 		else if (b == FALSE)
 			return a;
 
-		BOOL var = variable();
+		ELEM var = variable();
 		clause(Arrays.asList(a, b, not(var)));
 		clause(Arrays.asList(a, not(b), var));
 		clause(Arrays.asList(not(a), b, var));
