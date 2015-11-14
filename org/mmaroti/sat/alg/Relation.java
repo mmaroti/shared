@@ -132,12 +132,13 @@ public final class Relation<BOOL> {
 		return new Relation<BOOL>(alg, tmp);
 	}
 
-	public Relation<BOOL> subtract(Relation<BOOL> rel) {
-		checkArity(rel);
-
-		Tensor<BOOL> tmp = Tensor.map(alg.NOT, rel.tensor);
-		tmp = Tensor.map2(alg.AND, tensor, tmp);
+	public Relation<BOOL> complement() {
+		Tensor<BOOL> tmp = Tensor.map(alg.NOT, tensor);
 		return new Relation<BOOL>(alg, tmp);
+	}
+
+	public Relation<BOOL> subtract(Relation<BOOL> rel) {
+		return intersect(rel.complement());
 	}
 
 	public Relation<BOOL> invert() {
@@ -246,6 +247,15 @@ public final class Relation<BOOL> {
 		return rel.isEmpty();
 	}
 
+	public BOOL isTrichotome() {
+		assert tensor.getOrder() == 2;
+		Relation<BOOL> rel1, rel2;
+		rel1 = makeLessThan(alg, getSize());
+		rel2 = invert().complement().intersect(rel1);
+		rel1 = intersect(rel1);
+		return rel1.isEqual(rel2);
+	}
+
 	public BOOL isEquivalence() {
 		BOOL b = isReflexive();
 		b = alg.and(b, isSymmetric());
@@ -255,6 +265,12 @@ public final class Relation<BOOL> {
 	public BOOL isPartialOrder() {
 		BOOL b = isReflexive();
 		b = alg.and(b, isAntiSymmetric());
+		return alg.and(b, isTransitive());
+	}
+
+	public BOOL isTotalOrder() {
+		BOOL b = isReflexive();
+		b = alg.and(b, isTrichotome());
 		return alg.and(b, isTransitive());
 	}
 
