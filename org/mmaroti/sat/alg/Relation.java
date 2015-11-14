@@ -211,7 +211,7 @@ public final class Relation<BOOL> {
 		return alg.not(Tensor.fold(alg.ANY, getArity(), tensor).get());
 	}
 
-	public BOOL isOdd() {
+	public BOOL isOddCard() {
 		return Tensor.fold(alg.SUM, getArity(), tensor).get();
 	}
 

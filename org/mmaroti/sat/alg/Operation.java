@@ -51,18 +51,24 @@ public class Operation<BOOL> {
 		this.tensor = tensor;
 
 		if (getAlg() == BoolAlgebra.INSTANCE)
-			assert (Boolean) asRelation().isFunction();
+			assert (Boolean) isOperation();
+	}
+
+	public BOOL isOperation() {
+		return asRelation().isFunction();
 	}
 
 	public Relation<BOOL> asRelation() {
 		return new Relation<BOOL>(alg, tensor);
 	}
 
-	public BOOL isPermutation() {
-		assert getArity() == 1;
+	public BOOL isSurjective() {
+		int[] map = new int[tensor.getOrder()];
+		for (int i = 0; i < map.length - 1; i++)
+			map[i] = i + 1;
 
 		Tensor<BOOL> tmp;
-		tmp = Tensor.reshape(tensor, tensor.getShape(), new int[] { 1, 0 });
+		tmp = Tensor.reshape(tensor, tensor.getShape(), map);
 		tmp = Tensor.fold(alg.ANY, 1, tmp);
 		tmp = Tensor.fold(alg.ALL, 1, tmp);
 

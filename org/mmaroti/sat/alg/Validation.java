@@ -29,7 +29,8 @@ public class Validation {
 	void verify(String msg, int count, int expected) {
 		System.out.println(msg + " is " + count + ".");
 		if (count != expected) {
-			System.out.println("FAILED, the correct value is " + expected + ".");
+			System.out
+					.println("FAILED, the correct value is " + expected + ".");
 			failed = true;
 		}
 	}
@@ -98,11 +99,9 @@ public class Validation {
 			@Override
 			public <BOOL> BOOL compute(BoolAlgebra<BOOL> alg,
 					List<Tensor<BOOL>> tensors) {
-				Permutation<BOOL> perm;
-				perm = new Permutation<BOOL>(alg, tensors.get(0));
-				BOOL b = perm.asRelation().isFunction();
-				b = alg.and(b, perm.asOperation().isPermutation());
-				return b;
+				Permutation<BOOL> perm = new Permutation<BOOL>(alg,
+						tensors.get(0));
+				return perm.isPermutation();
 			}
 		};
 
@@ -111,26 +110,23 @@ public class Validation {
 				5040);
 	}
 
-	void checkAlternatingGroup() {
+	void checkAlternations() {
 		BoolProblem problem = new BoolProblem(new int[] { 6, 6 }) {
 			@Override
 			public <BOOL> BOOL compute(BoolAlgebra<BOOL> alg,
 					List<Tensor<BOOL>> tensors) {
-				Permutation<BOOL> perm;
-				perm = new Permutation<BOOL>(alg, tensors.get(0));
-				BOOL b = perm.asRelation().isFunction();
-				b = alg.and(b, perm.asOperation().isPermutation());
-				b = alg.and(b, perm.isEven());
-				return b;
+				Permutation<BOOL> perm = new Permutation<BOOL>(alg,
+						tensors.get(0));
+				return alg.and(perm.isPermutation(), perm.isEven());
 			}
 		};
 
 		int count = problem.solveAll(new Sat4J()).get(0).getLastDim();
-		verify("The number of even permutations on a 6 element set",
+		verify("A001710: The number of even permutations on a 6 element set",
 				count, 360);
 	}
 
-	// TODO: A000372,
+	// TODO: A000372
 
 	void check() {
 		failed = false;
@@ -139,8 +135,8 @@ public class Validation {
 		parseRelations();
 		checkEquivalences();
 		checkPermutations();
-		checkAlternatingGroup();
 		checkPartialOrders();
+		checkAlternations();
 		checkLinearExtensions();
 		time = System.currentTimeMillis() - time;
 

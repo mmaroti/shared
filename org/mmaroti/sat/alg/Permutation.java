@@ -43,10 +43,13 @@ public final class Permutation<BOOL> {
 		this.alg = alg;
 		this.tensor = tensor;
 
-		if (getAlg() == BoolAlgebra.INSTANCE) {
-			assert (Boolean) asRelation().isFunction();
-			assert (Boolean) asOperation().isPermutation();
-		}
+		if (getAlg() == BoolAlgebra.INSTANCE)
+			assert (Boolean) isPermutation();
+	}
+
+	public BOOL isPermutation() {
+		Operation<BOOL> op = asOperation();
+		return alg.and(op.isOperation(), op.isSurjective());
 	}
 
 	public Operation<BOOL> asOperation() {
@@ -66,7 +69,7 @@ public final class Permutation<BOOL> {
 	public BOOL isOdd() {
 		Relation<BOOL> less = Relation.makeLessThan(alg, getSize());
 		Relation<BOOL> perm = asRelation();
-		return less.multiply(perm).multiply(less).intersect(perm).isOdd();
+		return less.multiply(perm).multiply(less).intersect(perm).isOddCard();
 	}
 
 	public BOOL isEven() {
