@@ -51,15 +51,11 @@ public class Operation<BOOL> {
 		this.tensor = tensor;
 
 		if (getAlg() == BoolAlgebra.INSTANCE)
-			assert (Boolean) isFunction();
+			assert (Boolean) asRelation().isFunction();
 	}
 
 	public Relation<BOOL> asRelation() {
 		return new Relation<BOOL>(alg, tensor);
-	}
-
-	public BOOL isFunction() {
-		return asRelation().isFunction();
 	}
 
 	public BOOL isPermutation() {

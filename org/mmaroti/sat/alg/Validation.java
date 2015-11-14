@@ -29,7 +29,7 @@ public class Validation {
 	void verify(String msg, int count, int expected) {
 		System.out.println(msg + " is " + count + ".");
 		if (count != expected) {
-			System.out.println("FAILED, the correct value is " + expected);
+			System.out.println("FAILED, the correct value is " + expected + ".");
 			failed = true;
 		}
 	}
@@ -98,14 +98,36 @@ public class Validation {
 			@Override
 			public <BOOL> BOOL compute(BoolAlgebra<BOOL> alg,
 					List<Tensor<BOOL>> tensors) {
-				Operation<BOOL> op = new Operation<BOOL>(alg, tensors.get(0));
-				return alg.and(op.isFunction(), op.isPermutation());
+				Permutation<BOOL> perm;
+				perm = new Permutation<BOOL>(alg, tensors.get(0));
+				BOOL b = perm.asRelation().isFunction();
+				b = alg.and(b, perm.asOperation().isPermutation());
+				return b;
 			}
 		};
 
 		int count = problem.solveAll(new Sat4J()).get(0).getLastDim();
 		verify("A000142: the number of permutations on a 7 element set", count,
 				5040);
+	}
+
+	void checkAlternatingGroup() {
+		BoolProblem problem = new BoolProblem(new int[] { 6, 6 }) {
+			@Override
+			public <BOOL> BOOL compute(BoolAlgebra<BOOL> alg,
+					List<Tensor<BOOL>> tensors) {
+				Permutation<BOOL> perm;
+				perm = new Permutation<BOOL>(alg, tensors.get(0));
+				BOOL b = perm.asRelation().isFunction();
+				b = alg.and(b, perm.asOperation().isPermutation());
+				b = alg.and(b, perm.isEven());
+				return b;
+			}
+		};
+
+		int count = problem.solveAll(new Sat4J()).get(0).getLastDim();
+		verify("The number of even permutations on a 6 element set",
+				count, 360);
 	}
 
 	// TODO: A000372,
@@ -117,6 +139,7 @@ public class Validation {
 		parseRelations();
 		checkEquivalences();
 		checkPermutations();
+		checkAlternatingGroup();
 		checkPartialOrders();
 		checkLinearExtensions();
 		time = System.currentTimeMillis() - time;

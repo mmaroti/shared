@@ -120,15 +120,19 @@ public final class Relation<BOOL> {
 
 	public Relation<BOOL> intersect(Relation<BOOL> rel) {
 		checkArity(rel);
-
 		Tensor<BOOL> tmp = Tensor.map2(alg.AND, tensor, rel.tensor);
 		return new Relation<BOOL>(alg, tmp);
 	}
 
 	public Relation<BOOL> union(Relation<BOOL> rel) {
 		checkArity(rel);
-
 		Tensor<BOOL> tmp = Tensor.map2(alg.OR, tensor, rel.tensor);
+		return new Relation<BOOL>(alg, tmp);
+	}
+
+	public Relation<BOOL> symmDifference(Relation<BOOL> rel) {
+		checkArity(rel);
+		Tensor<BOOL> tmp = Tensor.map2(alg.ADD, tensor, rel.tensor);
 		return new Relation<BOOL>(alg, tmp);
 	}
 
@@ -160,29 +164,34 @@ public final class Relation<BOOL> {
 		return new Relation<BOOL>(alg, tmp);
 	}
 
-	public Relation<BOOL> compose(Relation<BOOL> rel) {
-		return rotate().composeHead(rel);
-	}
-
-	public Relation<BOOL> composeHead(Relation<BOOL> rel) {
+	private Tensor<BOOL> combine(Relation<BOOL> rel) {
 		checkSize(rel);
 		assert getArity() + rel.getArity() >= 3;
 
 		int[] shape = createShape(getSize(), getArity() + rel.getArity() - 1);
 
 		int[] map = new int[getArity()];
-		for (int i = 1; i < map.length; i++)
-			map[i] = i;
-
-		Tensor<BOOL> tmp = Tensor.reshape(tensor, shape, map);
+		for (int i = 0; i < map.length - 1; i++)
+			map[i] = i + 1;
+		Tensor<BOOL> tmp1 = Tensor.reshape(tensor, shape, map);
 
 		map = new int[rel.getArity()];
 		for (int i = 1; i < map.length; i++)
 			map[i] = getArity() + i - 1;
+		Tensor<BOOL> tmp2 = Tensor.reshape(rel.tensor, shape, map);
 
-		tmp = Tensor.map2(alg.AND, tmp, Tensor.reshape(rel.tensor, shape, map));
+		return Tensor.map2(alg.AND, tmp1, tmp2);
+	}
+
+	public Relation<BOOL> compose(Relation<BOOL> rel) {
+		Tensor<BOOL> tmp = combine(rel);
 		tmp = Tensor.fold(alg.ANY, 1, tmp);
+		return new Relation<BOOL>(alg, tmp);
+	}
 
+	public Relation<BOOL> multiply(Relation<BOOL> rel) {
+		Tensor<BOOL> tmp = combine(rel);
+		tmp = Tensor.fold(alg.SUM, 1, tmp);
 		return new Relation<BOOL>(alg, tmp);
 	}
 
@@ -195,13 +204,15 @@ public final class Relation<BOOL> {
 	}
 
 	public BOOL isFull() {
-		Tensor<BOOL> tmp = Tensor.fold(alg.ALL, getArity(), tensor);
-		return tmp.get();
+		return Tensor.fold(alg.ALL, getArity(), tensor).get();
 	}
 
 	public BOOL isEmpty() {
-		Tensor<BOOL> tmp = Tensor.fold(alg.ANY, getArity(), tensor);
-		return alg.not(tmp.get());
+		return alg.not(Tensor.fold(alg.ANY, getArity(), tensor).get());
+	}
+
+	public BOOL isOdd() {
+		return Tensor.fold(alg.SUM, getArity(), tensor).get();
 	}
 
 	public BOOL isEqual(Relation<BOOL> rel) {
