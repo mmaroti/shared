@@ -63,16 +63,9 @@ public class Operation<BOOL> {
 	}
 
 	public BOOL isSurjective() {
-		int[] map = new int[tensor.getOrder()];
-		for (int i = 0; i < map.length - 1; i++)
-			map[i] = i + 1;
-
-		Tensor<BOOL> tmp;
-		tmp = Tensor.reshape(tensor, tensor.getShape(), map);
-		tmp = Tensor.fold(alg.ANY, 1, tmp);
-		tmp = Tensor.fold(alg.ALL, 1, tmp);
-
-		return tmp.get();
+		Tensor<BOOL> tmp = Tensor.reorder(tensor, 0, 1, tensor.getOrder() - 1);
+		tmp = Tensor.fold(alg.ANY, tensor.getOrder() - 1, tmp);
+		return Tensor.fold(alg.ALL, 1, tmp).get();
 	}
 
 	private static int[] createShape(int size, int arity) {

@@ -208,6 +208,56 @@ public class Tensor<ELEM> implements Iterable<ELEM> {
 		return tensor;
 	}
 
+	private static int shapeCopy(int[] src, int srcPos, int[] dst, int dstPos,
+			int count) {
+		int a = 1;
+		for (int i = 0; i < count; i++) {
+			int b = src[srcPos + i];
+			dst[dstPos + i] = b;
+			a *= b;
+		}
+		return a;
+	}
+
+	public static <ELEM> Tensor<ELEM> reorder(final Tensor<ELEM> arg,
+			int range1, int range2, int range3) {
+		assert 0 <= range1 && 0 <= range2 && 0 <= range3;
+		assert range1 + range2 + range3 <= arg.getOrder();
+
+		int[] shape = new int[arg.shape.length];
+
+		int d1 = shapeCopy(arg.shape, 0, shape, 0, range1);
+		int d2 = shapeCopy(arg.shape, range1, shape, range1 + range3, range2);
+		int d3 = shapeCopy(arg.shape, range1 + range2, shape, range1, range3);
+		int d4 = shapeCopy(arg.shape, range1 + range2 + range3, shape, range1
+				+ range2 + range3, shape.length - range1 - range2 - range3);
+
+		Tensor<ELEM> tensor = new Tensor<ELEM>(shape);
+
+		ELEM[] src = arg.elems;
+		ELEM[] dst = tensor.elems;
+		assert src.length == dst.length;
+
+		if (d1 == 1) {
+			for (int i4 = 0; i4 < d4; i4++)
+				for (int i3 = 0; i3 < d3; i3++)
+					for (int i2 = 0; i2 < d2; i2++)
+						dst[d2 * d3 * i4 + d3 * i2 + i3] = src[d2 * d3 * i4
+								+ d2 * i3 + i2];
+
+			return tensor;
+		}
+
+		for (int i4 = 0; i4 < d4; i4++)
+			for (int i3 = 0; i3 < d3; i3++)
+				for (int i2 = 0; i2 < d2; i2++)
+					for (int i1 = 0; i1 < d1; i1++)
+						dst[d1 * d2 * d3 * i4 + d1 * d3 * i2 + d1 * i3 + i1] = src[d1
+								* d2 * d3 * i4 + d1 * d2 * i3 + d1 * i2 + i1];
+
+		return tensor;
+	}
+
 	public static <ELEM> Tensor<ELEM> reshape_old(final Tensor<ELEM> arg,
 			final int[] shape, final int[] map) {
 		assert arg.getOrder() == map.length;
@@ -380,60 +430,6 @@ public class Tensor<ELEM> implements Iterable<ELEM> {
 
 	public Named<ELEM> named(String names) {
 		return new Named<ELEM>(this, names);
-	}
-
-	private static class DimInfo {
-		public final int dim;
-		public final int lev;
-
-		public DimInfo(int dim, int lev) {
-			this.dim = dim;
-			this.lev = lev;
-		}
-	}
-
-	private static Map<Character, DimInfo> getDimInfo(Named<?>[] parts,
-			String names) {
-
-		Map<Character, DimInfo> info = new TreeMap<Character, DimInfo>();
-
-		for (int i = parts.length - 1; i >= 0; i--) {
-			Named<?> part = parts[i];
-			assert part.tensor.getOrder() == part.names.length();
-
-			for (int j = 0; j < part.names.length(); j++) {
-				int dim = part.tensor.getDim(j);
-				char c = part.names.charAt(j);
-				DimInfo inf = info.get(c);
-
-				if (inf == null) {
-					int idx = names.indexOf(c) >= 0 ? parts.length : i;
-					info.put(c, new DimInfo(dim, idx));
-				} else
-					assert inf.dim == dim;
-			}
-		}
-
-		for (int i = 0; i < names.length(); i++) {
-			char c = names.charAt(i);
-			assert info.get(c) != null;
-		}
-
-		return info;
-	}
-
-	@SafeVarargs
-	public static <ELEM> Tensor<ELEM> contract(Func1<ELEM, Iterable<ELEM>> sum,
-			String names, Func2<ELEM, ELEM, ELEM> prod, Named<ELEM>... parts) {
-
-		Map<Character, DimInfo> info = getDimInfo(parts, names);
-		Named<ELEM> base = parts[0];
-
-		for (int i = 1; i < parts.length; i++) {
-			Named<ELEM> part = parts[i];
-		}
-
-		return null;
 	}
 
 	private static Map<Character, Integer> getDimensionMap(Named<?>... parts) {

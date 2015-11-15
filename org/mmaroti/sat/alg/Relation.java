@@ -155,12 +155,7 @@ public final class Relation<BOOL> {
 	}
 
 	public Relation<BOOL> rotate() {
-		int[] map = new int[getArity()];
-		for (int i = 0; i < map.length - 1; i++)
-			map[i] = i + 1;
-		map[map.length - 1] = 0;
-
-		Tensor<BOOL> tmp = Tensor.reshape(tensor, tensor.getShape(), map);
+		Tensor<BOOL> tmp = Tensor.reorder(tensor, 0, 1, tensor.getOrder() - 1);
 		return new Relation<BOOL>(alg, tmp);
 	}
 
@@ -217,7 +212,6 @@ public final class Relation<BOOL> {
 
 	public BOOL isEqual(Relation<BOOL> rel) {
 		checkArity(rel);
-
 		Tensor<BOOL> tmp = Tensor.map2(alg.EQU, tensor, rel.tensor);
 		tmp = Tensor.fold(alg.ALL, getArity(), tmp);
 		return tmp.get();
@@ -288,6 +282,19 @@ public final class Relation<BOOL> {
 	public PartialOrder<BOOL> asPartialOrder() {
 		return new PartialOrder<BOOL>(alg, tensor);
 	}
+
+	/*
+	 * public BOOL isEssential() { int[] map = new int[getArity()];
+	 * 
+	 * Tensor<BOOL> tmp = Tensor.constant(tensor.getShape(), alg.TRUE); for (int
+	 * i = 0; i < getArity(); i++) { for (int j = 0; j < getArity(); j++) map[j]
+	 * = j < i ? j + 1 : j == i ? 0 : j;
+	 * 
+	 * Tensor<BOOL> t = Tensor.reshape(tensor, tensor.getShape(), map); t =
+	 * Tensor.fold(alg.ANY, 1, t);
+	 * 
+	 * tmp = Tensor.map2(alg.AND, tmp, t); } }
+	 */
 
 	public static <BOOL> Relation<BOOL> lift(BoolAlgebra<BOOL> alg,
 			Relation<Boolean> rel) {
