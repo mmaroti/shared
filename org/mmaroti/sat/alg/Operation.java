@@ -91,33 +91,40 @@ public class Operation<BOOL> {
 		return new Operation<BOOL>(alg, tensor);
 	}
 
-	public Relation<BOOL> graph() {
-		return new Relation<BOOL>(alg, tensor);
-	}
-
-	public Operation<BOOL> getPolymer(int... variables) {
+	public Operation<BOOL> polymer(int... variables) {
 		assert getArity() == variables.length;
 
 		int[] map = new int[variables.length + 1];
 
-		int max = 0;
+		int a = 0;
 		for (int i = 0; i < variables.length; i++) {
 			assert 0 <= variables[i];
-			max = Math.max(max, variables[i]);
+			a = Math.max(a, variables[i]);
 			map[i + 1] = variables[i] + 1;
 		}
 
-		int[] shape = createShape(getSize(), 1 + max);
-		Tensor<BOOL> tmp = Tensor.reshape(tensor, shape, map);
+		Tensor<BOOL> tmp = Tensor.reshape(tensor,
+				createShape(getSize(), 1 + a), map);
 		return new Operation<BOOL>(alg, tmp);
+	}
+
+	public BOOL isEqualTo(Operation<BOOL> op) {
+		return asRelation().isEqualTo(op.asRelation());
 	}
 
 	public BOOL isProjection(int coord) {
 		assert 0 <= coord && coord < getArity();
 
 		int[] map = new int[tensor.getOrder()];
-		for (int i = 1; i < map.length; i++) {
-		}
+		for (int i = 1; i < coord + 1; i++)
+			map[i] = i;
+		map[coord + 1] = 0;
+		for (int i = coord + 2; i < map.length; i++)
+			map[i] = i - 1;
+
+		Tensor<BOOL> tmp = Tensor.reshape(tensor,
+				createShape(getSize(), getArity()), map);
+		return Tensor.fold(alg.ALL, tmp.getOrder(), tmp).get();
 	}
 
 	public BOOL isSatisfied(int... identity) {
@@ -166,11 +173,6 @@ public class Operation<BOOL> {
 		assert getSize() == op.getSize();
 	}
 
-	private void checkSize(Relation<BOOL> op) {
-		assert getAlg() == op.getAlg();
-		assert getSize() == op.getSize();
-	}
-
 	public Operation<BOOL> compose(Operation<BOOL> op) {
 		checkSize(op);
 		assert getArity() == 1;
@@ -197,32 +199,40 @@ public class Operation<BOOL> {
 
 	public BOOL preserves(Relation<BOOL> rel) {
 		if (getArity() == 0)
-			return preserves_0x(rel);
-		if (getArity() == 1)
-			return preserves_1x(rel);
-		if (rel.getArity() == 1)
-			return preserves_x1(rel);
+			return preserves_op0(rel);
+		else if (rel.getArity() == 1)
+			return preserves_rel1(rel);
+		else if (getArity() == 1)
+			return preserves_op1(rel);
+		// else if (rel.getArity() == 2)
+		// return preserves_rel2(rel);
 
 		throw new IllegalArgumentException("not implemented for these arities");
 	}
 
-	private BOOL preserves_0x(Relation<BOOL> rel) {
-		checkSize(rel);
-		return rel.diagonal().intersect(asRelation()).isNotEmpty();
+	private BOOL preserves_op0(Relation<BOOL> rel) {
+		assert getArity() == 0;
+		return asRelation().isSubsetOf(rel.diagonal());
 	}
 
-	private BOOL preserves_1x(Relation<BOOL> rel) {
-		checkSize(rel);
+	private BOOL preserves_op1(Relation<BOOL> rel) {
+		assert getArity() == 1;
+
 		Relation<BOOL> op = asRelation();
 		Relation<BOOL> tmp = rel;
-
 		for (int i = 0; i < rel.getArity(); i++)
 			tmp = op.compose(tmp).rotate();
 
 		return tmp.isSubsetOf(rel);
 	}
 
-	private BOOL preserves_x1(Relation<BOOL> rel) {
-		checkSize(rel);
+	private BOOL preserves_rel1(Relation<BOOL> rel) {
+		assert rel.getArity() == 1;
+
+		Relation<BOOL> tmp = asRelation();
+		for (int i = 0; i < getArity(); i++)
+			tmp = tmp.compose(rel);
+
+		return tmp.isSubsetOf(rel);
 	}
 }
