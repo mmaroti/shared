@@ -86,7 +86,7 @@ public class Validation {
 					List<Tensor<BOOL>> tensors) {
 				Relation<BOOL> rel = new Relation<BOOL>(alg, tensors.get(0));
 				Relation<BOOL> ord2 = Relation.lift(alg, ord.asRelation());
-				return alg.and(ord2.isSubset(rel), rel.isTotalOrder());
+				return alg.and(ord2.isSubsetOf(rel), rel.isTotalOrder());
 			}
 		};
 
@@ -111,7 +111,7 @@ public class Validation {
 	}
 
 	void checkAlternations() {
-		BoolProblem problem = new BoolProblem(new int[] { 6, 6 }) {
+		BoolProblem problem = new BoolProblem(new int[] { 7, 7 }) {
 			@Override
 			public <BOOL> BOOL compute(BoolAlgebra<BOOL> alg,
 					List<Tensor<BOOL>> tensors) {
@@ -122,8 +122,8 @@ public class Validation {
 		};
 
 		int count = problem.solveAll(new Sat4J()).get(0).getLastDim();
-		verify("A001710: The number of even permutations on a 6 element set",
-				count, 360);
+		verify("A001710: The number of even permutations on a 7 element set",
+				count, 2520);
 	}
 
 	// TODO: A000372

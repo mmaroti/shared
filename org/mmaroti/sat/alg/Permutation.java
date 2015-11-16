@@ -67,9 +67,10 @@ public final class Permutation<BOOL> {
 	}
 
 	public BOOL isOdd() {
-		Relation<BOOL> less = Relation.makeLessThan(alg, getSize());
-		Relation<BOOL> perm = asRelation();
-		return less.multiply(perm).multiply(less).intersect(perm).isOddCard();
+		Relation<BOOL> tmp1, tmp2;
+		tmp1 = Relation.makeLessThan(alg, getSize()).compose(asRelation());
+		tmp2 = asRelation().compose(Relation.makeGreaterThan(alg, getSize()));
+		return tmp1.intersect(tmp2).isOddCard();
 	}
 
 	public BOOL isEven() {

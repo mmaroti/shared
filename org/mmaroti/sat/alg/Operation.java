@@ -95,6 +95,31 @@ public class Operation<BOOL> {
 		return new Relation<BOOL>(alg, tensor);
 	}
 
+	public Operation<BOOL> getPolymer(int... variables) {
+		assert getArity() == variables.length;
+
+		int[] map = new int[variables.length + 1];
+
+		int max = 0;
+		for (int i = 0; i < variables.length; i++) {
+			assert 0 <= variables[i];
+			max = Math.max(max, variables[i]);
+			map[i + 1] = variables[i] + 1;
+		}
+
+		int[] shape = createShape(getSize(), 1 + max);
+		Tensor<BOOL> tmp = Tensor.reshape(tensor, shape, map);
+		return new Operation<BOOL>(alg, tmp);
+	}
+
+	public BOOL isProjection(int coord) {
+		assert 0 <= coord && coord < getArity();
+
+		int[] map = new int[tensor.getOrder()];
+		for (int i = 1; i < map.length; i++) {
+		}
+	}
+
 	public BOOL isSatisfied(int... identity) {
 		assert getArity() == identity.length;
 
@@ -114,10 +139,6 @@ public class Operation<BOOL> {
 
 	public BOOL isIdempotent() {
 		return isSatisfied(new int[getArity()]);
-	}
-
-	public BOOL isIdentity() {
-		return isSatisfied(0, 0);
 	}
 
 	public BOOL isMajority() {
@@ -145,6 +166,11 @@ public class Operation<BOOL> {
 		assert getSize() == op.getSize();
 	}
 
+	private void checkSize(Relation<BOOL> op) {
+		assert getAlg() == op.getAlg();
+		assert getSize() == op.getSize();
+	}
+
 	public Operation<BOOL> compose(Operation<BOOL> op) {
 		checkSize(op);
 		assert getArity() == 1;
@@ -167,5 +193,36 @@ public class Operation<BOOL> {
 			Operation<Boolean> op) {
 		Tensor<BOOL> tensor = Tensor.map(alg.LIFT, op.tensor);
 		return new Operation<BOOL>(alg, tensor);
+	}
+
+	public BOOL preserves(Relation<BOOL> rel) {
+		if (getArity() == 0)
+			return preserves_0x(rel);
+		if (getArity() == 1)
+			return preserves_1x(rel);
+		if (rel.getArity() == 1)
+			return preserves_x1(rel);
+
+		throw new IllegalArgumentException("not implemented for these arities");
+	}
+
+	private BOOL preserves_0x(Relation<BOOL> rel) {
+		checkSize(rel);
+		return rel.diagonal().intersect(asRelation()).isNotEmpty();
+	}
+
+	private BOOL preserves_1x(Relation<BOOL> rel) {
+		checkSize(rel);
+		Relation<BOOL> op = asRelation();
+		Relation<BOOL> tmp = rel;
+
+		for (int i = 0; i < rel.getArity(); i++)
+			tmp = op.compose(tmp).rotate();
+
+		return tmp.isSubsetOf(rel);
+	}
+
+	private BOOL preserves_x1(Relation<BOOL> rel) {
+		checkSize(rel);
 	}
 }
