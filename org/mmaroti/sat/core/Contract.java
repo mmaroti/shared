@@ -24,7 +24,7 @@ public class Contract<ELEM> {
 	private final Func1<ELEM, Iterable<ELEM>> sum;
 	private final Func2<ELEM, ELEM, ELEM> prod;
 
-	private LinkedList<Integer> variables = new LinkedList<Integer>();
+	private LinkedList<Object> varOrder = new LinkedList<Object>();
 	private LinkedList<Entry<ELEM>> entries = new LinkedList<Entry<ELEM>>();
 
 	public Contract(Func1<ELEM, Iterable<ELEM>> sum,
@@ -35,88 +35,165 @@ public class Contract<ELEM> {
 
 	private static class Entry<ELEM> {
 		public final Tensor<ELEM> tensor;
-		public final List<Integer> variables;
+		public final List<Object> vars;
 
-		public Entry(Tensor<ELEM> tensor, List<Integer> variables) {
+		public Entry(Tensor<ELEM> tensor, List<Object> vars) {
 			this.tensor = tensor;
-			this.variables = variables;
+			this.vars = vars;
 		}
+	}
+
+	public void add(Tensor<ELEM> tensor, List<Object> vars) {
+		if (tensor.getOrder() != vars.size())
+			throw new IllegalArgumentException("invalid tensor");
+
+		for (Object v : vars) {
+			varOrder.remove(v);
+			varOrder.add(v);
+		}
+
+		entries.add(new Entry<ELEM>(tensor, vars));
 	}
 
 	public void add(Tensor<ELEM> tensor, int... vars) {
-		List<Integer> list = new ArrayList<Integer>();
-		for (int v : vars) {
-			variables.remove(v);
-			variables.add(v);
-			list.add(v);
-		}
+		List<Object> list = new ArrayList<Object>();
+		for (int v : vars)
+			list.add(new Integer(v));
 
-		entries.add(new Entry<ELEM>(tensor, list));
+		add(tensor, list);
 	}
 
-	private Entry<ELEM> normalize(Entry<ELEM> entry) {
-		List<Integer> ordered = new ArrayList<Integer>(variables);
-		ordered.retainAll(entry.variables);
+	public void add(Tensor<ELEM> tensor, String vars) {
+		List<Object> list = new ArrayList<Object>();
+		for (int i = 0; i < vars.length(); i++)
+			list.add(new Character(vars.charAt(i)));
 
-		int[] shape = new int[ordered.size()];
-		int[] map = new int[entry.variables.size()];
+		add(tensor, list);
+	}
 
-		for (int i = 0; i < map.length; i++) {
-			int pos = ordered.indexOf(entry.variables.get(i));
-			map[i] = pos;
-			if (shape[pos] == 0)
-				shape[pos] = entry.tensor.getDim(i);
-			else
-				assert shape[pos] == entry.tensor.getDim(i);
+	private int[] getMap(Entry<ELEM> entry, List<Object> vars, int[] shape) {
+		assert shape.length == vars.size();
+		int[] map = new int[entry.vars.size()];
+
+		int index = 0;
+		for (Object v : entry.vars) {
+			int pos = vars.indexOf(v);
+			assert pos >= 0;
+
+			int dim = entry.tensor.getDim(index);
+			if (shape[pos] >= 0 && shape[pos] != dim)
+				throw new IllegalStateException("variable dimension mismatch");
+
+			map[index] = pos;
+			shape[pos] = dim;
+			index += 1;
 		}
+
+		return map;
+	}
+
+	private Entry<ELEM> norm(Entry<ELEM> entry) {
+		List<Object> vars = new ArrayList<Object>(varOrder);
+		vars.retainAll(entry.vars);
+
+		if (vars.equals(entry.vars))
+			return entry;
+
+		int[] shape = new int[vars.size()];
+		Arrays.fill(shape, -1);
+		int[] map = getMap(entry, vars, shape);
 
 		Tensor<ELEM> tensor = Tensor.reshape(entry.tensor, shape, map);
-		return new Entry<ELEM>(tensor, ordered);
+		return new Entry<ELEM>(tensor, vars);
 	}
 
-	private void fold(Entry<ELEM> entry) {
-		List<Integer> fold = new ArrayList<Integer>();
-		List<Integer> rest = new ArrayList<Integer>();
+	private Entry<ELEM> join(Entry<ELEM> arg1, Entry<ELEM> arg2) {
+		Set<Object> set = new HashSet<Object>();
+		set.addAll(arg1.vars);
+		set.addAll(arg2.vars);
 
-		outer: for (Integer v : entry.variables) {
+		List<Object> vars = new LinkedList<Object>(varOrder);
+		vars.retainAll(set);
+
+		int[] shape = new int[vars.size()];
+		Arrays.fill(shape, -1);
+		int[] map1 = getMap(arg1, vars, shape);
+		int[] map2 = getMap(arg2, vars, shape);
+
+		Tensor<ELEM> tensor1 = Tensor.reshape(arg1.tensor, shape, map1);
+		Tensor<ELEM> tensor2 = Tensor.reshape(arg2.tensor, shape, map2);
+		Tensor<ELEM> tensor = Tensor.map2(prod, tensor1, tensor2);
+
+		return new Entry<ELEM>(tensor, vars);
+	}
+
+	private Entry<ELEM> fold(Entry<ELEM> entry) {
+		List<Object> fold = new ArrayList<Object>();
+		List<Object> rest = new ArrayList<Object>();
+
+		outer: for (Object v : entry.vars) {
 			for (Entry<ELEM> e : entries)
-				if (e != entry && e.variables.contains(v)) {
-					if (!rest.contains(v))
-						rest.add(v);
+				if (e != entry && e.vars.contains(v)) {
+					rest.add(v);
 					continue outer;
 				}
-			if (!fold.contains(v))
-				fold.add(v);
+			fold.add(v);
 		}
 
 		if (fold.isEmpty())
-			return;
+			return entry;
 
-		int c = fold.size();
+		int count = fold.size();
 		fold.addAll(rest);
+		assert fold.size() == entry.vars.size();
 
-	}
-
-	public Tensor<ELEM> get(int... vars) {
-		assert entries.size() >= 1;
-
-		for (int v : vars) {
-			variables.remove(v);
-			variables.add(v);
+		Tensor<ELEM> tensor = entry.tensor;
+		if (!fold.equals(entry.vars)) {
+			int[] shape = new int[rest.size()];
+			int[] map = new int[fold.size()];
 		}
 
-		ListIterator<Entry<ELEM>> iter = entries.listIterator();
-		while (iter.hasNext())
-			iter.set(normalize(iter.next()));
+		tensor = Tensor.fold(sum, count, tensor);
+		return new Entry<ELEM>(tensor, rest);
+	}
 
-		for (;;) {
-			fold(entries.get(0));
-			if (entries.size() == 1)
-				break;
+	public Tensor<ELEM> get(List<Object> vars) {
+		if (entries.isEmpty())
+			throw new IllegalStateException("no tensor added");
 
-			fold(entries.get(1));
+		HashSet<Object> output = new HashSet<Object>(vars);
+		if (output.size() != vars.size())
+			throw new IllegalArgumentException("multiple output variables");
+		else if (!varOrder.containsAll(output))
+			throw new IllegalArgumentException("cannot request new variables");
+
+		for (Object v : vars) {
+			varOrder.remove(v);
+			varOrder.add(v);
+		}
+
+		Entry<ELEM> entry = entries.removeFirst();
+		entries.addFirst(fold(norm(entry)));
+		while (entries.size() >= 2) {
+
 		}
 
 		return null;
+	}
+
+	public Tensor<ELEM> get(int... vars) {
+		List<Object> list = new ArrayList<Object>();
+		for (int v : vars)
+			list.add(new Integer(v));
+
+		return get(list);
+	}
+
+	public Tensor<ELEM> get(String vars) {
+		List<Object> list = new ArrayList<Object>();
+		for (int i = 0; i < vars.length(); i++)
+			list.add(new Character(vars.charAt(i)));
+
+		return get(list);
 	}
 }
