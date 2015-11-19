@@ -71,7 +71,8 @@ public class Contract<ELEM> {
 		add(tensor, list);
 	}
 
-	private int[] getMap(Entry<ELEM> entry, List<Object> vars, int[] shape) {
+	private static <ELEM> int[] fillShape(Entry<ELEM> entry, List<Object> vars,
+			int[] shape) {
 		assert shape.length == vars.size();
 		int[] map = new int[entry.vars.size()];
 
@@ -101,7 +102,7 @@ public class Contract<ELEM> {
 
 		int[] shape = new int[vars.size()];
 		Arrays.fill(shape, -1);
-		int[] map = getMap(entry, vars, shape);
+		int[] map = fillShape(entry, vars, shape);
 
 		Tensor<ELEM> tensor = Tensor.reshape(entry.tensor, shape, map);
 		return new Entry<ELEM>(tensor, vars);
@@ -117,8 +118,8 @@ public class Contract<ELEM> {
 
 		int[] shape = new int[vars.size()];
 		Arrays.fill(shape, -1);
-		int[] map1 = getMap(arg1, vars, shape);
-		int[] map2 = getMap(arg2, vars, shape);
+		int[] map1 = fillShape(arg1, vars, shape);
+		int[] map2 = fillShape(arg2, vars, shape);
 
 		Tensor<ELEM> tensor1 = Tensor.reshape(arg1.tensor, shape, map1);
 		Tensor<ELEM> tensor2 = Tensor.reshape(arg2.tensor, shape, map2);
@@ -128,7 +129,7 @@ public class Contract<ELEM> {
 	}
 
 	private Entry<ELEM> fold(Entry<ELEM> entry) {
-		List<Object> fold = new ArrayList<Object>();
+		List<Object> vars = new ArrayList<Object>();
 		List<Object> rest = new ArrayList<Object>();
 
 		outer: for (Object v : entry.vars) {
@@ -137,21 +138,24 @@ public class Contract<ELEM> {
 					rest.add(v);
 					continue outer;
 				}
-			fold.add(v);
+			vars.add(v);
 		}
 
-		if (fold.isEmpty())
+		if (vars.isEmpty())
 			return entry;
 
-		int count = fold.size();
-		fold.addAll(rest);
-		assert fold.size() == entry.vars.size();
+		int count = vars.size();
+		vars.addAll(rest);
+		assert vars.size() == entry.vars.size();
 
-		Tensor<ELEM> tensor = entry.tensor;
-		if (!fold.equals(entry.vars)) {
-			int[] shape = new int[rest.size()];
-			int[] map = new int[fold.size()];
-		}
+		Tensor<ELEM> tensor;
+		if (!vars.equals(entry.vars)) {
+			int[] shape = new int[vars.size()];
+			Arrays.fill(shape, -1);
+			int[] map = fillShape(entry, vars, shape);
+			tensor = Tensor.reshape(entry.tensor, shape, map);
+		} else
+			tensor = entry.tensor;
 
 		tensor = Tensor.fold(sum, count, tensor);
 		return new Entry<ELEM>(tensor, rest);
@@ -161,24 +165,33 @@ public class Contract<ELEM> {
 		if (entries.isEmpty())
 			throw new IllegalStateException("no tensor added");
 
-		HashSet<Object> output = new HashSet<Object>(vars);
-		if (output.size() != vars.size())
-			throw new IllegalArgumentException("multiple output variables");
-		else if (!varOrder.containsAll(output))
-			throw new IllegalArgumentException("cannot request new variables");
-
+		int a = varOrder.size();
 		for (Object v : vars) {
-			varOrder.remove(v);
+			if (!varOrder.remove(v))
+				throw new IllegalArgumentException("unknown variable");
+
 			varOrder.add(v);
 		}
+		if (a != varOrder.size())
+			throw new IllegalArgumentException("repeated variable");
+
+		entries.add(new Entry<ELEM>(null, vars));
 
 		Entry<ELEM> entry = entries.removeFirst();
 		entries.addFirst(fold(norm(entry)));
-		while (entries.size() >= 2) {
-
+		while (entries.size() > 2) {
+			entry = entries.removeFirst();
+			entry = join(entry, norm(entries.removeFirst()));
+			entries.addFirst(fold(entry));
 		}
 
-		return null;
+		entry = entries.removeFirst();
+		assert entry.vars.equals(vars);
+		assert entries.getFirst().tensor == null;
+
+		entries.clear();
+		varOrder.clear();
+		return entry.tensor;
 	}
 
 	public Tensor<ELEM> get(int... vars) {
@@ -195,5 +208,25 @@ public class Contract<ELEM> {
 			list.add(new Character(vars.charAt(i)));
 
 		return get(list);
+	}
+
+	public static void main(String[] args) {
+		Tensor<Integer> a = Tensor.matrix(new int[] { 2, 2 },
+				Arrays.asList(1, 2, 3, 4));
+		Tensor.print(a);
+
+		Contract<Integer> contract = new Contract<Integer>(Func1.INT_SUM,
+				Func2.INT_MUL);
+		contract.add(a, "ij");
+		contract.add(a, "jk");
+		Tensor.print(contract.get("ijk"));
+
+		contract.add(a, "ij");
+		contract.add(a, "jk");
+		Tensor.print(contract.get("ik"));
+
+		contract.add(a, "ij");
+		contract.add(a, "jk");
+		Tensor.print(contract.get("j"));
 	}
 }

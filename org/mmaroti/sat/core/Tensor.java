@@ -550,6 +550,10 @@ public class Tensor<ELEM> implements Iterable<ELEM> {
 			stream.println(tensor);
 	}
 
+	public static <ELEM> void print(Tensor<ELEM> tensor) {
+		print(tensor, System.out);
+	}
+
 	public static void main(String[] args) {
 		Tensor<Integer> m1 = Tensor.matrix(new int[] { 2, 3 },
 				Arrays.asList(1, 2, 3, 4, 5, 6));
