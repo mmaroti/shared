@@ -208,56 +208,6 @@ public class Tensor<ELEM> implements Iterable<ELEM> {
 		return tensor;
 	}
 
-	private static int shapeCopy(int[] src, int srcPos, int[] dst, int dstPos,
-			int count) {
-		int a = 1;
-		for (int i = 0; i < count; i++) {
-			int b = src[srcPos + i];
-			dst[dstPos + i] = b;
-			a *= b;
-		}
-		return a;
-	}
-
-	public static <ELEM> Tensor<ELEM> reorder(final Tensor<ELEM> arg,
-			int range1, int range2, int range3) {
-		assert 0 <= range1 && 0 <= range2 && 0 <= range3;
-		assert range1 + range2 + range3 <= arg.getOrder();
-
-		int[] shape = new int[arg.shape.length];
-
-		int d1 = shapeCopy(arg.shape, 0, shape, 0, range1);
-		int d2 = shapeCopy(arg.shape, range1, shape, range1 + range3, range2);
-		int d3 = shapeCopy(arg.shape, range1 + range2, shape, range1, range3);
-		int d4 = shapeCopy(arg.shape, range1 + range2 + range3, shape, range1
-				+ range2 + range3, shape.length - range1 - range2 - range3);
-
-		Tensor<ELEM> tensor = new Tensor<ELEM>(shape);
-
-		ELEM[] src = arg.elems;
-		ELEM[] dst = tensor.elems;
-		assert src.length == dst.length;
-
-		if (d1 == 1) {
-			for (int i4 = 0; i4 < d4; i4++)
-				for (int i3 = 0; i3 < d3; i3++)
-					for (int i2 = 0; i2 < d2; i2++)
-						dst[d2 * d3 * i4 + d3 * i2 + i3] = src[d2 * d3 * i4
-								+ d2 * i3 + i2];
-
-			return tensor;
-		}
-
-		for (int i4 = 0; i4 < d4; i4++)
-			for (int i3 = 0; i3 < d3; i3++)
-				for (int i2 = 0; i2 < d2; i2++)
-					for (int i1 = 0; i1 < d1; i1++)
-						dst[d1 * d2 * d3 * i4 + d1 * d3 * i2 + d1 * i3 + i1] = src[d1
-								* d2 * d3 * i4 + d1 * d2 * i3 + d1 * i2 + i1];
-
-		return tensor;
-	}
-
 	public static <ELEM> Tensor<ELEM> reshape_old(final Tensor<ELEM> arg,
 			final int[] shape, final int[] map) {
 		assert arg.getOrder() == map.length;
@@ -347,6 +297,29 @@ public class Tensor<ELEM> implements Iterable<ELEM> {
 		return tensor;
 	}
 
+	public static <ELEM1, ELEM2> Tensor<ELEM2> fold(
+			Func1<ELEM2, Iterable<ELEM1>> func, int proj, Tensor<ELEM1> arg) {
+
+		int[] shape1 = new int[proj];
+		System.arraycopy(arg.shape, 0, shape1, 0, proj);
+		Tensor<ELEM1> tensor1 = new Tensor<ELEM1>(shape1);
+
+		int[] shape2 = new int[arg.getOrder() - proj];
+		System.arraycopy(arg.shape, proj, shape2, 0, shape2.length);
+		Tensor<ELEM2> tensor2 = new Tensor<ELEM2>(shape2);
+
+		int pos = 0;
+		for (int i = 0; i < tensor2.elems.length; i++) {
+			System.arraycopy(arg.elems, pos, tensor1.elems, 0,
+					tensor1.elems.length);
+
+			tensor2.elems[i] = func.call(tensor1);
+			pos += tensor1.elems.length;
+		}
+
+		return tensor2;
+	}
+
 	public static <ELEM> Tensor<ELEM> concat(int[] commonShape,
 			List<Tensor<ELEM>> list) {
 		for (Tensor<ELEM> tensor : list)
@@ -391,29 +364,6 @@ public class Tensor<ELEM> implements Iterable<ELEM> {
 		}
 
 		return list;
-	}
-
-	public static <ELEM1, ELEM2> Tensor<ELEM2> fold(
-			Func1<ELEM2, Iterable<ELEM1>> func, int proj, Tensor<ELEM1> arg) {
-
-		int[] shape1 = new int[proj];
-		System.arraycopy(arg.shape, 0, shape1, 0, proj);
-		Tensor<ELEM1> tensor1 = new Tensor<ELEM1>(shape1);
-
-		int[] shape2 = new int[arg.getOrder() - proj];
-		System.arraycopy(arg.shape, proj, shape2, 0, shape2.length);
-		Tensor<ELEM2> tensor2 = new Tensor<ELEM2>(shape2);
-
-		int pos = 0;
-		for (int i = 0; i < tensor2.elems.length; i++) {
-			System.arraycopy(arg.elems, pos, tensor1.elems, 0,
-					tensor1.elems.length);
-
-			tensor2.elems[i] = func.call(tensor1);
-			pos += tensor1.elems.length;
-		}
-
-		return tensor2;
 	}
 
 	public static class Named<ELEM> {

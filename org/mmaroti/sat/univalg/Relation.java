@@ -21,8 +21,8 @@ package org.mmaroti.sat.univalg;
 import org.mmaroti.sat.core.*;
 
 public final class Relation<BOOL> {
-	protected final BoolAlgebra<BOOL> alg;
-	protected final Tensor<BOOL> tensor;
+	private final BoolAlgebra<BOOL> alg;
+	private final Tensor<BOOL> tensor;
 
 	public BoolAlgebra<BOOL> getAlg() {
 		return alg;
@@ -227,7 +227,7 @@ public final class Relation<BOOL> {
 		return new Relation<BOOL>(alg, tmp);
 	}
 
-	public Relation<BOOL> projectExclude(int coord) {
+	public Relation<BOOL> exclude(int coord) {
 		assert 0 <= coord && coord < getArity();
 
 		int[] map = new int[getArity()];
@@ -371,7 +371,7 @@ public final class Relation<BOOL> {
 	public BOOL isEssential() {
 		Relation<BOOL> tmp = makeFull(alg, getSize(), getArity());
 		for (int i = 0; i < getArity(); i++)
-			tmp = tmp.intersect(projectExclude(i));
+			tmp = tmp.intersect(exclude(i));
 
 		return tmp.subtract(this).isNotEmpty();
 	}

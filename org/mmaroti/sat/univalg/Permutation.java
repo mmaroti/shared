@@ -21,8 +21,8 @@ package org.mmaroti.sat.univalg;
 import org.mmaroti.sat.core.*;
 
 public final class Permutation<BOOL> {
-	protected final BoolAlgebra<BOOL> alg;
-	protected final Tensor<BOOL> tensor;
+	private final BoolAlgebra<BOOL> alg;
+	private final Tensor<BOOL> tensor;
 
 	public BoolAlgebra<BOOL> getAlg() {
 		return alg;
@@ -43,7 +43,7 @@ public final class Permutation<BOOL> {
 		this.alg = alg;
 		this.tensor = tensor;
 
-		if (getAlg() == BoolAlgebra.INSTANCE)
+		if (alg == BoolAlgebra.INSTANCE)
 			assert (Boolean) isPermutation();
 	}
 

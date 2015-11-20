@@ -21,8 +21,8 @@ package org.mmaroti.sat.univalg;
 import org.mmaroti.sat.core.*;
 
 public final class PartialOrder<BOOL> {
-	protected final BoolAlgebra<BOOL> alg;
-	protected final Tensor<BOOL> tensor;
+	private final BoolAlgebra<BOOL> alg;
+	private final Tensor<BOOL> tensor;
 
 	public BoolAlgebra<BOOL> getAlg() {
 		return alg;
@@ -43,8 +43,18 @@ public final class PartialOrder<BOOL> {
 		this.alg = alg;
 		this.tensor = tensor;
 
-		if (getAlg() == BoolAlgebra.INSTANCE)
+		if (alg == BoolAlgebra.INSTANCE)
 			assert (Boolean) isPartialOrder();
+	}
+
+	public static <BOOL> PartialOrder<BOOL> chain(BoolAlgebra<BOOL> alg,
+			int size) {
+		return Relation.makeLessOrEqual(alg, size).asPartialOrder();
+	}
+
+	public static <BOOL> PartialOrder<BOOL> antiChain(BoolAlgebra<BOOL> alg,
+			int size) {
+		return Relation.makeEqual(alg, size).asPartialOrder();
 	}
 
 	public Relation<BOOL> asRelation() {
@@ -56,18 +66,15 @@ public final class PartialOrder<BOOL> {
 	}
 
 	public PartialOrder<BOOL> invert() {
-		Tensor<BOOL> tmp;
-		tmp = Tensor.reshape(tensor, tensor.getShape(), new int[] { 1, 0 });
+		Tensor<BOOL> tmp = Tensor.reshape(tensor, tensor.getShape(), new int[] {
+				1, 0 });
 		return new PartialOrder<BOOL>(alg, tmp);
 	}
 
-	private void checkSize(PartialOrder<BOOL> ord) {
+	public PartialOrder<BOOL> intersect(PartialOrder<BOOL> ord) {
 		assert getAlg() == ord.getAlg();
 		assert getSize() == ord.getSize();
-	}
 
-	public PartialOrder<BOOL> intersect(PartialOrder<BOOL> ord) {
-		checkSize(ord);
 		Tensor<BOOL> tmp = Tensor.map2(alg.AND, tensor, ord.tensor);
 		return new PartialOrder<BOOL>(alg, tmp);
 	}

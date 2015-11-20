@@ -179,7 +179,7 @@ public class Contract<ELEM> {
 		return new Entry<ELEM>(tensor, rest);
 	}
 
-	public Tensor<ELEM> get(List<Object> vars) {
+	public Tensor<ELEM> get(List<?> vars) {
 		if (entries.isEmpty())
 			throw new IllegalStateException("no tensor added");
 

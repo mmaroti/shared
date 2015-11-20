@@ -20,9 +20,9 @@ package org.mmaroti.sat.univalg;
 
 import org.mmaroti.sat.core.*;
 
-public class Operation<BOOL> {
-	protected final BoolAlgebra<BOOL> alg;
-	protected final Tensor<BOOL> tensor;
+public final class Operation<BOOL> {
+	private final BoolAlgebra<BOOL> alg;
+	private final Tensor<BOOL> tensor;
 
 	public BoolAlgebra<BOOL> getAlg() {
 		return alg;
@@ -50,7 +50,7 @@ public class Operation<BOOL> {
 		this.alg = alg;
 		this.tensor = tensor;
 
-		if (getAlg() == BoolAlgebra.INSTANCE)
+		if (alg == BoolAlgebra.INSTANCE)
 			assert (Boolean) isOperation();
 	}
 
@@ -63,7 +63,7 @@ public class Operation<BOOL> {
 	}
 
 	public BOOL isSurjective() {
-		Tensor<BOOL> tmp = Tensor.reorder(tensor, 0, 1, tensor.getOrder() - 1);
+		Tensor<BOOL> tmp = asRelation().rotate().getTensor();
 		tmp = Tensor.fold(alg.ANY, tensor.getOrder() - 1, tmp);
 		return Tensor.fold(alg.ALL, 1, tmp).get();
 	}
@@ -148,6 +148,10 @@ public class Operation<BOOL> {
 		return isSatisfied(new int[getArity()]);
 	}
 
+	public BOOL isCommutative() {
+		return isEqualTo(polymer(1, 0));
+	}
+
 	public BOOL isMajority() {
 		BOOL b = isSatisfied(1, 0, 0);
 		b = alg.and(b, isSatisfied(0, 1, 0));
@@ -197,56 +201,135 @@ public class Operation<BOOL> {
 		return new Operation<BOOL>(alg, tensor);
 	}
 
-	public BOOL preserves(Relation<BOOL> rel) {
+	public Relation<BOOL> evaluate(Relation<BOOL> rel) {
 		if (getArity() == 0)
-			return preserves_op0(rel);
+			return evaluate_op0(rel.getArity());
 		else if (rel.getArity() == 1)
-			return preserves_rel1(rel);
+			return evaluate_rel1(rel);
 		else if (getArity() == 1)
-			return preserves_op1(rel);
+			return evaluate_op1(rel);
 		else if (rel.getArity() == 2)
-			return preserves_rel2(rel);
+			return evaluate_rel2(rel);
+		else if (getArity() == 2 && rel.getArity() == 3)
+			return evaluate_op2_rel3(rel);
+		else if (getArity() == 2 && rel.getArity() == 4)
+			return evaluate_op2_rel4(rel);
+		else if (getArity() == 3 && rel.getArity() == 3)
+			return evaluate_op3_rel3(rel);
+		else if (getArity() == 3 && rel.getArity() == 4)
+			return evaluate_op3_rel4(rel);
 
 		throw new IllegalArgumentException("not implemented for these arities");
 	}
 
-	private BOOL preserves_op0(Relation<BOOL> rel) {
-		assert getArity() == 0;
-		return asRelation().isSubsetOf(rel.diagonal());
+	private Relation<BOOL> evaluate_op0(int arity) {
 	}
 
-	private BOOL preserves_op1(Relation<BOOL> rel) {
-		assert getArity() == 1;
+	private Relation<BOOL> evaluate_rel1(Relation<BOOL> rel) {
+		int a = getArity();
+		Contract<BOOL> c = Contract.logical(alg);
 
-		Relation<BOOL> op = asRelation();
-		Relation<BOOL> tmp = rel;
-		for (int i = 0; i < rel.getArity(); i++)
-			tmp = op.compose(tmp).rotate();
+		c.add(tensor, Contract.range(0, a));
+		for (int i = 1; i < a; i++)
+			c.add(rel.getTensor(), i);
+		Tensor<BOOL> t = c.get(0);
 
-		return tmp.isSubsetOf(rel);
+		return new Relation<BOOL>(alg, t);
 	}
 
-	private BOOL preserves_rel1(Relation<BOOL> rel) {
-		assert rel.getArity() == 1;
+	private Relation<BOOL> evaluate_op1(Relation<BOOL> rel) {
+		int a = rel.getArity();
+		Contract<BOOL> c = Contract.logical(alg);
 
-		Relation<BOOL> tmp = asRelation();
-		for (int i = 0; i < getArity(); i++)
-			tmp = tmp.compose(rel);
+		c.add(rel.getTensor(), Contract.range(a, 2 * a));
+		for (int i = 0; i < a; i++)
+			c.add(tensor, i, i + a);
+		Tensor<BOOL> t = c.get(Contract.range(0, a));
 
-		return tmp.isSubsetOf(rel);
+		return new Relation<BOOL>(alg, t);
 	}
 
-	private BOOL preserves_rel2(Relation<BOOL> rel) {
-		assert rel.getArity() == 2;
+	private Relation<BOOL> evaluate_rel2(Relation<BOOL> rel) {
+		int a = getArity();
+		Contract<BOOL> c = Contract.logical(alg);
 
-		Contract<BOOL> contract = Contract.logical(alg);
-		contract.add(tensor, Contract.range(0, getArity()));
-		for (int i = 1; i < getArity(); i++)
-			contract.add(rel.getTensor(), i, getArity() + i);
-		contract.add(tensor, Contract.range(getArity(), 2 * getArity()));
-		Relation<BOOL> tmp = new Relation<BOOL>(alg,
-				contract.get(0, getArity()));
+		c.add(tensor, Contract.range(0, a));
+		for (int i = 1; i < a; i++)
+			c.add(rel.getTensor(), i, i + a);
+		c.add(tensor, Contract.range(a, 2 * a));
+		Tensor<BOOL> t = c.get(Contract.range(0, a));
 
-		return tmp.isSubsetOf(rel);
+		return new Relation<BOOL>(alg, t);
+	}
+
+	private Relation<BOOL> evaluate_op2_rel3(Relation<BOOL> rel) {
+		assert getArity() == 2 && rel.getArity() == 3;
+		Contract<BOOL> c = Contract.logical(alg);
+
+		// the order matters for performance
+		c.add(tensor, "xad");
+		c.add(rel.getTensor(), "abc");
+		c.add(tensor, "ybe");
+		c.add(rel.getTensor(), "def");
+		c.add(tensor, "zcf");
+		Tensor<BOOL> t = c.get("xyz");
+
+		return new Relation<BOOL>(alg, t);
+	}
+
+	private Relation<BOOL> evaluate_op2_rel4(Relation<BOOL> rel) {
+		assert getArity() == 2 && rel.getArity() == 4;
+		Contract<BOOL> c = Contract.logical(alg);
+
+		// the order matters for performance
+		c.add(rel.getTensor(), "abcd");
+		c.add(tensor, "xae");
+		c.add(tensor, "ybf");
+		c.add(rel.getTensor(), "efgh");
+		c.add(tensor, "zcg");
+		c.add(tensor, "udh");
+		Tensor<BOOL> t = c.get("xyzu");
+
+		return new Relation<BOOL>(alg, t);
+	}
+
+	private Relation<BOOL> evaluate_op3_rel3(Relation<BOOL> rel) {
+		assert getArity() == 3 && rel.getArity() == 3;
+		Contract<BOOL> c = Contract.logical(alg);
+
+		// the order matters for performance
+		c.add(rel.getTensor(), "abc");
+		c.add(tensor, "xadg");
+		c.add(rel.getTensor(), "def");
+		c.add(tensor, "ybeh");
+		c.add(rel.getTensor(), "ghi");
+		c.add(tensor, "zcfi");
+		Tensor<BOOL> t = c.get("xyz");
+
+		return new Relation<BOOL>(alg, t);
+	}
+
+	private Relation<BOOL> evaluate_op3_rel4(Relation<BOOL> rel) {
+		assert getArity() == 3 && rel.getArity() == 4;
+		Contract<BOOL> c = Contract.logical(alg);
+
+		// the order matters for performance
+		c.add(tensor, "xaei");
+		c.add(rel.getTensor(), "abcd");
+		c.add(tensor, "ybfj");
+		c.add(rel.getTensor(), "efgh");
+		c.add(tensor, "zcgk");
+		c.add(rel.getTensor(), "ijkl");
+		c.add(tensor, "udhl");
+		Tensor<BOOL> t = c.get("xyzu");
+
+		return new Relation<BOOL>(alg, t);
+	}
+
+	public BOOL preserves(Relation<BOOL> rel) {
+		if (getArity() == 0)
+			return asRelation().isSubsetOf(rel.diagonal());
+		else
+			return evaluate(rel).isSubsetOf(rel);
 	}
 }
