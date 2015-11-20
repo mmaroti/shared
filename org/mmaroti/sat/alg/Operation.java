@@ -204,8 +204,8 @@ public class Operation<BOOL> {
 			return preserves_rel1(rel);
 		else if (getArity() == 1)
 			return preserves_op1(rel);
-		// else if (rel.getArity() == 2)
-		// return preserves_rel2(rel);
+		else if (rel.getArity() == 2)
+			return preserves_rel2(rel);
 
 		throw new IllegalArgumentException("not implemented for these arities");
 	}
@@ -232,6 +232,20 @@ public class Operation<BOOL> {
 		Relation<BOOL> tmp = asRelation();
 		for (int i = 0; i < getArity(); i++)
 			tmp = tmp.compose(rel);
+
+		return tmp.isSubsetOf(rel);
+	}
+
+	private BOOL preserves_rel2(Relation<BOOL> rel) {
+		assert rel.getArity() == 2;
+
+		Contract<BOOL> contract = Contract.logical(alg);
+		contract.add(tensor, Contract.range(0, getArity()));
+		for (int i = 1; i < getArity(); i++)
+			contract.add(rel.getTensor(), i, getArity() + i);
+		contract.add(tensor, Contract.range(getArity(), 2 * getArity()));
+		Relation<BOOL> tmp = new Relation<BOOL>(alg,
+				contract.get(0, getArity()));
 
 		return tmp.isSubsetOf(rel);
 	}

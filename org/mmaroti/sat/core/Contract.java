@@ -33,17 +33,35 @@ public class Contract<ELEM> {
 		this.prod = prod;
 	}
 
+	public static <ELEM> Contract<ELEM> logical(BoolAlgebra<ELEM> alg) {
+		return new Contract<ELEM>(alg.ANY, alg.AND);
+	}
+
+	public static <ELEM> Contract<ELEM> linear(BoolAlgebra<ELEM> alg) {
+		return new Contract<ELEM>(alg.SUM, alg.AND);
+	}
+
 	private static class Entry<ELEM> {
 		public final Tensor<ELEM> tensor;
-		public final List<Object> vars;
+		public final List<?> vars;
 
-		public Entry(Tensor<ELEM> tensor, List<Object> vars) {
+		public Entry(Tensor<ELEM> tensor, List<?> vars) {
 			this.tensor = tensor;
 			this.vars = vars;
 		}
 	}
 
-	public void add(Tensor<ELEM> tensor, List<Object> vars) {
+	public static List<Integer> range(int start, int end) {
+		assert end >= start;
+
+		List<Integer> list = new ArrayList<Integer>();
+		for (int i = start; i < end; i++)
+			list.add(i);
+
+		return list;
+	}
+
+	public void add(Tensor<ELEM> tensor, List<?> vars) {
 		if (tensor.getOrder() != vars.size())
 			throw new IllegalArgumentException("invalid tensor");
 
