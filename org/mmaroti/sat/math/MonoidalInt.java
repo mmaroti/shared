@@ -20,9 +20,9 @@ package org.mmaroti.sat.math;
 
 import java.text.*;
 import java.util.*;
-
 import org.mmaroti.sat.core.*;
 import org.mmaroti.sat.solvers.*;
+import org.mmaroti.sat.univalg.*;
 
 public class MonoidalInt {
 	public static Tensor<Boolean> decodeMonoid(final int size, String monoid) {
@@ -48,27 +48,20 @@ public class MonoidalInt {
 				});
 	}
 
-	public static <ELEM> ELEM isFunction(BoolAlgebra<ELEM> alg, Tensor<ELEM> func) {
+	public static <ELEM> ELEM isFunction(BoolAlgebra<ELEM> alg,
+			Tensor<ELEM> func) {
 		func = Tensor.fold(alg.ONE, 1, func);
 		func = Tensor.fold(alg.ALL, func.getOrder(), func);
 		return func.get();
 	}
 
-	public static <ELEM> ELEM isReflexiveRel(BoolAlgebra<ELEM> alg, Tensor<ELEM> rel) {
+	public static <ELEM> ELEM isReflexiveRel(BoolAlgebra<ELEM> alg,
+			Tensor<ELEM> rel) {
 		assert rel.getOrder() == 2 && rel.getDim(0) == rel.getDim(1);
 
 		Tensor<ELEM> t = Tensor.reshape(rel, new int[] { rel.getDim(0) },
 				new int[] { 0, 0 });
 		t = Tensor.fold(alg.ALL, 1, t);
-
-		return t.get();
-	}
-
-	public static <ELEM> ELEM isSymmetricRel(BoolAlgebra<ELEM> alg, Tensor<ELEM> rel) {
-		assert rel.getOrder() == 2 && rel.getDim(0) == rel.getDim(1);
-
-		Tensor<ELEM> t = Tensor.reduce(alg.ALL, "", alg.EQU, rel.named("xy"),
-				rel.named("yx"));
 
 		return t.get();
 	}
@@ -85,7 +78,8 @@ public class MonoidalInt {
 		return t.get();
 	}
 
-	public static <ELEM> ELEM isMajorityOp(BoolAlgebra<ELEM> alg, Tensor<ELEM> op) {
+	public static <ELEM> ELEM isMajorityOp(BoolAlgebra<ELEM> alg,
+			Tensor<ELEM> op) {
 		assert op.getOrder() == 4;
 
 		ELEM t = Tensor.reduce(alg.ALL, "", alg.ID, op.named("xxxy")).get();
@@ -329,8 +323,8 @@ public class MonoidalInt {
 		return prob.solveAll(solver, LIMIT).get(0);
 	}
 
-	public static <ELEM> Tensor<Boolean> getBinaryRels(
-			SatSolver<ELEM> solver, int size, String monoid) {
+	public static <ELEM> Tensor<Boolean> getBinaryRels(SatSolver<ELEM> solver,
+			int size, String monoid) {
 		final Tensor<Boolean> mon = decodeMonoid(size, monoid);
 		BoolProblem prob = new BoolProblem(new int[] { size, size }) {
 			@Override
@@ -403,8 +397,8 @@ public class MonoidalInt {
 		return prob.solveAll(solver, LIMIT).get(0);
 	}
 
-	public static <ELEM> Tensor<Boolean> getTernaryRels(
-			SatSolver<ELEM> solver, int size, String monoid) {
+	public static <ELEM> Tensor<Boolean> getTernaryRels(SatSolver<ELEM> solver,
+			int size, String monoid) {
 		final Tensor<Boolean> mon = decodeMonoid(size, monoid);
 		BoolProblem prob = new BoolProblem(new int[] { size, size, size }) {
 			@Override
@@ -545,8 +539,8 @@ public class MonoidalInt {
 		return prob.solveAll(solver, LIMIT).get(0);
 	}
 
-	public static <ELEM> Tensor<Boolean> getTernaryOps(
-			SatSolver<ELEM> solver, int size, String monoid) {
+	public static <ELEM> Tensor<Boolean> getTernaryOps(SatSolver<ELEM> solver,
+			int size, String monoid) {
 		final Tensor<Boolean> mon = decodeMonoid(size, monoid);
 		BoolProblem prob = new BoolProblem(new int[] { size, size, size, size }) {
 			@Override
@@ -599,7 +593,8 @@ public class MonoidalInt {
 	public static <ELEM> Tensor<Boolean> getQuaternaryOps(
 			SatSolver<ELEM> solver, int size, String monoid) {
 		final Tensor<Boolean> mon = decodeMonoid(size, monoid);
-		BoolProblem prob = new BoolProblem(new int[] { size, size, size, size, size }) {
+		BoolProblem prob = new BoolProblem(new int[] { size, size, size, size,
+				size }) {
 			@Override
 			public <BOOL> BOOL compute(BoolAlgebra<BOOL> alg,
 					List<Tensor<BOOL>> tensors) {
@@ -639,8 +634,8 @@ public class MonoidalInt {
 		return prob.solveAll(solver, LIMIT).get(0);
 	}
 
-	public static <ELEM> Tensor<Boolean> getMajorityOps(
-			SatSolver<ELEM> solver, int size, String monoid) {
+	public static <ELEM> Tensor<Boolean> getMajorityOps(SatSolver<ELEM> solver,
+			int size, String monoid) {
 		final Tensor<Boolean> mon = decodeMonoid(size, monoid);
 		BoolProblem prob = new BoolProblem(new int[] { size, size, size, size }) {
 			@Override
@@ -661,8 +656,8 @@ public class MonoidalInt {
 		return prob.solveAll(solver, LIMIT).get(0);
 	}
 
-	public static <ELEM> Tensor<Boolean> getMaltsevOps(
-			SatSolver<ELEM> solver, int size, String monoid) {
+	public static <ELEM> Tensor<Boolean> getMaltsevOps(SatSolver<ELEM> solver,
+			int size, String monoid) {
 		final Tensor<Boolean> mon = decodeMonoid(size, monoid);
 		BoolProblem prob = new BoolProblem(new int[] { size, size, size, size }) {
 			@Override
@@ -743,6 +738,22 @@ public class MonoidalInt {
 		}
 	}
 
+	public static <ELEM> Tensor<ELEM> getCompatibility(
+			final BoolAlgebra<ELEM> alg, Tensor<ELEM> ops, Tensor<ELEM> rels) {
+		final List<Tensor<ELEM>> os = Tensor.unconcat(ops);
+		final List<Tensor<ELEM>> rs = Tensor.unconcat(rels);
+
+		return Tensor.generate(os.size(), rs.size(),
+				new Func2<ELEM, Integer, Integer>() {
+					@Override
+					public ELEM call(Integer a, Integer b) {
+						Operation<ELEM> op = new Operation<ELEM>(alg, os.get(a));
+						Relation<ELEM> rel = new Relation<ELEM>(alg, rs.get(b));
+						return op.preserves(rel);
+					}
+				});
+	}
+
 	public static <ELEM> ELEM isCompatible22(BoolAlgebra<ELEM> alg,
 			Tensor<ELEM> op, Tensor<ELEM> rel) {
 		assert op.getOrder() == 3 && rel.getOrder() == 2;
@@ -775,8 +786,8 @@ public class MonoidalInt {
 				});
 	}
 
-	public static <ELEM> Tensor<ELEM> getCompatibility22Old(BoolAlgebra<ELEM> alg,
-			Tensor<ELEM> ops, Tensor<ELEM> rels) {
+	public static <ELEM> Tensor<ELEM> getCompatibility22Old(
+			BoolAlgebra<ELEM> alg, Tensor<ELEM> ops, Tensor<ELEM> rels) {
 		assert ops.getOrder() == 4 && rels.getOrder() == 3;
 
 		Tensor<ELEM> t;
@@ -1021,7 +1032,8 @@ public class MonoidalInt {
 						1, 0 });
 	}
 
-	public static <ELEM> ELEM isMonoid(BoolAlgebra<ELEM> alg, Tensor<ELEM> monoid) {
+	public static <ELEM> ELEM isMonoid(BoolAlgebra<ELEM> alg,
+			Tensor<ELEM> monoid) {
 		assert monoid.getOrder() == 3;
 
 		Tensor<ELEM> t;
@@ -1185,14 +1197,30 @@ public class MonoidalInt {
 			"000 001 002 010 011 012 020 022 111 222",
 			"000 001 002 010 011 012 020 022 100 101 110 111 200 202 220 222" };
 
-	public static void printStatistics(int size, String monoid) {
+	private static long startTime = 0;
+	private static long lastTime = 0;
+
+	public static void printTime() {
+		long a = System.currentTimeMillis();
+		if (startTime == 0)
+			startTime = a;
+		else {
+			String l = TIME_FORMAT.format(0.001 * (a - lastTime));
+			String t = TIME_FORMAT.format(0.001 * (a - startTime));
+			System.out.println("finished in " + l + " seconds (total " + t
+					+ ")");
+		}
+		lastTime = a;
+	}
+
+	public static void printStatisticsOld(int size, String monoid) {
 		SatSolver<Integer> solver = new Sat4J();
 		solver.debugging = false;
 
 		System.out.println("monoid: " + monoid);
 		checkMonoid(size, monoid);
 
-		long time = System.currentTimeMillis();
+		printTime();
 
 		Tensor<Boolean> unaryRels = getUnaryRels(solver, size, monoid);
 		System.out.println("unary relations:        " + unaryRels.getDim(1));
@@ -1262,25 +1290,30 @@ public class MonoidalInt {
 		System.out.println("maltsev ops:            "
 				+ getMaltsevOps(solver, size, monoid).getDim(4));
 
-		Tensor<Boolean> compat, closed;
+		printTime();
 
+		Tensor<Boolean> compat, closed;
 		if (binaryOps.getDim(3) * binaryRels.getDim(2) <= GALOIS_LIMIT) {
-			compat = getCompatibility22(BoolAlgebra.INSTANCE, binaryOps, binaryRels);
+			compat = getCompatibility22(BoolAlgebra.INSTANCE, binaryOps,
+					binaryRels);
 			closed = getClosedSubsets(solver, compat);
 			System.out.println("clones (op 2 rel 2):    " + closed.getDim(1));
 			if (closed.getDim(0) <= PRINT_LIMIT
 					&& closed.getDim(1) <= PRINT_LIMIT)
 				printMatrix("closed binary op subsets", sort(closed));
 		}
+		printTime();
 
 		if (binaryOps.getDim(3) * ternaryRels.getDim(3) <= GALOIS_LIMIT) {
-			compat = getCompatibility23(BoolAlgebra.INSTANCE, binaryOps, ternaryRels);
+			compat = getCompatibility23(BoolAlgebra.INSTANCE, binaryOps,
+					ternaryRels);
 			closed = getClosedSubsets(solver, compat);
 			System.out.println("clones (op 2 rel 3):    " + closed.getDim(1));
 			if (closed.getDim(0) <= PRINT_LIMIT
 					&& closed.getDim(1) <= PRINT_LIMIT)
 				printMatrix("closed binary op subsets", sort(closed));
 		}
+		printTime();
 
 		if (binaryOps.getDim(3) * selTernaryRels.getDim(3) <= GALOIS_LIMIT) {
 			compat = getCompatibility23(BoolAlgebra.INSTANCE, binaryOps,
@@ -1288,12 +1321,15 @@ public class MonoidalInt {
 			closed = getClosedSubsets(solver, compat);
 			System.out.println("clones (op 2 rel s3):   " + closed.getDim(1));
 		}
+		printTime();
 
 		if (binaryOps.getDim(3) * qaryRels.getDim(4) <= GALOIS_LIMIT) {
-			compat = getCompatibility24(BoolAlgebra.INSTANCE, binaryOps, qaryRels);
+			compat = getCompatibility24(BoolAlgebra.INSTANCE, binaryOps,
+					qaryRels);
 			closed = getClosedSubsets(solver, compat);
 			System.out.println("clones (op 2 rel 4):    " + closed.getDim(1));
 		}
+		printTime();
 
 		if (selTernaryOps.getDim(4) * binaryRels.getDim(2) <= GALOIS_LIMIT) {
 			compat = getCompatibility32(BoolAlgebra.INSTANCE, selTernaryOps,
@@ -1301,6 +1337,7 @@ public class MonoidalInt {
 			closed = getClosedSubsets(solver, compat);
 			System.out.println("clones (op s3 rel 2):   " + closed.getDim(1));
 		}
+		printTime();
 
 		if (selTernaryOps.getDim(4) * ternaryRels.getDim(3) <= GALOIS_LIMIT) {
 			compat = getCompatibility33(BoolAlgebra.INSTANCE, selTernaryOps,
@@ -1308,6 +1345,7 @@ public class MonoidalInt {
 			closed = getClosedSubsets(solver, compat);
 			System.out.println("clones (op s3 rel 3):   " + closed.getDim(1));
 		}
+		printTime();
 
 		if (selTernaryOps.getDim(4) * selTernaryRels.getDim(3) <= GALOIS_LIMIT) {
 			compat = getCompatibility33(BoolAlgebra.INSTANCE, selTernaryOps,
@@ -1315,6 +1353,7 @@ public class MonoidalInt {
 			closed = getClosedSubsets(solver, compat);
 			System.out.println("clones (op s3 rel s3):  " + closed.getDim(1));
 		}
+		printTime();
 
 		if (selTernaryOps.getDim(4) * qaryRels.getDim(4) <= GALOIS_LIMIT) {
 			compat = getCompatibility34(BoolAlgebra.INSTANCE, selTernaryOps,
@@ -1322,15 +1361,18 @@ public class MonoidalInt {
 			closed = getClosedSubsets(solver, compat);
 			System.out.println("clones (op s3 rel 4):   " + closed.getDim(1));
 		}
+		printTime();
 
 		if (ternaryOps.getDim(4) * binaryRels.getDim(2) <= GALOIS_LIMIT) {
-			compat = getCompatibility32(BoolAlgebra.INSTANCE, ternaryOps, binaryRels);
+			compat = getCompatibility32(BoolAlgebra.INSTANCE, ternaryOps,
+					binaryRels);
 			closed = getClosedSubsets(solver, compat);
 			System.out.println("clones (op 3 rel 2):    " + closed.getDim(1));
 			if (closed.getDim(0) <= PRINT_LIMIT
 					&& closed.getDim(1) <= PRINT_LIMIT)
 				printMatrix("closed ternary op subsets", sort(closed));
 		}
+		printTime();
 
 		if (ternaryOps.getDim(4) * ternaryRels.getDim(3) <= GALOIS_LIMIT) {
 			compat = getCompatibility33(BoolAlgebra.INSTANCE, ternaryOps,
@@ -1341,6 +1383,7 @@ public class MonoidalInt {
 					&& closed.getDim(1) <= PRINT_LIMIT)
 				printMatrix("closed ternary op subsets", sort(closed));
 		}
+		printTime();
 
 		if (ternaryOps.getDim(4) * selTernaryRels.getDim(3) <= GALOIS_LIMIT) {
 			compat = getCompatibility33(BoolAlgebra.INSTANCE, ternaryOps,
@@ -1348,19 +1391,206 @@ public class MonoidalInt {
 			closed = getClosedSubsets(solver, compat);
 			System.out.println("clones (op 3 rel s3):   " + closed.getDim(1));
 		}
+		printTime();
 
 		if (ternaryOps.getDim(4) * qaryRels.getDim(4) <= GALOIS_LIMIT) {
-			compat = getCompatibility34(BoolAlgebra.INSTANCE, ternaryOps, qaryRels);
+			compat = getCompatibility34(BoolAlgebra.INSTANCE, ternaryOps,
+					qaryRels);
 			closed = getClosedSubsets(solver, compat);
 			System.out.println("clones (op 3 rel 4):    " + closed.getDim(1));
 		}
-
-		time = System.currentTimeMillis() - time;
-		System.out.println("finished in " + TIME_FORMAT.format(0.001 * time)
-				+ " seconds\n");
+		printTime();
 	}
 
-	public static void main(String[] args) {
+	public static void printStatistics(int size, String monoid) {
+		SatSolver<Integer> solver = new Sat4J();
+		solver.debugging = false;
+
+		System.out.println("monoid: " + monoid);
+		checkMonoid(size, monoid);
+
+		printTime();
+
+		Tensor<Boolean> unaryRels = getUnaryRels(solver, size, monoid);
+		System.out.println("unary relations:        " + unaryRels.getDim(1));
+
+		Tensor<Boolean> binaryRels = getBinaryRels(solver, size, monoid);
+		System.out.println("binary relations:       " + binaryRels.getDim(2));
+		if (binaryRels.getDim(2) <= PRINT_LIMIT) {
+			binaryRels = sort(binaryRels);
+			printBinaryRels(binaryRels);
+		}
+
+		Tensor<Boolean> ternaryRels = getTernaryRels(solver, size, monoid);
+		System.out.println("ternary relations:      " + ternaryRels.getDim(3));
+		if (ternaryRels.getDim(3) <= PRINT_LIMIT) {
+			ternaryRels = sort(ternaryRels);
+			printTernaryRels(ternaryRels);
+		}
+
+		Tensor<Boolean> qaryRels = getQuaternaryRels(solver, size, monoid);
+		System.out.println("quaternary relations:   " + qaryRels.getDim(4));
+
+		System.out.println("essential binary rels:  "
+				+ getEssentialBinaryRels(solver, size, monoid).getDim(2));
+
+		System.out.println("essential ternary rels: "
+				+ getEssentialTernaryRels(solver, size, monoid).getDim(3));
+
+		Tensor<Boolean> selTernaryRels = getSelectedTernaryRels(solver, size,
+				monoid);
+		System.out.println("selected ternary rels:  "
+				+ selTernaryRels.getDim(3));
+
+		System.out.println("quasiorder relations:   "
+				+ getQuasiorderRels(solver, size, monoid).getDim(2));
+
+		Tensor<Boolean> binaryOps = getBinaryOps(solver, size, monoid);
+		System.out.println("binary ops:             " + binaryOps.getDim(3));
+		if (binaryOps.getDim(3) <= PRINT_LIMIT) {
+			binaryOps = sort(binaryOps);
+			printBinaryOps(binaryOps);
+		}
+
+		Tensor<Boolean> ternaryOps = getTernaryOps(solver, size, monoid);
+		System.out.println("ternary ops:            " + ternaryOps.getDim(4));
+		if (ternaryOps.getDim(4) <= PRINT_LIMIT) {
+			ternaryOps = sort(ternaryOps);
+			printTernaryOps(ternaryOps);
+		}
+
+		Tensor<Boolean> qaryOps = getQuaternaryOps(solver, size, monoid);
+		System.out.println("quaternary ops:         " + qaryOps.getDim(5));
+
+		System.out.println("essential binary ops:   "
+				+ getEssentialBinaryOps(solver, size, monoid).getDim(3));
+
+		System.out.println("essential ternary ops:  "
+				+ getEssentialTernaryOps(solver, size, monoid).getDim(4));
+
+		Tensor<Boolean> selTernaryOps = getSelectedTernaryOps(solver, size,
+				monoid);
+		System.out
+				.println("selected ternary ops:   " + selTernaryOps.getDim(4));
+
+		System.out.println("majority ops:           "
+				+ getMajorityOps(solver, size, monoid).getDim(4));
+
+		System.out.println("maltsev ops:            "
+				+ getMaltsevOps(solver, size, monoid).getDim(4));
+
+		printTime();
+
+		Tensor<Boolean> compat, closed;
+		if (binaryOps.getDim(3) * binaryRels.getDim(2) <= GALOIS_LIMIT) {
+			compat = getCompatibility(BoolAlgebra.INSTANCE, binaryOps,
+					binaryRels);
+			closed = getClosedSubsets(solver, compat);
+			System.out.println("clones (op 2 rel 2):    " + closed.getDim(1));
+			if (closed.getDim(0) <= PRINT_LIMIT
+					&& closed.getDim(1) <= PRINT_LIMIT)
+				printMatrix("closed binary op subsets", sort(closed));
+		}
+		printTime();
+
+		if (binaryOps.getDim(3) * ternaryRels.getDim(3) <= GALOIS_LIMIT) {
+			compat = getCompatibility(BoolAlgebra.INSTANCE, binaryOps,
+					ternaryRels);
+			closed = getClosedSubsets(solver, compat);
+			System.out.println("clones (op 2 rel 3):    " + closed.getDim(1));
+			if (closed.getDim(0) <= PRINT_LIMIT
+					&& closed.getDim(1) <= PRINT_LIMIT)
+				printMatrix("closed binary op subsets", sort(closed));
+		}
+		printTime();
+
+		if (binaryOps.getDim(3) * selTernaryRels.getDim(3) <= GALOIS_LIMIT) {
+			compat = getCompatibility(BoolAlgebra.INSTANCE, binaryOps,
+					selTernaryRels);
+			closed = getClosedSubsets(solver, compat);
+			System.out.println("clones (op 2 rel s3):   " + closed.getDim(1));
+		}
+		printTime();
+
+		if (binaryOps.getDim(3) * qaryRels.getDim(4) <= GALOIS_LIMIT) {
+			compat = getCompatibility(BoolAlgebra.INSTANCE, binaryOps, qaryRels);
+			closed = getClosedSubsets(solver, compat);
+			System.out.println("clones (op 2 rel 4):    " + closed.getDim(1));
+		}
+		printTime();
+
+		if (selTernaryOps.getDim(4) * binaryRels.getDim(2) <= GALOIS_LIMIT) {
+			compat = getCompatibility(BoolAlgebra.INSTANCE, selTernaryOps,
+					binaryRels);
+			closed = getClosedSubsets(solver, compat);
+			System.out.println("clones (op s3 rel 2):   " + closed.getDim(1));
+		}
+		printTime();
+
+		if (selTernaryOps.getDim(4) * ternaryRels.getDim(3) <= GALOIS_LIMIT) {
+			compat = getCompatibility(BoolAlgebra.INSTANCE, selTernaryOps,
+					ternaryRels);
+			closed = getClosedSubsets(solver, compat);
+			System.out.println("clones (op s3 rel 3):   " + closed.getDim(1));
+		}
+		printTime();
+
+		if (selTernaryOps.getDim(4) * selTernaryRels.getDim(3) <= GALOIS_LIMIT) {
+			compat = getCompatibility(BoolAlgebra.INSTANCE, selTernaryOps,
+					selTernaryRels);
+			closed = getClosedSubsets(solver, compat);
+			System.out.println("clones (op s3 rel s3):  " + closed.getDim(1));
+		}
+		printTime();
+
+		if (selTernaryOps.getDim(4) * qaryRels.getDim(4) <= GALOIS_LIMIT) {
+			compat = getCompatibility(BoolAlgebra.INSTANCE, selTernaryOps,
+					qaryRels);
+			closed = getClosedSubsets(solver, compat);
+			System.out.println("clones (op s3 rel 4):   " + closed.getDim(1));
+		}
+		printTime();
+
+		if (ternaryOps.getDim(4) * binaryRels.getDim(2) <= GALOIS_LIMIT) {
+			compat = getCompatibility(BoolAlgebra.INSTANCE, ternaryOps,
+					binaryRels);
+			closed = getClosedSubsets(solver, compat);
+			System.out.println("clones (op 3 rel 2):    " + closed.getDim(1));
+			if (closed.getDim(0) <= PRINT_LIMIT
+					&& closed.getDim(1) <= PRINT_LIMIT)
+				printMatrix("closed ternary op subsets", sort(closed));
+		}
+		printTime();
+
+		if (ternaryOps.getDim(4) * ternaryRels.getDim(3) <= GALOIS_LIMIT) {
+			compat = getCompatibility(BoolAlgebra.INSTANCE, ternaryOps,
+					ternaryRels);
+			closed = getClosedSubsets(solver, compat);
+			System.out.println("clones (op 3 rel 3):    " + closed.getDim(1));
+			if (closed.getDim(0) <= PRINT_LIMIT
+					&& closed.getDim(1) <= PRINT_LIMIT)
+				printMatrix("closed ternary op subsets", sort(closed));
+		}
+		printTime();
+
+		if (ternaryOps.getDim(4) * selTernaryRels.getDim(3) <= GALOIS_LIMIT) {
+			compat = getCompatibility(BoolAlgebra.INSTANCE, ternaryOps,
+					selTernaryRels);
+			closed = getClosedSubsets(solver, compat);
+			System.out.println("clones (op 3 rel s3):   " + closed.getDim(1));
+		}
+		printTime();
+
+		if (ternaryOps.getDim(4) * qaryRels.getDim(4) <= GALOIS_LIMIT) {
+			compat = getCompatibility(BoolAlgebra.INSTANCE, ternaryOps,
+					qaryRels);
+			closed = getClosedSubsets(solver, compat);
+			System.out.println("clones (op 3 rel 4):    " + closed.getDim(1));
+		}
+		printTime();
+	}
+
+	public static void main3(String[] args) {
 		SatSolver<Integer> solver = new Sat4J();
 		int size = 3;
 
@@ -1372,18 +1602,20 @@ public class MonoidalInt {
 		Tensor<Boolean> binaryRels = getAllBinaryRels(solver, size);
 		System.out.println("binary rels:         " + binaryRels.getDim(2));
 
-		Tensor<Boolean> compat = getCompatibility22(BoolAlgebra.INSTANCE, binaryOps,
-				binaryRels);
+		Tensor<Boolean> compat = getCompatibility22(BoolAlgebra.INSTANCE,
+				binaryOps, binaryRels);
 		Tensor<Boolean> closed = getClosedSubsets(solver, transpose(compat));
 
 		System.out.println("clones (op 2 rel 2): " + closed.getDim(1));
 	}
 
-	public static void main3(String[] args) {
+	public static void main(String[] args) {
 		// for (String monoid : TWO_MONOIDS)
 		// printStatistics(2, monoid);
-		printStatistics(3, "000 002 012 102 111 112 222");
-		printStatistics(3, "000 002 012 111 112 222");
+		// printStatistics(3, "000 002 012 102 111 112 222");
+		// printStatistics(3, "000 002 012 111 112 222");
+		// printStatisticsOld(2, "01");
+		printStatistics(2, "01");
 	}
 
 	public static void main2(String[] args) {
@@ -1400,7 +1632,7 @@ public class MonoidalInt {
 			printStatistics(3, monoid);
 	}
 
-	public static final int LIMIT = 70000;
+	public static final int LIMIT = 700;
 	public static final int GALOIS_LIMIT = 100 * LIMIT;
 	public static final int PRINT_LIMIT = 100;
 }

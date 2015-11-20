@@ -223,9 +223,13 @@ public final class Operation<BOOL> {
 	}
 
 	private Relation<BOOL> evaluate_op0(int arity) {
+		assert getArity() == 0;
+		Tensor<BOOL> t = Tensor.diagonal(tensor, new int[arity], alg.FALSE);
+		return new Relation<BOOL>(alg, t);
 	}
 
 	private Relation<BOOL> evaluate_rel1(Relation<BOOL> rel) {
+		assert rel.getArity() == 1;
 		int a = getArity();
 		Contract<BOOL> c = Contract.logical(alg);
 
@@ -238,6 +242,7 @@ public final class Operation<BOOL> {
 	}
 
 	private Relation<BOOL> evaluate_op1(Relation<BOOL> rel) {
+		assert getArity() == 1;
 		int a = rel.getArity();
 		Contract<BOOL> c = Contract.logical(alg);
 
@@ -250,14 +255,15 @@ public final class Operation<BOOL> {
 	}
 
 	private Relation<BOOL> evaluate_rel2(Relation<BOOL> rel) {
-		int a = getArity();
+		assert rel.getArity() == 2;
+		int a = getArity() + 1;
 		Contract<BOOL> c = Contract.logical(alg);
 
 		c.add(tensor, Contract.range(0, a));
 		for (int i = 1; i < a; i++)
 			c.add(rel.getTensor(), i, i + a);
 		c.add(tensor, Contract.range(a, 2 * a));
-		Tensor<BOOL> t = c.get(Contract.range(0, a));
+		Tensor<BOOL> t = c.get(0, a);
 
 		return new Relation<BOOL>(alg, t);
 	}

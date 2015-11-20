@@ -208,6 +208,35 @@ public class Tensor<ELEM> implements Iterable<ELEM> {
 		return tensor;
 	}
 
+	public static <ELEM> Tensor<ELEM> diagonal(final Tensor<ELEM> tensor,
+			final int[] map, final ELEM defval) {
+		final int[] shape = new int[map.length];
+		for (int i = 0; i < shape.length; i++)
+			shape[i] = tensor.getDim(map[i]);
+
+		final int[] index = new int[tensor.getOrder()];
+		for (int i = 0; i < index.length; i++) {
+			boolean b = false;
+			for (int j = 0; j < map.length; j++)
+				b |= map[j] == i;
+			assert b;
+		}
+
+		return Tensor.generate(shape, new Func1<ELEM, int[]>() {
+			@Override
+			public ELEM call(int[] elem) {
+				Arrays.fill(index, -1);
+				for (int i = 0; i < elem.length; i++)
+					if (index[map[i]] == -1)
+						index[map[i]] = elem[i];
+					else if (index[map[i]] != elem[i])
+						return defval;
+
+				return tensor.getElem(index);
+			}
+		});
+	}
+
 	public static <ELEM> Tensor<ELEM> reshape_old(final Tensor<ELEM> arg,
 			final int[] shape, final int[] map) {
 		assert arg.getOrder() == map.length;
