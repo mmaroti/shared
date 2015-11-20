@@ -16,11 +16,11 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-package org.mmaroti.sat.alg;
+package org.mmaroti.sat.univalg;
 
 import org.mmaroti.sat.core.*;
 
-public final class Permutation<BOOL> {
+public final class PartialOrder<BOOL> {
 	protected final BoolAlgebra<BOOL> alg;
 	protected final Tensor<BOOL> tensor;
 
@@ -36,7 +36,7 @@ public final class Permutation<BOOL> {
 		return tensor.getDim(0);
 	}
 
-	public Permutation(BoolAlgebra<BOOL> alg, Tensor<BOOL> tensor) {
+	public PartialOrder(BoolAlgebra<BOOL> alg, Tensor<BOOL> tensor) {
 		assert tensor.getOrder() == 2;
 		assert tensor.getDim(0) == tensor.getDim(1);
 
@@ -44,36 +44,37 @@ public final class Permutation<BOOL> {
 		this.tensor = tensor;
 
 		if (getAlg() == BoolAlgebra.INSTANCE)
-			assert (Boolean) isPermutation();
-	}
-
-	public BOOL isPermutation() {
-		Operation<BOOL> op = asOperation();
-		return alg.and(op.isOperation(), op.isSurjective());
-	}
-
-	public Operation<BOOL> asOperation() {
-		return new Operation<BOOL>(alg, tensor);
+			assert (Boolean) isPartialOrder();
 	}
 
 	public Relation<BOOL> asRelation() {
 		return new Relation<BOOL>(alg, tensor);
 	}
 
-	public Permutation<BOOL> invert() {
+	public BOOL isPartialOrder() {
+		return asRelation().isPartialOrder();
+	}
+
+	public PartialOrder<BOOL> invert() {
 		Tensor<BOOL> tmp;
 		tmp = Tensor.reshape(tensor, tensor.getShape(), new int[] { 1, 0 });
-		return new Permutation<BOOL>(alg, tmp);
+		return new PartialOrder<BOOL>(alg, tmp);
 	}
 
-	public BOOL isOdd() {
-		Relation<BOOL> tmp1, tmp2;
-		tmp1 = Relation.makeLessThan(alg, getSize()).compose(asRelation());
-		tmp2 = asRelation().compose(Relation.makeGreaterThan(alg, getSize()));
-		return tmp1.intersect(tmp2).isOddCard();
+	private void checkSize(PartialOrder<BOOL> ord) {
+		assert getAlg() == ord.getAlg();
+		assert getSize() == ord.getSize();
 	}
 
-	public BOOL isEven() {
-		return alg.not(isOdd());
+	public PartialOrder<BOOL> intersect(PartialOrder<BOOL> ord) {
+		checkSize(ord);
+		Tensor<BOOL> tmp = Tensor.map2(alg.AND, tensor, ord.tensor);
+		return new PartialOrder<BOOL>(alg, tmp);
+	}
+
+	public Relation<BOOL> covers() {
+		Relation<BOOL> tmp = Relation.makeNotEqual(alg, getSize());
+		tmp = tmp.intersect(asRelation());
+		return tmp.subtract(tmp.compose(tmp));
 	}
 }
