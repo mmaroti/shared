@@ -66,21 +66,12 @@ public class Validation {
 	}
 
 	void checkLinearExtensions() {
-		int size = 3 * 2 * 2;
-		final PartialOrder<Boolean> ord = new PartialOrder<Boolean>(
-				BoolAlgebra.INSTANCE, Tensor.generate(size, size,
-						new Func2<Boolean, Integer, Integer>() {
-							@Override
-							public Boolean call(Integer elem1, Integer elem2) {
-								int a1 = elem1 % 2, b1 = elem2 % 2;
-								int a2 = (elem1 / 2) % 2, b2 = (elem2 / 2) % 2;
-								int a3 = elem1 / 4, b3 = elem2 / 4;
+		PartialOrder<Boolean> c2 = PartialOrder.chain(2);
+		PartialOrder<Boolean> c3 = PartialOrder.chain(3);
+		final PartialOrder<Boolean> ord = c3.product(c2).product(c2);
 
-								return a1 <= b1 && a2 <= b2 && a3 <= b3;
-							}
-						}));
-
-		BoolProblem problem = new BoolProblem(new int[] { size, size }) {
+		BoolProblem problem = new BoolProblem(new int[] { ord.getSize(),
+				ord.getSize() }) {
 			@Override
 			public <BOOL> BOOL compute(BoolAlgebra<BOOL> alg,
 					List<Tensor<BOOL>> tensors) {
@@ -126,7 +117,22 @@ public class Validation {
 				count, 2520);
 	}
 
-	// TODO: A000372
+	void checkAntiChains() {
+		final PartialOrder<Boolean> ord = PartialOrder.powerset(4);
+
+		BoolProblem problem = new BoolProblem(new int[] { ord.getSize() }) {
+			@Override
+			public <BOOL> BOOL compute(BoolAlgebra<BOOL> alg,
+					List<Tensor<BOOL>> tensors) {
+				Relation<BOOL> rel = new Relation<BOOL>(alg, tensors.get(0));
+				PartialOrder<BOOL> ord2 = PartialOrder.lift(alg, ord);
+				return ord2.isAntiChain(rel);
+			}
+		};
+
+		int count = problem.solveAll(new Sat4J()).get(0).getLastDim();
+		verify("A000372: the number of antichains of 2^4", count, 168);
+	}
 
 	void check() {
 		failed = false;
@@ -135,6 +141,7 @@ public class Validation {
 		parseRelations();
 		checkEquivalences();
 		checkPermutations();
+		checkAntiChains();
 		checkPartialOrders();
 		checkAlternations();
 		checkLinearExtensions();

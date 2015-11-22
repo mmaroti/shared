@@ -52,9 +52,33 @@ public final class PartialOrder<BOOL> {
 		return Relation.makeLessOrEqual(alg, size).asPartialOrder();
 	}
 
+	public static PartialOrder<Boolean> chain(int size) {
+		return chain(BoolAlgebra.INSTANCE, size);
+	}
+
 	public static <BOOL> PartialOrder<BOOL> antiChain(BoolAlgebra<BOOL> alg,
 			int size) {
 		return Relation.makeEqual(alg, size).asPartialOrder();
+	}
+
+	public static PartialOrder<Boolean> antiChain(int size) {
+		return antiChain(BoolAlgebra.INSTANCE, size);
+	}
+
+	public static PartialOrder<Boolean> powerset(int base) {
+		assert 0 <= base && base <= 30;
+
+		int size = 1 << base;
+		Tensor<Boolean> tmp = Tensor.generate(size, size,
+				new Func2<Boolean, Integer, Integer>() {
+					@Override
+					public Boolean call(Integer elem1, Integer elem2) {
+						int a = elem1, b = elem2;
+						return (a & b) == a;
+					}
+				});
+
+		return new PartialOrder<Boolean>(BoolAlgebra.INSTANCE, tmp);
 	}
 
 	public Relation<BOOL> asRelation() {
@@ -66,22 +90,51 @@ public final class PartialOrder<BOOL> {
 	}
 
 	public PartialOrder<BOOL> invert() {
-		Tensor<BOOL> tmp = Tensor.reshape(tensor, tensor.getShape(), new int[] {
-				1, 0 });
-		return new PartialOrder<BOOL>(alg, tmp);
+		return asRelation().revert().asPartialOrder();
 	}
 
 	public PartialOrder<BOOL> intersect(PartialOrder<BOOL> ord) {
-		assert getAlg() == ord.getAlg();
-		assert getSize() == ord.getSize();
-
-		Tensor<BOOL> tmp = Tensor.map2(alg.AND, tensor, ord.tensor);
-		return new PartialOrder<BOOL>(alg, tmp);
+		return asRelation().intersect(ord.asRelation()).asPartialOrder();
 	}
 
 	public Relation<BOOL> covers() {
 		Relation<BOOL> tmp = Relation.makeNotEqual(alg, getSize());
 		tmp = tmp.intersect(asRelation());
 		return tmp.subtract(tmp.compose(tmp));
+	}
+
+	public PartialOrder<BOOL> product(PartialOrder<BOOL> ord) {
+		return asRelation().product(ord.asRelation()).asPartialOrder();
+	}
+
+	public Relation<BOOL> downsetOf(Relation<BOOL> rel) {
+		return asRelation().compose(rel);
+	}
+
+	public BOOL isDownset(Relation<BOOL> rel) {
+		return rel.isSubsetOf(downsetOf(rel));
+	}
+
+	public Relation<BOOL> upsetOf(Relation<BOOL> rel) {
+		return rel.compose(asRelation());
+	}
+
+	public BOOL isUpset(Relation<BOOL> rel) {
+		return rel.isSubsetOf(upsetOf(rel));
+	}
+
+	public BOOL isAntiChain(Relation<BOOL> rel) {
+		assert rel.getArity() == 1;
+
+		Relation<BOOL> tmp = Relation.makeNotEqual(alg, getSize());
+		tmp = tmp.intersect(asRelation());
+		tmp = rel.compose(tmp).intersect(rel);
+		return tmp.isEmpty();
+	}
+
+	public static <BOOL> PartialOrder<BOOL> lift(BoolAlgebra<BOOL> alg,
+			PartialOrder<Boolean> rel) {
+		Tensor<BOOL> tensor = Tensor.map(alg.LIFT, rel.tensor);
+		return new PartialOrder<BOOL>(alg, tensor);
 	}
 }

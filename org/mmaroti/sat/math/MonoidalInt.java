@@ -1614,7 +1614,6 @@ public class MonoidalInt {
 		// printStatistics(2, monoid);
 		// printStatistics(3, "000 002 012 102 111 112 222");
 		// printStatistics(3, "000 002 012 111 112 222");
-		// printStatisticsOld(2, "01");
 		printStatistics(2, "01");
 	}
 

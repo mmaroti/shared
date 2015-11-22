@@ -229,8 +229,7 @@ public class Contract<ELEM> {
 	}
 
 	public static void main(String[] args) {
-		Tensor<Integer> a = Tensor.matrix(new int[] { 2, 2 },
-				Arrays.asList(1, 2, 3, 4));
+		Tensor<Integer> a = Tensor.matrix(2, 2, Arrays.asList(1, 2, 3, 4));
 		Tensor.print(a);
 
 		Contract<Integer> contract = new Contract<Integer>(Func1.INT_SUM,

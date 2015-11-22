@@ -196,9 +196,9 @@ public class Tensor<ELEM> implements Iterable<ELEM> {
 		return tensor;
 	}
 
-	public static <ELEM> Tensor<ELEM> matrix(final int[] shape,
+	public static <ELEM> Tensor<ELEM> matrix(int dim1, int dim2,
 			final List<ELEM> elems) {
-		Tensor<ELEM> tensor = new Tensor<ELEM>(shape);
+		Tensor<ELEM> tensor = new Tensor<ELEM>(new int[] { dim1, dim2 });
 		assert tensor.elems.length == elems.size();
 
 		int pos = 0;
@@ -531,29 +531,5 @@ public class Tensor<ELEM> implements Iterable<ELEM> {
 
 	public static <ELEM> void print(Tensor<ELEM> tensor) {
 		print(tensor, System.out);
-	}
-
-	public static void main(String[] args) {
-		Tensor<Integer> m1 = Tensor.matrix(new int[] { 2, 3 },
-				Arrays.asList(1, 2, 3, 4, 5, 6));
-		System.out.println(m1);
-
-		Tensor<Integer> m2 = Tensor.matrix(new int[] { 3, 3 },
-				Arrays.asList(0, 1, 0, 1, 0, 0, 0, 0, 1));
-		System.out.println(m2);
-
-		Tensor<Integer> m3 = Tensor.reduce(Func1.INT_SUM, "ac", Func2.INT_MUL,
-				m1.named("ab"), m2.named("bc"));
-		System.out.println(m3);
-
-		m1 = Tensor.vector(Arrays.asList(1, 2, 3));
-		System.out.println(m1);
-
-		m2 = Tensor.vector(Arrays.asList(10, 20));
-		System.out.println(m2);
-
-		m3 = Tensor.reduce(Func1.INT_SUM, "ab", Func2.INT_MUL, m1.named("a"),
-				m2.named("b"));
-		System.out.println(m3);
 	}
 }

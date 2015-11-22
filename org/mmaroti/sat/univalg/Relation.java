@@ -279,6 +279,46 @@ public final class Relation<BOOL> {
 		return new Relation<BOOL>(alg, tmp);
 	}
 
+	public Relation<BOOL> product(Relation<BOOL> rel) {
+		assert getAlg() == rel.getAlg();
+		assert getArity() == rel.getArity();
+
+		final int a = getSize();
+		int s = a * rel.getSize();
+		int[] shape = new int[getArity()];
+		for (int i = 0; i < shape.length; i++)
+			shape[i] = s;
+
+		final Tensor<BOOL> t1 = tensor;
+		final Tensor<BOOL> t2 = rel.getTensor();
+
+		final int[] idx1 = new int[getArity()];
+		final int[] idx2 = new int[getArity()];
+		Tensor<BOOL> tmp = Tensor.generate(shape, new Func1<BOOL, int[]>() {
+			@Override
+			public BOOL call(int[] elem) {
+				for (int i = 0; i < elem.length; i++) {
+					idx1[i] = elem[i] % a;
+					idx2[i] = elem[i] / a;
+				}
+
+				return alg.and(t1.getElem(idx1), t2.getElem(idx2));
+			}
+		});
+
+		return new Relation<BOOL>(alg, tmp);
+	}
+
+	public Relation<BOOL> power(int exp) {
+		assert exp >= 1;
+
+		Relation<BOOL> rel = this;
+		for (int i = 1; i < exp; i++)
+			rel = product(rel);
+
+		return rel;
+	}
+
 	public BOOL isFull() {
 		return Tensor.fold(alg.ALL, getArity(), tensor).get();
 	}
@@ -366,6 +406,10 @@ public final class Relation<BOOL> {
 
 	public PartialOrder<BOOL> asPartialOrder() {
 		return new PartialOrder<BOOL>(alg, tensor);
+	}
+
+	public Operation<BOOL> asOperation() {
+		return new Operation<BOOL>(alg, tensor);
 	}
 
 	public BOOL isEssential() {

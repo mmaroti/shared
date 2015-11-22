@@ -29,10 +29,9 @@ public class FanoPlane2 {
 		public Planes() {
 			super(new int[] { 7, 3 });
 
-			pts = Tensor.matrix(new int[] { 3, 7 }, Arrays.asList(true, false,
-					false, false, true, false, false, false, true, true, true,
-					false, true, false, true, false, true, true, true, true,
-					true));
+			pts = Tensor.matrix(3, 7, Arrays.asList(true, false, false, false,
+					true, false, false, false, true, true, true, false, true,
+					false, true, false, true, true, true, true, true));
 		}
 
 		@Override

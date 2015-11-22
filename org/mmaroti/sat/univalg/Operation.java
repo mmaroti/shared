@@ -62,10 +62,14 @@ public final class Operation<BOOL> {
 		return new Relation<BOOL>(alg, tensor);
 	}
 
-	public BOOL isSurjective() {
+	public Relation<BOOL> range() {
 		Tensor<BOOL> tmp = asRelation().rotate().getTensor();
 		tmp = Tensor.fold(alg.ANY, tensor.getOrder() - 1, tmp);
-		return Tensor.fold(alg.ALL, 1, tmp).get();
+		return new Relation<BOOL>(alg, tmp);
+	}
+
+	public BOOL isSurjective() {
+		return range().isFull();
 	}
 
 	private static int[] createShape(int size, int arity) {
@@ -337,5 +341,9 @@ public final class Operation<BOOL> {
 			return asRelation().isSubsetOf(rel.diagonal());
 		else
 			return evaluate(rel).isSubsetOf(rel);
+	}
+
+	public Operation<BOOL> product(Operation<BOOL> op) {
+		return asRelation().product(op.asRelation()).asOperation();
 	}
 }
