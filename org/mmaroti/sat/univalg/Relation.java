@@ -51,6 +51,10 @@ public final class Relation<BOOL> {
 		this.tensor = tensor;
 	}
 
+	public static Relation<Boolean> wrap(Tensor<Boolean> tensor) {
+		return new Relation<Boolean>(BoolAlgebra.INSTANCE, tensor);
+	}
+
 	private static int[] createShape(int size, int arity) {
 		assert size > 1 && arity >= 0;
 
@@ -225,19 +229,6 @@ public final class Relation<BOOL> {
 			tmp = Tensor.fold(alg.ANY, pos, tmp);
 
 		return new Relation<BOOL>(alg, tmp);
-	}
-
-	public Relation<BOOL> exclude(int coord) {
-		assert 0 <= coord && coord < getArity();
-
-		int[] map = new int[getArity()];
-		for (int i = 0; i < coord; i++)
-			map[i] = 1 + i;
-		for (int i = coord + 1; i < getArity(); i++)
-			map[i] = i;
-
-		Tensor<BOOL> tmp = Tensor.reshape(tensor, tensor.getShape(), map);
-		return new Relation<BOOL>(alg, Tensor.fold(alg.ANY, 1, tmp));
 	}
 
 	private Tensor<BOOL> combine(Relation<BOOL> rel) {
@@ -417,13 +408,22 @@ public final class Relation<BOOL> {
 		return new Operation<BOOL>(alg, tensor);
 	}
 
-	// TODO: not good
 	public BOOL isEssential() {
-		Relation<BOOL> tmp = makeFull(alg, getSize(), getArity());
-		for (int i = 0; i < getArity(); i++)
-			tmp = tmp.intersect(exclude(i));
+		if (getArity() <= 1)
+			return alg.or(isEmpty(), isFull());
 
-		return tmp.subtract(this).isNotEmpty();
+		int[] v = new int[getArity()];
+		for (int i = 0; i < v.length; i++)
+			v[i] = i;
+
+		Contract<BOOL> c = Contract.logical(alg);
+		for (int i = 0; i < getArity(); i++) {
+			v[i] = i + getArity();
+			c.add(tensor, v);
+			v[i] = i;
+		}
+		c.add(Tensor.map(alg.NOT, tensor), v);
+		return c.get(new int[0]).get();
 	}
 
 	public static <BOOL> Relation<BOOL> lift(BoolAlgebra<BOOL> alg,

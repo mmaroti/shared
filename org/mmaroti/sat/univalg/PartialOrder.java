@@ -47,22 +47,13 @@ public final class PartialOrder<BOOL> {
 			assert (Boolean) isPartialOrder();
 	}
 
-	public static <BOOL> PartialOrder<BOOL> chain(BoolAlgebra<BOOL> alg,
-			int size) {
-		return Relation.makeLessOrEqual(alg, size).asPartialOrder();
-	}
-
 	public static PartialOrder<Boolean> chain(int size) {
-		return chain(BoolAlgebra.INSTANCE, size);
-	}
-
-	public static <BOOL> PartialOrder<BOOL> antiChain(BoolAlgebra<BOOL> alg,
-			int size) {
-		return Relation.makeEqual(alg, size).asPartialOrder();
+		return Relation.makeLessOrEqual(BoolAlgebra.INSTANCE, size)
+				.asPartialOrder();
 	}
 
 	public static PartialOrder<Boolean> antiChain(int size) {
-		return antiChain(BoolAlgebra.INSTANCE, size);
+		return Relation.makeEqual(BoolAlgebra.INSTANCE, size).asPartialOrder();
 	}
 
 	public static PartialOrder<Boolean> powerset(int base) {

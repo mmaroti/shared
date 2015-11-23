@@ -134,6 +134,20 @@ public class Validation {
 		verify("A000372: the number of antichains of 2^4", count, 168);
 	}
 
+	void checkEssentialRelations() {
+		BoolProblem problem = new BoolProblem(new int[] { 3, 3 }) {
+			@Override
+			public <BOOL> BOOL compute(BoolAlgebra<BOOL> alg,
+					List<Tensor<BOOL>> tensors) {
+				Relation<BOOL> rel = new Relation<BOOL>(alg, tensors.get(0));
+				return rel.isEssential();
+			}
+		};
+
+		int count = problem.solveAll(new Sat4J()).get(0).getLastDim();
+		verify("The number of essential binary relations on 3", count, 462);
+	}
+
 	void check() {
 		failed = false;
 
@@ -145,6 +159,7 @@ public class Validation {
 		checkPartialOrders();
 		checkAlternations();
 		checkLinearExtensions();
+		checkEssentialRelations();
 		time = System.currentTimeMillis() - time;
 
 		System.out.println("Finished in " + TIME_FORMAT.format(0.001 * time)

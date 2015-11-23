@@ -629,30 +629,11 @@ public class MonoidalInt {
 		return prob.solveAll(solver, LIMIT).get(0);
 	}
 
-	public static void printBinaryRels(Tensor<Boolean> rels) {
-		assert rels.getOrder() == 3;
-
-		for (int p = 0; p < rels.getDim(2); p++) {
-			System.out.print("binrel " + p + ":");
-			for (int i = 0; i < rels.getDim(0); i++)
-				for (int j = 0; j < rels.getDim(1); j++)
-					if (rels.getElem(i, j, p))
-						System.out.print(" " + i + "" + j);
-			System.out.println();
-		}
-	}
-
-	public static void printTernaryRels(Tensor<Boolean> rels) {
-		assert rels.getOrder() == 4;
-
-		for (int p = 0; p < rels.getDim(3); p++) {
-			System.out.print("trnrel " + p + ":");
-			for (int i = 0; i < rels.getDim(0); i++)
-				for (int j = 0; j < rels.getDim(1); j++)
-					for (int k = 0; k < rels.getDim(2); k++)
-						if (rels.getElem(i, j, k, p))
-							System.out.print(" " + i + "" + j + "" + k);
-			System.out.println();
+	public static void printRels(Tensor<Boolean> rels) {
+		List<Tensor<Boolean>> list = Tensor.unconcat(rels);
+		for (int i = 0; i < list.size(); i++) {
+			Relation<Boolean> rel = Relation.wrap(list.get(i));
+			System.out.println("rel " + i + ": " + Relation.formatMembers(rel));
 		}
 	}
 
@@ -945,7 +926,7 @@ public class MonoidalInt {
 				.println("binary relations:       " + binaryRels.getLastDim());
 		if (binaryRels.getLastDim() <= PRINT_LIMIT) {
 			binaryRels = sort(binaryRels);
-			printBinaryRels(binaryRels);
+			printRels(binaryRels);
 		}
 
 		Tensor<Boolean> ternaryRels = getTernaryRels(solver, size, monoid);
@@ -953,7 +934,7 @@ public class MonoidalInt {
 				+ ternaryRels.getLastDim());
 		if (ternaryRels.getLastDim() <= PRINT_LIMIT) {
 			ternaryRels = sort(ternaryRels);
-			printTernaryRels(ternaryRels);
+			printRels(ternaryRels);
 		}
 
 		Tensor<Boolean> qaryRels = getQuaternaryRels(solver, size, monoid);

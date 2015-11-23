@@ -94,6 +94,7 @@ public class Contract<ELEM> {
 		assert shape.length == vars.size();
 		int[] map = new int[entry.vars.size()];
 
+		boolean triv = shape.length == map.length;
 		int index = 0;
 		for (Object v : entry.vars) {
 			int pos = vars.indexOf(v);
@@ -103,24 +104,25 @@ public class Contract<ELEM> {
 			if (shape[pos] >= 0 && shape[pos] != dim)
 				throw new IllegalStateException("variable dimension mismatch");
 
+			triv &= index == pos;
 			map[index] = pos;
 			shape[pos] = dim;
 			index += 1;
 		}
 
-		return map;
+		return triv ? null : map;
 	}
 
 	private Entry<ELEM> norm(Entry<ELEM> entry) {
 		List<Object> vars = new ArrayList<Object>(varOrder);
 		vars.retainAll(entry.vars);
 
-		if (vars.equals(entry.vars))
-			return entry;
-
 		int[] shape = new int[vars.size()];
 		Arrays.fill(shape, -1);
 		int[] map = fillShape(entry, vars, shape);
+
+		if (map == null)
+			return entry;
 
 		Tensor<ELEM> tensor = Tensor.reshape(entry.tensor, shape, map);
 		return new Entry<ELEM>(tensor, vars);
@@ -139,11 +141,12 @@ public class Contract<ELEM> {
 		int[] map1 = fillShape(arg1, vars, shape);
 		int[] map2 = fillShape(arg2, vars, shape);
 
-		Tensor<ELEM> tensor1 = Tensor.reshape(arg1.tensor, shape, map1);
-		Tensor<ELEM> tensor2 = Tensor.reshape(arg2.tensor, shape, map2);
-		Tensor<ELEM> tensor = Tensor.map2(prod, tensor1, tensor2);
+		Tensor<ELEM> t1 = map1 != null ? Tensor.reshape(arg1.tensor, shape,
+				map1) : arg1.tensor;
+		Tensor<ELEM> t2 = map2 != null ? Tensor.reshape(arg2.tensor, shape,
+				map2) : arg2.tensor;
 
-		return new Entry<ELEM>(tensor, vars);
+		return new Entry<ELEM>(Tensor.map2(prod, t1, t2), vars);
 	}
 
 	private Entry<ELEM> fold(Entry<ELEM> entry) {
@@ -166,14 +169,11 @@ public class Contract<ELEM> {
 		vars.addAll(rest);
 		assert vars.size() == entry.vars.size();
 
-		Tensor<ELEM> tensor;
-		if (!vars.equals(entry.vars)) {
-			int[] shape = new int[vars.size()];
-			Arrays.fill(shape, -1);
-			int[] map = fillShape(entry, vars, shape);
-			tensor = Tensor.reshape(entry.tensor, shape, map);
-		} else
-			tensor = entry.tensor;
+		int[] shape = new int[vars.size()];
+		Arrays.fill(shape, -1);
+		int[] map = fillShape(entry, vars, shape);
+		Tensor<ELEM> tensor = map != null ? Tensor.reshape(entry.tensor, shape,
+				map) : entry.tensor;
 
 		tensor = Tensor.fold(sum, count, tensor);
 		return new Entry<ELEM>(tensor, rest);
