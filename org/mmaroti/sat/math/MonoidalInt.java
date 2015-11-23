@@ -55,52 +55,6 @@ public class MonoidalInt {
 		return func.get();
 	}
 
-	public static <ELEM> ELEM isReflexiveRel(BoolAlgebra<ELEM> alg,
-			Tensor<ELEM> rel) {
-		assert rel.getOrder() == 2 && rel.getDim(0) == rel.getDim(1);
-
-		Tensor<ELEM> t = Tensor.reshape(rel, new int[] { rel.getDim(0) },
-				new int[] { 0, 0 });
-		t = Tensor.fold(alg.ALL, 1, t);
-
-		return t.get();
-	}
-
-	public static <ELEM> ELEM isTransitiveRel(BoolAlgebra<ELEM> alg,
-			Tensor<ELEM> rel) {
-		assert rel.getOrder() == 2 && rel.getDim(0) == rel.getDim(1);
-
-		Tensor<ELEM> t = Tensor.reduce(alg.ANY, "xz", alg.AND, rel.named("xy"),
-				rel.named("yz"));
-		t = Tensor.map2(alg.LEQ, t, rel);
-		t = Tensor.fold(alg.ALL, 2, t);
-
-		return t.get();
-	}
-
-	public static <ELEM> ELEM isMajorityOp(BoolAlgebra<ELEM> alg,
-			Tensor<ELEM> op) {
-		assert op.getOrder() == 4;
-
-		ELEM t = Tensor.reduce(alg.ALL, "", alg.ID, op.named("xxxy")).get();
-		t = alg.and(t, Tensor.reduce(alg.ALL, "", alg.ID, op.named("xxyx"))
-				.get());
-		t = alg.and(t, Tensor.reduce(alg.ALL, "", alg.ID, op.named("xyxx"))
-				.get());
-
-		return t;
-	}
-
-	public static <ELEM> ELEM isMaltsevOp(BoolAlgebra<ELEM> alg, Tensor<ELEM> op) {
-		assert op.getOrder() == 4;
-
-		ELEM t = Tensor.reduce(alg.ALL, "", alg.ID, op.named("yxxy")).get();
-		t = alg.and(t, Tensor.reduce(alg.ALL, "", alg.ID, op.named("yyxx"))
-				.get());
-
-		return t;
-	}
-
 	public static <ELEM> ELEM isStabilizerOp2(BoolAlgebra<ELEM> alg,
 			Tensor<ELEM> func, Tensor<ELEM> monoid) {
 		assert func.getOrder() == 3 && monoid.getOrder() == 3;
@@ -383,14 +337,11 @@ public class MonoidalInt {
 			public <BOOL> BOOL compute(BoolAlgebra<BOOL> alg,
 					List<Tensor<BOOL>> tensors) {
 
-				Tensor<BOOL> rel = tensors.get(0);
+				Relation<BOOL> rel = new Relation<BOOL>(alg, tensors.get(0));
 				Tensor<BOOL> monoid = Tensor.map(alg.LIFT, mon);
 
-				BOOL t = isCompatibleRel2(alg, rel, monoid);
-				t = alg.and(t, isReflexiveRel(alg, rel));
-				t = alg.and(t, isTransitiveRel(alg, rel));
-
-				return t;
+				BOOL t = isCompatibleRel2(alg, rel.getTensor(), monoid);
+				return alg.and(t, rel.isQuasiOrder());
 			}
 		};
 
@@ -642,12 +593,12 @@ public class MonoidalInt {
 			public <BOOL> BOOL compute(BoolAlgebra<BOOL> alg,
 					List<Tensor<BOOL>> tensors) {
 
-				Tensor<BOOL> func = tensors.get(0);
+				Operation<BOOL> op = new Operation<BOOL>(alg, tensors.get(0));
 				Tensor<BOOL> monoid = Tensor.map(alg.LIFT, mon);
 
-				BOOL res = isFunction(alg, func);
-				res = alg.and(res, isStabilizerOp3(alg, func, monoid));
-				res = alg.and(res, isMajorityOp(alg, func));
+				BOOL res = isStabilizerOp3(alg, op.getTensor(), monoid);
+				res = alg.and(res, op.isOperation());
+				res = alg.and(res, op.isMajority());
 
 				return res;
 			}
@@ -664,12 +615,12 @@ public class MonoidalInt {
 			public <BOOL> BOOL compute(BoolAlgebra<BOOL> alg,
 					List<Tensor<BOOL>> tensors) {
 
-				Tensor<BOOL> func = tensors.get(0);
+				Operation<BOOL> op = new Operation<BOOL>(alg, tensors.get(0));
 				Tensor<BOOL> monoid = Tensor.map(alg.LIFT, mon);
 
-				BOOL res = isFunction(alg, func);
-				res = alg.and(res, isStabilizerOp3(alg, func, monoid));
-				res = alg.and(res, isMaltsevOp(alg, func));
+				BOOL res = isStabilizerOp3(alg, op.getTensor(), monoid);
+				res = alg.and(res, op.isOperation());
+				res = alg.and(res, op.isMaltsev());
 
 				return res;
 			}
@@ -750,237 +701,6 @@ public class MonoidalInt {
 						Operation<ELEM> op = new Operation<ELEM>(alg, os.get(a));
 						Relation<ELEM> rel = new Relation<ELEM>(alg, rs.get(b));
 						return op.preserves(rel);
-					}
-				});
-	}
-
-	public static <ELEM> ELEM isCompatible22(BoolAlgebra<ELEM> alg,
-			Tensor<ELEM> op, Tensor<ELEM> rel) {
-		assert op.getOrder() == 3 && rel.getOrder() == 2;
-
-		Tensor<ELEM> t;
-		t = Tensor.reduce(alg.ANY, "cbx", alg.AND, rel.named("ab"),
-				op.named("xac")); // a
-		t = Tensor.reduce(alg.ANY, "bdx", alg.AND, t.named("cbx"),
-				rel.named("cd")); // c
-		t = Tensor.reduce(alg.ANY, "xy", alg.AND, t.named("bdx"),
-				op.named("ybd")); // bd
-		t = Tensor.fold(alg.ALL, 2, Tensor.map2(alg.LEQ, t, rel));
-
-		return t.get();
-	}
-
-	public static <ELEM> Tensor<ELEM> getCompatibility22(
-			final BoolAlgebra<ELEM> alg, Tensor<ELEM> ops, Tensor<ELEM> rels) {
-		assert ops.getOrder() == 4 && rels.getOrder() == 3;
-
-		final List<Tensor<ELEM>> os = Tensor.unconcat(ops);
-		final List<Tensor<ELEM>> rs = Tensor.unconcat(rels);
-
-		return Tensor.generate(os.size(), rs.size(),
-				new Func2<ELEM, Integer, Integer>() {
-					@Override
-					public ELEM call(Integer a, Integer b) {
-						return isCompatible22(alg, os.get(a), rs.get(b));
-					}
-				});
-	}
-
-	public static <ELEM> Tensor<ELEM> getCompatibility22Old(
-			BoolAlgebra<ELEM> alg, Tensor<ELEM> ops, Tensor<ELEM> rels) {
-		assert ops.getOrder() == 4 && rels.getOrder() == 3;
-
-		Tensor<ELEM> t;
-		t = Tensor.reduce(alg.ANY, "cbxfr", alg.AND, rels.named("abr"),
-				ops.named("xacf")); // a
-		t = Tensor.reduce(alg.ANY, "bdxfr", alg.AND, t.named("cbxfr"),
-				rels.named("cdr")); // c
-		t = Tensor.reduce(alg.ANY, "xyfr", alg.AND, t.named("bdxfr"),
-				ops.named("ybdf")); // bd
-		t = Tensor.reduce(alg.ALL, "fr", alg.LEQ, t.named("xyfr"),
-				rels.named("xyr"));
-
-		return t;
-	}
-
-	public static <ELEM> ELEM isCompatible23(BoolAlgebra<ELEM> alg,
-			Tensor<ELEM> op, Tensor<ELEM> rel) {
-		assert op.getOrder() == 3 && rel.getOrder() == 3;
-
-		Tensor<ELEM> t;
-		t = Tensor.reduce(alg.ANY, "bdcx", alg.AND, op.named("xad"),
-				rel.named("abc")); // a
-		t = Tensor.reduce(alg.ANY, "decxy", alg.AND, t.named("bdcx"),
-				op.named("ybe")); // b
-		t = Tensor.reduce(alg.ANY, "cfxy", alg.AND, t.named("decxy"),
-				rel.named("def")); // de
-		t = Tensor.reduce(alg.ANY, "xyz", alg.AND, t.named("cfxy"),
-				op.named("zcf")); // cf
-		t = Tensor.reduce(alg.ALL, "", alg.LEQ, t.named("xyz"),
-				rel.named("xyz"));
-
-		return t.get();
-	}
-
-	public static <ELEM> Tensor<ELEM> getCompatibility23(
-			final BoolAlgebra<ELEM> alg, Tensor<ELEM> ops, Tensor<ELEM> rels) {
-		assert ops.getOrder() == 4 && rels.getOrder() == 4;
-
-		final List<Tensor<ELEM>> os = Tensor.unconcat(ops);
-		final List<Tensor<ELEM>> rs = Tensor.unconcat(rels);
-
-		return Tensor.generate(os.size(), rs.size(),
-				new Func2<ELEM, Integer, Integer>() {
-					@Override
-					public ELEM call(Integer a, Integer b) {
-						return isCompatible23(alg, os.get(a), rs.get(b));
-					}
-				});
-	}
-
-	public static <ELEM> ELEM isCompatible24(BoolAlgebra<ELEM> alg,
-			Tensor<ELEM> op, Tensor<ELEM> rel) {
-		assert op.getOrder() == 3 && rel.getOrder() == 4;
-
-		Tensor<ELEM> t;
-		t = Tensor.reduce(alg.ANY, "becdx", alg.AND, rel.named("abcd"),
-				op.named("xae")); // a
-		t = Tensor.reduce(alg.ANY, "efcdxy", alg.AND, t.named("becdx"),
-				op.named("ybf")); // b
-		t = Tensor.reduce(alg.ANY, "cgdhxy", alg.AND, t.named("efcdxy"),
-				rel.named("efgh")); // ef
-		t = Tensor.reduce(alg.ANY, "dhxyz", alg.AND, t.named("cgdhxy"),
-				op.named("zcg")); // cg
-		t = Tensor.reduce(alg.ANY, "xyzu", alg.AND, t.named("dhxyz"),
-				op.named("udh")); // dh
-		t = Tensor.reduce(alg.ALL, "", alg.LEQ, t.named("xyzu"),
-				rel.named("xyzu"));
-
-		return t.get();
-	}
-
-	public static <ELEM> Tensor<ELEM> getCompatibility24(
-			final BoolAlgebra<ELEM> alg, Tensor<ELEM> ops, Tensor<ELEM> rels) {
-		assert ops.getOrder() == 4 && rels.getOrder() == 5;
-
-		final List<Tensor<ELEM>> os = Tensor.unconcat(ops);
-		final List<Tensor<ELEM>> rs = Tensor.unconcat(rels);
-
-		return Tensor.generate(os.size(), rs.size(),
-				new Func2<ELEM, Integer, Integer>() {
-					@Override
-					public ELEM call(Integer a, Integer b) {
-						return isCompatible24(alg, os.get(a), rs.get(b));
-					}
-				});
-	}
-
-	public static <ELEM> ELEM isCompatible32(BoolAlgebra<ELEM> alg,
-			Tensor<ELEM> op, Tensor<ELEM> rel) {
-		assert op.getOrder() == 4 && rel.getOrder() == 2;
-
-		Tensor<ELEM> t;
-		t = Tensor.reduce(alg.ANY, "cebx", alg.AND, rel.named("ab"),
-				op.named("xace")); // a
-		t = Tensor.reduce(alg.ANY, "ebdx", alg.AND, t.named("cebx"),
-				rel.named("cd")); // c
-		t = Tensor.reduce(alg.ANY, "bdfx", alg.AND, t.named("ebdx"),
-				rel.named("ef")); // e
-		t = Tensor.reduce(alg.ANY, "xy", alg.AND, t.named("bdfx"),
-				op.named("ybdf")); // bdf
-		t = Tensor.reduce(alg.ALL, "", alg.LEQ, t.named("xy"), rel.named("xy"));
-
-		return t.get();
-	}
-
-	public static <ELEM> Tensor<ELEM> getCompatibility32(
-			final BoolAlgebra<ELEM> alg, Tensor<ELEM> ops, Tensor<ELEM> rels) {
-		assert ops.getOrder() == 5 && rels.getOrder() == 3;
-
-		final List<Tensor<ELEM>> os = Tensor.unconcat(ops);
-		final List<Tensor<ELEM>> rs = Tensor.unconcat(rels);
-
-		return Tensor.generate(os.size(), rs.size(),
-				new Func2<ELEM, Integer, Integer>() {
-					@Override
-					public ELEM call(Integer a, Integer b) {
-						return isCompatible32(alg, os.get(a), rs.get(b));
-					}
-				});
-	}
-
-	public static <ELEM> ELEM isCompatible33(BoolAlgebra<ELEM> alg,
-			Tensor<ELEM> op, Tensor<ELEM> rel) {
-		assert op.getOrder() == 4 && rel.getOrder() == 3;
-
-		Tensor<ELEM> t;
-		t = Tensor.reduce(alg.ANY, "dbgcx", alg.AND, rel.named("abc"),
-				op.named("xadg")); // a
-		t = Tensor.reduce(alg.ANY, "begcfx", alg.AND, t.named("dbgcx"),
-				rel.named("def")); // d
-		t = Tensor.reduce(alg.ANY, "ghcfxy", alg.AND, t.named("begcfx"),
-				op.named("ybeh")); // be
-		t = Tensor.reduce(alg.ANY, "cfixy", alg.AND, t.named("ghcfxy"),
-				rel.named("ghi")); // gh
-		t = Tensor.reduce(alg.ANY, "xyz", alg.AND, t.named("cfixy"),
-				op.named("zcfi")); // cfi
-		t = Tensor.reduce(alg.ALL, "", alg.LEQ, t.named("xyz"),
-				rel.named("xyz"));
-
-		return t.get();
-	}
-
-	public static <ELEM> Tensor<ELEM> getCompatibility33(
-			final BoolAlgebra<ELEM> alg, Tensor<ELEM> ops, Tensor<ELEM> rels) {
-		assert ops.getOrder() == 5 && rels.getOrder() == 4;
-
-		final List<Tensor<ELEM>> os = Tensor.unconcat(ops);
-		final List<Tensor<ELEM>> rs = Tensor.unconcat(rels);
-
-		return Tensor.generate(os.size(), rs.size(),
-				new Func2<ELEM, Integer, Integer>() {
-					@Override
-					public ELEM call(Integer a, Integer b) {
-						return isCompatible33(alg, os.get(a), rs.get(b));
-					}
-				});
-	}
-
-	public static <ELEM> ELEM isCompatible34(BoolAlgebra<ELEM> alg,
-			Tensor<ELEM> op, Tensor<ELEM> rel) {
-		assert op.getOrder() == 4 && rel.getOrder() == 4;
-
-		Tensor<ELEM> t;
-		t = Tensor.reduce(alg.ANY, "becidx", alg.AND, rel.named("abcd"),
-				op.named("xaei")); // a
-		t = Tensor.reduce(alg.ANY, "efcijdxy", alg.AND, t.named("becidx"),
-				op.named("ybfj")); // b
-		t = Tensor.reduce(alg.ANY, "cgijdhxy", alg.AND, t.named("efcijdxy"),
-				rel.named("efgh")); // ef
-		t = Tensor.reduce(alg.ANY, "ijkdhxyz", alg.AND, t.named("cgijdhxy"),
-				op.named("zcgk")); // cg
-		t = Tensor.reduce(alg.ANY, "dhlxyz", alg.AND, t.named("ijkdhxyz"),
-				rel.named("ijkl")); // ijk
-		t = Tensor.reduce(alg.ANY, "xyzu", alg.AND, t.named("dhlxyz"),
-				op.named("udhl")); // dhl
-		t = Tensor.reduce(alg.ALL, "", alg.LEQ, t.named("xyzu"),
-				rel.named("xyzu"));
-
-		return t.get();
-	}
-
-	public static <ELEM> Tensor<ELEM> getCompatibility34(
-			final BoolAlgebra<ELEM> alg, Tensor<ELEM> ops, Tensor<ELEM> rels) {
-		assert ops.getOrder() == 5 && rels.getOrder() == 5;
-
-		final List<Tensor<ELEM>> os = Tensor.unconcat(ops);
-		final List<Tensor<ELEM>> rs = Tensor.unconcat(rels);
-
-		return Tensor.generate(os.size(), rs.size(),
-				new Func2<ELEM, Integer, Integer>() {
-					@Override
-					public ELEM call(Integer a, Integer b) {
-						return isCompatible34(alg, os.get(a), rs.get(b));
 					}
 				});
 	}
@@ -1197,209 +917,17 @@ public class MonoidalInt {
 			"000 001 002 010 011 012 020 022 111 222",
 			"000 001 002 010 011 012 020 022 100 101 110 111 200 202 220 222" };
 
-	private static long startTime = 0;
-	private static long lastTime = 0;
-
-	public static void printTime() {
-		long a = System.currentTimeMillis();
-		if (startTime == 0)
-			startTime = a;
-		else {
-			String l = TIME_FORMAT.format(0.001 * (a - lastTime));
-			String t = TIME_FORMAT.format(0.001 * (a - startTime));
-			System.out.println("finished in " + l + " seconds (total " + t
-					+ ")");
-		}
-		lastTime = a;
-	}
-
-	public static void printStatisticsOld(int size, String monoid) {
-		SatSolver<Integer> solver = new Sat4J();
-		solver.debugging = false;
-
-		System.out.println("monoid: " + monoid);
-		checkMonoid(size, monoid);
-
-		printTime();
-
-		Tensor<Boolean> unaryRels = getUnaryRels(solver, size, monoid);
-		System.out.println("unary relations:        " + unaryRels.getDim(1));
-
-		Tensor<Boolean> binaryRels = getBinaryRels(solver, size, monoid);
-		System.out.println("binary relations:       " + binaryRels.getDim(2));
-		if (binaryRels.getDim(2) <= PRINT_LIMIT) {
-			binaryRels = sort(binaryRels);
-			printBinaryRels(binaryRels);
-		}
-
-		Tensor<Boolean> ternaryRels = getTernaryRels(solver, size, monoid);
-		System.out.println("ternary relations:      " + ternaryRels.getDim(3));
-		if (ternaryRels.getDim(3) <= PRINT_LIMIT) {
-			ternaryRels = sort(ternaryRels);
-			printTernaryRels(ternaryRels);
-		}
-
-		Tensor<Boolean> qaryRels = getQuaternaryRels(solver, size, monoid);
-		System.out.println("quaternary relations:   " + qaryRels.getDim(4));
-
-		System.out.println("essential binary rels:  "
-				+ getEssentialBinaryRels(solver, size, monoid).getDim(2));
-
-		System.out.println("essential ternary rels: "
-				+ getEssentialTernaryRels(solver, size, monoid).getDim(3));
-
-		Tensor<Boolean> selTernaryRels = getSelectedTernaryRels(solver, size,
-				monoid);
-		System.out.println("selected ternary rels:  "
-				+ selTernaryRels.getDim(3));
-
-		System.out.println("quasiorder relations:   "
-				+ getQuasiorderRels(solver, size, monoid).getDim(2));
-
-		Tensor<Boolean> binaryOps = getBinaryOps(solver, size, monoid);
-		System.out.println("binary ops:             " + binaryOps.getDim(3));
-		if (binaryOps.getDim(3) <= PRINT_LIMIT) {
-			binaryOps = sort(binaryOps);
-			printBinaryOps(binaryOps);
-		}
-
-		Tensor<Boolean> ternaryOps = getTernaryOps(solver, size, monoid);
-		System.out.println("ternary ops:            " + ternaryOps.getDim(4));
-		if (ternaryOps.getDim(4) <= PRINT_LIMIT) {
-			ternaryOps = sort(ternaryOps);
-			printTernaryOps(ternaryOps);
-		}
-
-		Tensor<Boolean> qaryOps = getQuaternaryOps(solver, size, monoid);
-		System.out.println("quaternary ops:         " + qaryOps.getDim(5));
-
-		System.out.println("essential binary ops:   "
-				+ getEssentialBinaryOps(solver, size, monoid).getDim(3));
-
-		System.out.println("essential ternary ops:  "
-				+ getEssentialTernaryOps(solver, size, monoid).getDim(4));
-
-		Tensor<Boolean> selTernaryOps = getSelectedTernaryOps(solver, size,
-				monoid);
-		System.out
-				.println("selected ternary ops:   " + selTernaryOps.getDim(4));
-
-		System.out.println("majority ops:           "
-				+ getMajorityOps(solver, size, monoid).getDim(4));
-
-		System.out.println("maltsev ops:            "
-				+ getMaltsevOps(solver, size, monoid).getDim(4));
-
-		printTime();
-
-		Tensor<Boolean> compat, closed;
-		if (binaryOps.getDim(3) * binaryRels.getDim(2) <= GALOIS_LIMIT) {
-			compat = getCompatibility22(BoolAlgebra.INSTANCE, binaryOps,
-					binaryRels);
-			closed = getClosedSubsets(solver, compat);
-			System.out.println("clones (op 2 rel 2):    " + closed.getDim(1));
+	public static void printClones(String what, Tensor<Boolean> ops,
+			Tensor<Boolean> rels) {
+		if (ops.getLastDim() * rels.getLastDim() <= GALOIS_LIMIT) {
+			Tensor<Boolean> compat = getCompatibility(BoolAlgebra.INSTANCE,
+					ops, rels);
+			Tensor<Boolean> closed = getClosedSubsets(new Sat4J(), compat);
+			System.out.println("clones (" + what + "):\t" + closed.getDim(1));
 			if (closed.getDim(0) <= PRINT_LIMIT
 					&& closed.getDim(1) <= PRINT_LIMIT)
-				printMatrix("closed binary op subsets", sort(closed));
+				printMatrix("closed op subsets", sort(closed));
 		}
-		printTime();
-
-		if (binaryOps.getDim(3) * ternaryRels.getDim(3) <= GALOIS_LIMIT) {
-			compat = getCompatibility23(BoolAlgebra.INSTANCE, binaryOps,
-					ternaryRels);
-			closed = getClosedSubsets(solver, compat);
-			System.out.println("clones (op 2 rel 3):    " + closed.getDim(1));
-			if (closed.getDim(0) <= PRINT_LIMIT
-					&& closed.getDim(1) <= PRINT_LIMIT)
-				printMatrix("closed binary op subsets", sort(closed));
-		}
-		printTime();
-
-		if (binaryOps.getDim(3) * selTernaryRels.getDim(3) <= GALOIS_LIMIT) {
-			compat = getCompatibility23(BoolAlgebra.INSTANCE, binaryOps,
-					selTernaryRels);
-			closed = getClosedSubsets(solver, compat);
-			System.out.println("clones (op 2 rel s3):   " + closed.getDim(1));
-		}
-		printTime();
-
-		if (binaryOps.getDim(3) * qaryRels.getDim(4) <= GALOIS_LIMIT) {
-			compat = getCompatibility24(BoolAlgebra.INSTANCE, binaryOps,
-					qaryRels);
-			closed = getClosedSubsets(solver, compat);
-			System.out.println("clones (op 2 rel 4):    " + closed.getDim(1));
-		}
-		printTime();
-
-		if (selTernaryOps.getDim(4) * binaryRels.getDim(2) <= GALOIS_LIMIT) {
-			compat = getCompatibility32(BoolAlgebra.INSTANCE, selTernaryOps,
-					binaryRels);
-			closed = getClosedSubsets(solver, compat);
-			System.out.println("clones (op s3 rel 2):   " + closed.getDim(1));
-		}
-		printTime();
-
-		if (selTernaryOps.getDim(4) * ternaryRels.getDim(3) <= GALOIS_LIMIT) {
-			compat = getCompatibility33(BoolAlgebra.INSTANCE, selTernaryOps,
-					ternaryRels);
-			closed = getClosedSubsets(solver, compat);
-			System.out.println("clones (op s3 rel 3):   " + closed.getDim(1));
-		}
-		printTime();
-
-		if (selTernaryOps.getDim(4) * selTernaryRels.getDim(3) <= GALOIS_LIMIT) {
-			compat = getCompatibility33(BoolAlgebra.INSTANCE, selTernaryOps,
-					selTernaryRels);
-			closed = getClosedSubsets(solver, compat);
-			System.out.println("clones (op s3 rel s3):  " + closed.getDim(1));
-		}
-		printTime();
-
-		if (selTernaryOps.getDim(4) * qaryRels.getDim(4) <= GALOIS_LIMIT) {
-			compat = getCompatibility34(BoolAlgebra.INSTANCE, selTernaryOps,
-					qaryRels);
-			closed = getClosedSubsets(solver, compat);
-			System.out.println("clones (op s3 rel 4):   " + closed.getDim(1));
-		}
-		printTime();
-
-		if (ternaryOps.getDim(4) * binaryRels.getDim(2) <= GALOIS_LIMIT) {
-			compat = getCompatibility32(BoolAlgebra.INSTANCE, ternaryOps,
-					binaryRels);
-			closed = getClosedSubsets(solver, compat);
-			System.out.println("clones (op 3 rel 2):    " + closed.getDim(1));
-			if (closed.getDim(0) <= PRINT_LIMIT
-					&& closed.getDim(1) <= PRINT_LIMIT)
-				printMatrix("closed ternary op subsets", sort(closed));
-		}
-		printTime();
-
-		if (ternaryOps.getDim(4) * ternaryRels.getDim(3) <= GALOIS_LIMIT) {
-			compat = getCompatibility33(BoolAlgebra.INSTANCE, ternaryOps,
-					ternaryRels);
-			closed = getClosedSubsets(solver, compat);
-			System.out.println("clones (op 3 rel 3):    " + closed.getDim(1));
-			if (closed.getDim(0) <= PRINT_LIMIT
-					&& closed.getDim(1) <= PRINT_LIMIT)
-				printMatrix("closed ternary op subsets", sort(closed));
-		}
-		printTime();
-
-		if (ternaryOps.getDim(4) * selTernaryRels.getDim(3) <= GALOIS_LIMIT) {
-			compat = getCompatibility33(BoolAlgebra.INSTANCE, ternaryOps,
-					selTernaryRels);
-			closed = getClosedSubsets(solver, compat);
-			System.out.println("clones (op 3 rel s3):   " + closed.getDim(1));
-		}
-		printTime();
-
-		if (ternaryOps.getDim(4) * qaryRels.getDim(4) <= GALOIS_LIMIT) {
-			compat = getCompatibility34(BoolAlgebra.INSTANCE, ternaryOps,
-					qaryRels);
-			closed = getClosedSubsets(solver, compat);
-			System.out.println("clones (op 3 rel 4):    " + closed.getDim(1));
-		}
-		printTime();
 	}
 
 	public static void printStatistics(int size, String monoid) {
@@ -1409,185 +937,95 @@ public class MonoidalInt {
 		System.out.println("monoid: " + monoid);
 		checkMonoid(size, monoid);
 
-		printTime();
-
 		Tensor<Boolean> unaryRels = getUnaryRels(solver, size, monoid);
-		System.out.println("unary relations:        " + unaryRels.getDim(1));
+		System.out.println("unary relations:        " + unaryRels.getLastDim());
 
 		Tensor<Boolean> binaryRels = getBinaryRels(solver, size, monoid);
-		System.out.println("binary relations:       " + binaryRels.getDim(2));
-		if (binaryRels.getDim(2) <= PRINT_LIMIT) {
+		System.out
+				.println("binary relations:       " + binaryRels.getLastDim());
+		if (binaryRels.getLastDim() <= PRINT_LIMIT) {
 			binaryRels = sort(binaryRels);
 			printBinaryRels(binaryRels);
 		}
 
 		Tensor<Boolean> ternaryRels = getTernaryRels(solver, size, monoid);
-		System.out.println("ternary relations:      " + ternaryRels.getDim(3));
-		if (ternaryRels.getDim(3) <= PRINT_LIMIT) {
+		System.out.println("ternary relations:      "
+				+ ternaryRels.getLastDim());
+		if (ternaryRels.getLastDim() <= PRINT_LIMIT) {
 			ternaryRels = sort(ternaryRels);
 			printTernaryRels(ternaryRels);
 		}
 
 		Tensor<Boolean> qaryRels = getQuaternaryRels(solver, size, monoid);
-		System.out.println("quaternary relations:   " + qaryRels.getDim(4));
+		System.out.println("quaternary relations:   " + qaryRels.getLastDim());
 
 		System.out.println("essential binary rels:  "
-				+ getEssentialBinaryRels(solver, size, monoid).getDim(2));
+				+ getEssentialBinaryRels(solver, size, monoid).getLastDim());
 
 		System.out.println("essential ternary rels: "
-				+ getEssentialTernaryRels(solver, size, monoid).getDim(3));
+				+ getEssentialTernaryRels(solver, size, monoid).getLastDim());
 
 		Tensor<Boolean> selTernaryRels = getSelectedTernaryRels(solver, size,
 				monoid);
 		System.out.println("selected ternary rels:  "
-				+ selTernaryRels.getDim(3));
+				+ selTernaryRels.getLastDim());
 
 		System.out.println("quasiorder relations:   "
-				+ getQuasiorderRels(solver, size, monoid).getDim(2));
+				+ getQuasiorderRels(solver, size, monoid).getLastDim());
 
 		Tensor<Boolean> binaryOps = getBinaryOps(solver, size, monoid);
-		System.out.println("binary ops:             " + binaryOps.getDim(3));
-		if (binaryOps.getDim(3) <= PRINT_LIMIT) {
+		System.out.println("binary ops:             " + binaryOps.getLastDim());
+		if (binaryOps.getLastDim() <= PRINT_LIMIT) {
 			binaryOps = sort(binaryOps);
 			printBinaryOps(binaryOps);
 		}
 
 		Tensor<Boolean> ternaryOps = getTernaryOps(solver, size, monoid);
-		System.out.println("ternary ops:            " + ternaryOps.getDim(4));
-		if (ternaryOps.getDim(4) <= PRINT_LIMIT) {
+		System.out
+				.println("ternary ops:            " + ternaryOps.getLastDim());
+		if (ternaryOps.getLastDim() <= PRINT_LIMIT) {
 			ternaryOps = sort(ternaryOps);
 			printTernaryOps(ternaryOps);
 		}
 
 		Tensor<Boolean> qaryOps = getQuaternaryOps(solver, size, monoid);
-		System.out.println("quaternary ops:         " + qaryOps.getDim(5));
+		System.out.println("quaternary ops:         " + qaryOps.getLastDim());
 
 		System.out.println("essential binary ops:   "
-				+ getEssentialBinaryOps(solver, size, monoid).getDim(3));
+				+ getEssentialBinaryOps(solver, size, monoid).getLastDim());
 
 		System.out.println("essential ternary ops:  "
-				+ getEssentialTernaryOps(solver, size, monoid).getDim(4));
+				+ getEssentialTernaryOps(solver, size, monoid).getLastDim());
 
 		Tensor<Boolean> selTernaryOps = getSelectedTernaryOps(solver, size,
 				monoid);
-		System.out
-				.println("selected ternary ops:   " + selTernaryOps.getDim(4));
+		System.out.println("selected ternary ops:   "
+				+ selTernaryOps.getLastDim());
 
 		System.out.println("majority ops:           "
-				+ getMajorityOps(solver, size, monoid).getDim(4));
+				+ getMajorityOps(solver, size, monoid).getLastDim());
 
 		System.out.println("maltsev ops:            "
-				+ getMaltsevOps(solver, size, monoid).getDim(4));
+				+ getMaltsevOps(solver, size, monoid).getLastDim());
 
-		printTime();
+		long time = System.currentTimeMillis();
 
-		Tensor<Boolean> compat, closed;
-		if (binaryOps.getDim(3) * binaryRels.getDim(2) <= GALOIS_LIMIT) {
-			compat = getCompatibility(BoolAlgebra.INSTANCE, binaryOps,
-					binaryRels);
-			closed = getClosedSubsets(solver, compat);
-			System.out.println("clones (op 2 rel 2):    " + closed.getDim(1));
-			if (closed.getDim(0) <= PRINT_LIMIT
-					&& closed.getDim(1) <= PRINT_LIMIT)
-				printMatrix("closed binary op subsets", sort(closed));
-		}
-		printTime();
+		printClones("op 2 rel 2", binaryOps, binaryRels);
+		printClones("op 2 rel 3", binaryOps, ternaryRels);
+		printClones("op 2 rel s3", binaryOps, selTernaryRels);
+		printClones("op 2 rel 4", binaryOps, qaryRels);
+		printClones("op s3 rel 2", selTernaryOps, binaryRels);
+		printClones("op s3 rel 3", selTernaryOps, ternaryRels);
+		printClones("op s3 rel s3", selTernaryOps, selTernaryRels);
+		printClones("op s3 rel 4", selTernaryOps, qaryRels);
+		printClones("op 3 rel 2", ternaryOps, binaryRels);
+		printClones("op 3 rel 3", ternaryOps, ternaryRels);
+		printClones("op 3 rel s3", ternaryOps, selTernaryRels);
+		printClones("op 3 rel 4", ternaryOps, qaryRels);
 
-		if (binaryOps.getDim(3) * ternaryRels.getDim(3) <= GALOIS_LIMIT) {
-			compat = getCompatibility(BoolAlgebra.INSTANCE, binaryOps,
-					ternaryRels);
-			closed = getClosedSubsets(solver, compat);
-			System.out.println("clones (op 2 rel 3):    " + closed.getDim(1));
-			if (closed.getDim(0) <= PRINT_LIMIT
-					&& closed.getDim(1) <= PRINT_LIMIT)
-				printMatrix("closed binary op subsets", sort(closed));
-		}
-		printTime();
-
-		if (binaryOps.getDim(3) * selTernaryRels.getDim(3) <= GALOIS_LIMIT) {
-			compat = getCompatibility(BoolAlgebra.INSTANCE, binaryOps,
-					selTernaryRels);
-			closed = getClosedSubsets(solver, compat);
-			System.out.println("clones (op 2 rel s3):   " + closed.getDim(1));
-		}
-		printTime();
-
-		if (binaryOps.getDim(3) * qaryRels.getDim(4) <= GALOIS_LIMIT) {
-			compat = getCompatibility(BoolAlgebra.INSTANCE, binaryOps, qaryRels);
-			closed = getClosedSubsets(solver, compat);
-			System.out.println("clones (op 2 rel 4):    " + closed.getDim(1));
-		}
-		printTime();
-
-		if (selTernaryOps.getDim(4) * binaryRels.getDim(2) <= GALOIS_LIMIT) {
-			compat = getCompatibility(BoolAlgebra.INSTANCE, selTernaryOps,
-					binaryRels);
-			closed = getClosedSubsets(solver, compat);
-			System.out.println("clones (op s3 rel 2):   " + closed.getDim(1));
-		}
-		printTime();
-
-		if (selTernaryOps.getDim(4) * ternaryRels.getDim(3) <= GALOIS_LIMIT) {
-			compat = getCompatibility(BoolAlgebra.INSTANCE, selTernaryOps,
-					ternaryRels);
-			closed = getClosedSubsets(solver, compat);
-			System.out.println("clones (op s3 rel 3):   " + closed.getDim(1));
-		}
-		printTime();
-
-		if (selTernaryOps.getDim(4) * selTernaryRels.getDim(3) <= GALOIS_LIMIT) {
-			compat = getCompatibility(BoolAlgebra.INSTANCE, selTernaryOps,
-					selTernaryRels);
-			closed = getClosedSubsets(solver, compat);
-			System.out.println("clones (op s3 rel s3):  " + closed.getDim(1));
-		}
-		printTime();
-
-		if (selTernaryOps.getDim(4) * qaryRels.getDim(4) <= GALOIS_LIMIT) {
-			compat = getCompatibility(BoolAlgebra.INSTANCE, selTernaryOps,
-					qaryRels);
-			closed = getClosedSubsets(solver, compat);
-			System.out.println("clones (op s3 rel 4):   " + closed.getDim(1));
-		}
-		printTime();
-
-		if (ternaryOps.getDim(4) * binaryRels.getDim(2) <= GALOIS_LIMIT) {
-			compat = getCompatibility(BoolAlgebra.INSTANCE, ternaryOps,
-					binaryRels);
-			closed = getClosedSubsets(solver, compat);
-			System.out.println("clones (op 3 rel 2):    " + closed.getDim(1));
-			if (closed.getDim(0) <= PRINT_LIMIT
-					&& closed.getDim(1) <= PRINT_LIMIT)
-				printMatrix("closed ternary op subsets", sort(closed));
-		}
-		printTime();
-
-		if (ternaryOps.getDim(4) * ternaryRels.getDim(3) <= GALOIS_LIMIT) {
-			compat = getCompatibility(BoolAlgebra.INSTANCE, ternaryOps,
-					ternaryRels);
-			closed = getClosedSubsets(solver, compat);
-			System.out.println("clones (op 3 rel 3):    " + closed.getDim(1));
-			if (closed.getDim(0) <= PRINT_LIMIT
-					&& closed.getDim(1) <= PRINT_LIMIT)
-				printMatrix("closed ternary op subsets", sort(closed));
-		}
-		printTime();
-
-		if (ternaryOps.getDim(4) * selTernaryRels.getDim(3) <= GALOIS_LIMIT) {
-			compat = getCompatibility(BoolAlgebra.INSTANCE, ternaryOps,
-					selTernaryRels);
-			closed = getClosedSubsets(solver, compat);
-			System.out.println("clones (op 3 rel s3):   " + closed.getDim(1));
-		}
-		printTime();
-
-		if (ternaryOps.getDim(4) * qaryRels.getDim(4) <= GALOIS_LIMIT) {
-			compat = getCompatibility(BoolAlgebra.INSTANCE, ternaryOps,
-					qaryRels);
-			closed = getClosedSubsets(solver, compat);
-			System.out.println("clones (op 3 rel 4):    " + closed.getDim(1));
-		}
-		printTime();
+		time = System.currentTimeMillis() - time;
+		System.out.println("Finished in " + TIME_FORMAT.format(0.001 * time)
+				+ " seconds.");
 	}
 
 	public static void main3(String[] args) {
@@ -1602,7 +1040,7 @@ public class MonoidalInt {
 		Tensor<Boolean> binaryRels = getAllBinaryRels(solver, size);
 		System.out.println("binary rels:         " + binaryRels.getDim(2));
 
-		Tensor<Boolean> compat = getCompatibility22(BoolAlgebra.INSTANCE,
+		Tensor<Boolean> compat = getCompatibility(BoolAlgebra.INSTANCE,
 				binaryOps, binaryRels);
 		Tensor<Boolean> closed = getClosedSubsets(solver, transpose(compat));
 

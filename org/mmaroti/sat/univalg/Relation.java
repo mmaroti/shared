@@ -398,6 +398,11 @@ public final class Relation<BOOL> {
 		return alg.and(b, isTransitive());
 	}
 
+	public BOOL isQuasiOrder() {
+		BOOL b = isReflexive();
+		return alg.and(b, isTransitive());
+	}
+
 	public BOOL isTotalOrder() {
 		BOOL b = isReflexive();
 		b = alg.and(b, isTrichotome());
@@ -412,6 +417,7 @@ public final class Relation<BOOL> {
 		return new Operation<BOOL>(alg, tensor);
 	}
 
+	// TODO: not good
 	public BOOL isEssential() {
 		Relation<BOOL> tmp = makeFull(alg, getSize(), getArity());
 		for (int i = 0; i < getArity(); i++)
