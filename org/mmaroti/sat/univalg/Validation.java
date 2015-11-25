@@ -46,7 +46,7 @@ public class Validation {
 		};
 
 		int count = problem.solveAll(new Sat4J()).get(0).getLastDim();
-		verify("A000110: the number of equivalences on a 7 element set", count,
+		verify("A000110 the number of equivalences on a 7 element set", count,
 				877);
 	}
 
@@ -61,7 +61,7 @@ public class Validation {
 		};
 
 		int count = problem.solveAll(new Sat4J()).get(0).getLastDim();
-		verify("A001035: the number of partial orders on a 5 element set",
+		verify("A001035 the number of partial orders on a 5 element set",
 				count, 4231);
 	}
 
@@ -82,7 +82,7 @@ public class Validation {
 		};
 
 		int count = problem.solveAll(new Sat4J()).get(0).getLastDim();
-		verify("A114714: the number of linear extensions of 2x2x4", count, 2452);
+		verify("A114714 the number of linear extensions of 2x2x4", count, 2452);
 	}
 
 	void checkPermutations() {
@@ -97,7 +97,7 @@ public class Validation {
 		};
 
 		int count = problem.solveAll(new Sat4J()).get(0).getLastDim();
-		verify("A000142: the number of permutations on a 7 element set", count,
+		verify("A000142 the number of permutations on a 7 element set", count,
 				5040);
 	}
 
@@ -113,7 +113,7 @@ public class Validation {
 		};
 
 		int count = problem.solveAll(new Sat4J()).get(0).getLastDim();
-		verify("A001710: The number of even permutations on a 7 element set",
+		verify("A001710 the number of even permutations on a 7 element set",
 				count, 2520);
 	}
 
@@ -131,7 +131,7 @@ public class Validation {
 		};
 
 		int count = problem.solveAll(new Sat4J()).get(0).getLastDim();
-		verify("A000372: the number of antichains of 2^4", count, 168);
+		verify("A000372 the number of antichains of 2^4", count, 168);
 	}
 
 	void checkEssentialRelations() {
@@ -152,7 +152,6 @@ public class Validation {
 		failed = false;
 
 		long time = System.currentTimeMillis();
-		parseRelations();
 		checkEquivalences();
 		checkPermutations();
 		checkAntiChains();
@@ -160,6 +159,7 @@ public class Validation {
 		checkAlternations();
 		checkLinearExtensions();
 		checkEssentialRelations();
+		parseRelations();
 		time = System.currentTimeMillis() - time;
 
 		System.out.println("Finished in " + TIME_FORMAT.format(0.001 * time)

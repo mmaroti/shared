@@ -54,6 +54,15 @@ public final class Operation<BOOL> {
 			assert (Boolean) isOperation();
 	}
 
+	public static Operation<Boolean> wrap(Tensor<Boolean> tensor) {
+		return new Operation<Boolean>(BoolAlgebra.INSTANCE, tensor);
+	}
+
+	public static <BOOL> Operation<BOOL> wrap(BoolAlgebra<BOOL> alg,
+			Tensor<BOOL> tensor) {
+		return new Operation<BOOL>(alg, tensor);
+	}
+
 	public BOOL isOperation() {
 		return asRelation().isFunction();
 	}

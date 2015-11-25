@@ -48,12 +48,11 @@ public final class PartialOrder<BOOL> {
 	}
 
 	public static PartialOrder<Boolean> chain(int size) {
-		return Relation.makeLessOrEqual(BoolAlgebra.INSTANCE, size)
-				.asPartialOrder();
+		return Relation.makeLessOrEqual(size).asPartialOrder();
 	}
 
 	public static PartialOrder<Boolean> antiChain(int size) {
-		return Relation.makeEqual(BoolAlgebra.INSTANCE, size).asPartialOrder();
+		return Relation.makeEqual(size).asPartialOrder();
 	}
 
 	public static PartialOrder<Boolean> powerset(int base) {
@@ -89,7 +88,8 @@ public final class PartialOrder<BOOL> {
 	}
 
 	public Relation<BOOL> covers() {
-		Relation<BOOL> tmp = Relation.makeNotEqual(alg, getSize());
+		Relation<BOOL> tmp = Relation.lift(alg,
+				Relation.makeNotEqual(getSize()));
 		tmp = tmp.intersect(asRelation());
 		return tmp.subtract(tmp.compose(tmp));
 	}
@@ -117,7 +117,8 @@ public final class PartialOrder<BOOL> {
 	public BOOL isAntiChain(Relation<BOOL> rel) {
 		assert rel.getArity() == 1;
 
-		Relation<BOOL> tmp = Relation.makeNotEqual(alg, getSize());
+		Relation<BOOL> tmp = Relation.lift(alg,
+				Relation.makeNotEqual(getSize()));
 		tmp = tmp.intersect(asRelation());
 		tmp = rel.compose(tmp).intersect(rel);
 		return tmp.isEmpty();
@@ -127,5 +128,17 @@ public final class PartialOrder<BOOL> {
 			PartialOrder<Boolean> rel) {
 		Tensor<BOOL> tensor = Tensor.map(alg.LIFT, rel.tensor);
 		return new PartialOrder<BOOL>(alg, tensor);
+	}
+
+	public static String formatCovers(PartialOrder<Boolean> ord) {
+		return Relation.formatMembers(ord.covers());
+	}
+
+	public static PartialOrder<Boolean> parseCovers(String str, int size) {
+		Relation<Boolean> rel = Relation.parseMembers(size, 2, str);
+		rel = Relation.transitiveClosure(rel).reflexiveClosure();
+
+		assert rel.isAntiSymmetric();
+		return rel.asPartialOrder();
 	}
 }

@@ -67,9 +67,14 @@ public final class Permutation<BOOL> {
 	}
 
 	public BOOL isOdd() {
-		Relation<BOOL> tmp1, tmp2;
-		tmp1 = Relation.makeLessThan(alg, getSize()).compose(asRelation());
-		tmp2 = asRelation().compose(Relation.makeGreaterThan(alg, getSize()));
+		Relation<BOOL> tmp1 = Relation.lift(alg,
+				Relation.makeLessThan(getSize()));
+		tmp1 = tmp1.compose(asRelation());
+
+		Relation<BOOL> tmp2 = Relation.lift(alg,
+				Relation.makeGreaterThan(getSize()));
+		tmp2 = asRelation().compose(tmp2);
+
 		return tmp1.intersect(tmp2).isOddCard();
 	}
 
