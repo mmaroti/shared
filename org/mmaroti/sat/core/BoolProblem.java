@@ -128,7 +128,7 @@ public abstract class BoolProblem {
 				list.add(solution.get(key));
 
 			int[] shape = masks.get(key).getShape();
-			result.add(Tensor.concat(shape, list));
+			result.add(Tensor.stack(shape, list));
 		}
 
 		return result;

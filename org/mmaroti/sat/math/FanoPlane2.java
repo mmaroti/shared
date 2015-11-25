@@ -44,7 +44,7 @@ public class FanoPlane2 {
 					g.named("ij"), p.named("jk"));
 			ELEM b = Tensor.fold(alg.ALL, 1, Tensor.fold(alg.ANY, 1, t)).get();
 
-			List<Tensor<ELEM>> xs = Tensor.unconcat(t);
+			List<Tensor<ELEM>> xs = Tensor.unstack(t);
 
 			b = alg.and(b, alg.lexless(xs.get(0), xs.get(1)));
 			b = alg.and(b, alg.lexless(xs.get(0), xs.get(2)));

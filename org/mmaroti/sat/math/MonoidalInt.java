@@ -630,7 +630,7 @@ public class MonoidalInt {
 	}
 
 	public static void printRels(Tensor<Boolean> rels) {
-		List<Tensor<Boolean>> list = Tensor.unconcat(rels);
+		List<Tensor<Boolean>> list = Tensor.unstack(rels);
 		for (int i = 0; i < list.size(); i++) {
 			Relation<Boolean> rel = Relation.wrap(list.get(i));
 			System.out.println("rel " + i + ": " + Relation.formatMembers(rel));
@@ -672,8 +672,8 @@ public class MonoidalInt {
 
 	public static <ELEM> Tensor<ELEM> getCompatibility(
 			final BoolAlgebra<ELEM> alg, Tensor<ELEM> ops, Tensor<ELEM> rels) {
-		final List<Tensor<ELEM>> os = Tensor.unconcat(ops);
-		final List<Tensor<ELEM>> rs = Tensor.unconcat(rels);
+		final List<Tensor<ELEM>> os = Tensor.unstack(ops);
+		final List<Tensor<ELEM>> rs = Tensor.unstack(rels);
 
 		return Tensor.generate(os.size(), rs.size(),
 				new Func2<ELEM, Integer, Integer>() {
@@ -753,7 +753,7 @@ public class MonoidalInt {
 	}
 
 	public static Tensor<Boolean> sort(Tensor<Boolean> tensor) {
-		List<Tensor<Boolean>> list = Tensor.unconcat(tensor);
+		List<Tensor<Boolean>> list = Tensor.unstack(tensor);
 
 		Collections.sort(list, new Comparator<Tensor<Boolean>>() {
 			@Override
@@ -779,7 +779,7 @@ public class MonoidalInt {
 
 		int[] shape = new int[tensor.getOrder() - 1];
 		System.arraycopy(tensor.getShape(), 0, shape, 0, shape.length);
-		return Tensor.concat(shape, list);
+		return Tensor.stack(shape, list);
 	}
 
 	protected static DecimalFormat TIME_FORMAT = new DecimalFormat("0.00");

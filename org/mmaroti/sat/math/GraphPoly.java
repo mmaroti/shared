@@ -35,7 +35,7 @@ public class GraphPoly {
 
 	public static List<Operation<Boolean>> wrapOperations(Tensor<Boolean> tensor) {
 		List<Operation<Boolean>> result = new ArrayList<Operation<Boolean>>();
-		for (Tensor<Boolean> t : Tensor.unconcat(tensor))
+		for (Tensor<Boolean> t : Tensor.unstack(tensor))
 			result.add(Operation.wrap(t));
 
 		return result;

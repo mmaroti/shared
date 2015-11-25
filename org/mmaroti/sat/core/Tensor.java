@@ -349,7 +349,7 @@ public class Tensor<ELEM> implements Iterable<ELEM> {
 		return tensor2;
 	}
 
-	public static <ELEM> Tensor<ELEM> concat(int[] commonShape,
+	public static <ELEM> Tensor<ELEM> stack(int[] commonShape,
 			List<Tensor<ELEM>> list) {
 		for (Tensor<ELEM> tensor : list)
 			assert Arrays.equals(commonShape, tensor.shape);
@@ -372,12 +372,12 @@ public class Tensor<ELEM> implements Iterable<ELEM> {
 		return tensor;
 	}
 
-	public static <ELEM> Tensor<ELEM> concat(List<Tensor<ELEM>> list) {
+	public static <ELEM> Tensor<ELEM> stack(List<Tensor<ELEM>> list) {
 		assert list.size() >= 1;
-		return concat(list.get(0).shape, list);
+		return stack(list.get(0).shape, list);
 	}
 
-	public static <ELEM> List<Tensor<ELEM>> unconcat(Tensor<ELEM> tensor) {
+	public static <ELEM> List<Tensor<ELEM>> unstack(Tensor<ELEM> tensor) {
 		assert tensor.getOrder() >= 1;
 
 		int[] shape = new int[tensor.getOrder() - 1];
@@ -506,6 +506,13 @@ public class Tensor<ELEM> implements Iterable<ELEM> {
 		str.append("]");
 
 		return str.toString();
+	}
+
+	public boolean equals(Object other) {
+		Tensor<?> tensor = (Tensor<?>) other;
+		assert Arrays.equals(shape, tensor.shape);
+
+		return Arrays.equals(elems, tensor.elems);
 	}
 
 	public String info() {
