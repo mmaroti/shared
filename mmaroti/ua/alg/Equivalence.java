@@ -118,10 +118,12 @@ public class Equivalence {
 		this.repr = repr;
 	}
 
+	@Override
 	public Object clone() {
 		return new Equivalence(repr.clone());
 	}
 
+	@Override
 	public boolean equals(Object o) {
 		if (!(o instanceof Equivalence))
 			return false;
@@ -131,6 +133,7 @@ public class Equivalence {
 		return Arrays.equals(repr, e.repr);
 	}
 
+	@Override
 	public int hashCode() {
 		int a = 0;
 
@@ -168,6 +171,7 @@ public class Equivalence {
 		return equ;
 	}
 
+	@Override
 	public String toString() {
 		StringBuilder s = new StringBuilder();
 		s.append("[ ");
