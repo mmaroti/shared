@@ -56,6 +56,7 @@ public class Display extends JComponent {
 		this.setOpaque(true);
 		this.addMouseListener(new MouseHandler());
 		this.addMouseMotionListener(new MouseMotionHandler());
+		ToolTipManager.sharedInstance().registerComponent(this);
 
 		for (int x = 10; x <= 300; x += 10)
 			for (int y = 10; y <= 300; y += 10)
@@ -87,36 +88,56 @@ public class Display extends JComponent {
 		}
 	}
 
+	@Override
+	public String getToolTipText(MouseEvent event) {
+		return "hihi " + event.getX() + " " + event.getY();
+	}
+
 	private class MouseHandler extends MouseAdapter {
 		@Override
 		public void mouseReleased(MouseEvent event) {
-			System.out.println("released");
-			selecting = false;
+			System.out.println("released "
+					+ MouseEvent.getModifiersExText(event.getModifiersEx()));
+
+			if (selecting) {
+				selecting = false;
+				repaint();
+			}
+
 			if (event.isPopupTrigger())
 				showPopup(event);
-			repaint();
 		}
 
 		@Override
 		public void mousePressed(MouseEvent event) {
-			System.out.println("pressed");
-			mousePt = event.getPoint();
-			if (event.isShiftDown()) {
-				graph.toggle(mousePt);
-			} else if (event.isPopupTrigger()) {
+			System.out.println("pressed "
+					+ MouseEvent.getModifiersExText(event.getModifiersEx()));
+
+			mousePt = event.getPoint(); // drag starts here
+			if (event.isPopupTrigger())
 				showPopup(event);
-			} else if (graph.select(mousePt)) {
-				selecting = false;
-			} else {
-				graph.unselectAll();
-				selecting = true;
-				mouseRect.setBounds(mousePt.x, mousePt.y, 0, 0);
-			}
-			repaint();
 		}
 
 		private void showPopup(MouseEvent e) {
 			control.popup.show(e.getComponent(), e.getX(), e.getY());
+		}
+
+		@Override
+		public void mouseClicked(MouseEvent event) {
+			System.out.println("clicked "
+					+ MouseEvent.getModifiersExText(event.getModifiersEx())
+					+ " " + event.getClickCount());
+
+			Point p = event.getPoint();
+			if (event.getClickCount() == 1) {
+				int m = event.getModifiers();
+				if (m == (MouseEvent.BUTTON1_MASK | MouseEvent.SHIFT_MASK))
+					graph.toggle(p);
+				else if (m == MouseEvent.BUTTON1_MASK) {
+					graph.select(p);
+					selecting = false;
+				}
+			}
 		}
 	}
 
@@ -125,7 +146,9 @@ public class Display extends JComponent {
 
 		@Override
 		public void mouseDragged(MouseEvent event) {
-			System.out.println("dragged");
+			System.out.println("dragged "
+					+ MouseEvent.getModifiersExText(event.getModifiersEx()));
+
 			if (selecting) {
 				mouseRect.setBounds(Math.min(mousePt.x, event.getX()),
 						Math.min(mousePt.y, event.getY()),
@@ -138,7 +161,7 @@ public class Display extends JComponent {
 				graph.moveSlected(delta);
 				mousePt = event.getPoint();
 			}
-			event.getComponent().repaint();
+			repaint();
 		}
 	}
 
