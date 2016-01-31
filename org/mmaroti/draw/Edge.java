@@ -29,8 +29,8 @@ public class Edge {
 		this.node2 = node2;
 	}
 
-	public boolean hasNode(Node node) {
-		return node == node1 || node == node2;
+	public boolean hasSelectedNode() {
+		return node1.isSelected() || node2.isSelected();
 	}
 
 	public void draw(Graphics2D graphics) {

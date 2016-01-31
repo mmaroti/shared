@@ -23,8 +23,8 @@ import java.util.*;
 import java.util.List;
 
 public class Graph {
-	public List<Node> nodes = new ArrayList<Node>();
-	public List<Edge> edges = new ArrayList<Edge>();
+	private List<Node> nodes = new ArrayList<Node>();
+	private List<Edge> edges = new ArrayList<Edge>();
 
 	public void draw(Graphics2D g) {
 		for (Edge e : edges)
@@ -47,12 +47,6 @@ public class Graph {
 		edges.add(edge);
 	}
 
-	public void move(Point offset) {
-		for (Node n : nodes)
-			if (n.isSelected())
-				n.move(offset);
-	}
-
 	public void unselectAll() {
 		for (Node n : nodes)
 			n.setSelected(false);
@@ -62,13 +56,12 @@ public class Graph {
 		Iterator<Node> i = nodes.iterator();
 		while (i.hasNext()) {
 			Node n = i.next();
-			boolean b = n.contains(point);
-
-			n.setSelected(b);
-			if (b) {
+			if (!n.contains(point))
+				n.setSelected(false);
+			else if (n.contains(point)) {
+				n.setSelected(true);
 				while (i.hasNext())
 					i.next().setSelected(false);
-
 				return true;
 			}
 		}
@@ -94,5 +87,27 @@ public class Graph {
 				list.add(n);
 
 		return list;
+	}
+
+	public void moveSlected(Point offset) {
+		for (Node n : nodes)
+			if (n.isSelected())
+				n.move(offset);
+	}
+
+	public void removeSelected() {
+		ListIterator<Edge> i1 = edges.listIterator();
+		while (i1.hasNext()) {
+			Edge e = i1.next();
+			if (e.hasSelectedNode())
+				i1.remove();
+		}
+
+		ListIterator<Node> i2 = nodes.listIterator();
+		while (i1.hasNext()) {
+			Node n = i2.next();
+			if (n.isSelected())
+				i1.remove();
+		}
 	}
 }

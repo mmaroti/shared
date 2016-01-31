@@ -34,6 +34,7 @@ public class Node {
 		gaphics.setColor(Color.BLACK);
 		gaphics.fillOval(center.x - radius, center.y - radius, 2 * radius + 1,
 				2 * radius + 1);
+
 		if (selected) {
 			gaphics.setColor(Color.RED);
 			gaphics.drawOval(center.x - radius - 3, center.y - radius - 3,

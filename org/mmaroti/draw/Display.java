@@ -21,7 +21,6 @@ package org.mmaroti.draw;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
-import java.util.*;
 import java.util.List;
 
 @SuppressWarnings("serial")
@@ -58,13 +57,9 @@ public class Display extends JComponent {
 		this.addMouseListener(new MouseHandler());
 		this.addMouseMotionListener(new MouseMotionHandler());
 
-		Node n1 = new Node(new Point(100, 100));
-		Node n2 = new Node(new Point(120, 80));
-		Edge e1 = new Edge(n1, n2);
-
-		graph.nodes.add(n1);
-		graph.nodes.add(n2);
-		graph.edges.add(e1);
+		for (int x = 10; x <= 300; x += 10)
+			for (int y = 10; y <= 300; y += 10)
+				graph.add(new Node(new Point(x, y)));
 	}
 
 	@Override
@@ -72,15 +67,14 @@ public class Display extends JComponent {
 		return new Dimension(WIDE, HIGH);
 	}
 
-	private static RenderingHints RENDERING_HINT = new RenderingHints(
-			RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 	private static Color BACKGROUND_COLOR = new Color(0x00F0F0FF);
 
 	@Override
 	public void paintComponent(Graphics graphics) {
 		Graphics2D g = (Graphics2D) graphics;
 
-		g.setRenderingHints(RENDERING_HINT);
+		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+				RenderingHints.VALUE_ANTIALIAS_ON);
 		g.setColor(BACKGROUND_COLOR);
 		g.fillRect(0, 0, getWidth(), getHeight());
 
@@ -96,29 +90,29 @@ public class Display extends JComponent {
 	private class MouseHandler extends MouseAdapter {
 		@Override
 		public void mouseReleased(MouseEvent event) {
+			System.out.println("released");
 			selecting = false;
-			mouseRect.setBounds(0, 0, 0, 0);
-			if (event.isPopupTrigger()) {
+			if (event.isPopupTrigger())
 				showPopup(event);
-			}
-			event.getComponent().repaint();
+			repaint();
 		}
 
 		@Override
 		public void mousePressed(MouseEvent event) {
+			System.out.println("pressed");
 			mousePt = event.getPoint();
 			if (event.isShiftDown()) {
 				graph.toggle(mousePt);
 			} else if (event.isPopupTrigger()) {
-				graph.select(mousePt);
 				showPopup(event);
 			} else if (graph.select(mousePt)) {
 				selecting = false;
 			} else {
 				graph.unselectAll();
 				selecting = true;
+				mouseRect.setBounds(mousePt.x, mousePt.y, 0, 0);
 			}
-			event.getComponent().repaint();
+			repaint();
 		}
 
 		private void showPopup(MouseEvent e) {
@@ -131,6 +125,7 @@ public class Display extends JComponent {
 
 		@Override
 		public void mouseDragged(MouseEvent event) {
+			System.out.println("dragged");
 			if (selecting) {
 				mouseRect.setBounds(Math.min(mousePt.x, event.getX()),
 						Math.min(mousePt.y, event.getY()),
@@ -140,7 +135,7 @@ public class Display extends JComponent {
 			} else {
 				delta.setLocation(event.getX() - mousePt.x, event.getY()
 						- mousePt.y);
-				graph.move(delta);
+				graph.moveSlected(delta);
 				mousePt = event.getPoint();
 			}
 			event.getComponent().repaint();
@@ -227,24 +222,8 @@ public class Display extends JComponent {
 
 		@Override
 		public void actionPerformed(ActionEvent event) {
-			ListIterator<Node> iter = graph.nodes.listIterator();
-			while (iter.hasNext()) {
-				Node n = iter.next();
-				if (n.isSelected()) {
-					deleteEdges(n);
-					iter.remove();
-				}
-			}
+			graph.removeSelected();
 			repaint();
-		}
-
-		private void deleteEdges(Node node) {
-			ListIterator<Edge> iter = graph.edges.listIterator();
-			while (iter.hasNext()) {
-				Edge e = iter.next();
-				if (e.hasNode(node))
-					iter.remove();
-			}
 		}
 	}
 }
