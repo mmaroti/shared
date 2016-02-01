@@ -27,12 +27,18 @@ import java.util.List;
 public class Display extends JComponent {
 	private static final int WIDE = 640;
 	private static final int HIGH = 480;
+	private static final Color BACKGROUND = new Color(0x00F0F0FF);
 
 	private Graph graph = new Graph();
 	private ControlPanel control = new ControlPanel();
+
+	private static final int DRAGSTATE_NONE = 0;
+	private static final int DRAGSTATE_SELECT = 1;
+	private static final int DRAGSTATE_MOVE = 2;
+	private int dragState = DRAGSTATE_NONE;
+
 	private Point mousePt = new Point(WIDE / 2, HIGH / 2);
-	private Rectangle mouseRect = new Rectangle();
-	private boolean selecting = false;
+	private Rectangle selectRect = new Rectangle();
 
 	public static void main(String[] args) throws Exception {
 		EventQueue.invokeLater(new Runnable() {
@@ -54,8 +60,11 @@ public class Display extends JComponent {
 
 	public Display() {
 		this.setOpaque(true);
-		this.addMouseListener(new MouseHandler());
-		this.addMouseMotionListener(new MouseMotionHandler());
+
+		MouseHandler handler = new MouseHandler();
+		this.addMouseListener(handler);
+		this.addMouseMotionListener(handler);
+
 		ToolTipManager.sharedInstance().registerComponent(this);
 
 		for (int x = 10; x <= 300; x += 10)
@@ -68,23 +77,21 @@ public class Display extends JComponent {
 		return new Dimension(WIDE, HIGH);
 	}
 
-	private static Color BACKGROUND_COLOR = new Color(0x00F0F0FF);
-
 	@Override
 	public void paintComponent(Graphics graphics) {
 		Graphics2D g = (Graphics2D) graphics;
 
 		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
 				RenderingHints.VALUE_ANTIALIAS_ON);
-		g.setColor(BACKGROUND_COLOR);
+		g.setColor(BACKGROUND);
 		g.fillRect(0, 0, getWidth(), getHeight());
 
 		graph.draw(g);
 
-		if (selecting) {
+		if (dragState == DRAGSTATE_SELECT) {
 			g.setColor(Color.DARK_GRAY);
-			g.drawRect(mouseRect.x, mouseRect.y, mouseRect.width,
-					mouseRect.height);
+			g.drawRect(selectRect.x, selectRect.y, selectRect.width,
+					selectRect.height);
 		}
 	}
 
@@ -94,34 +101,6 @@ public class Display extends JComponent {
 	}
 
 	private class MouseHandler extends MouseAdapter {
-		@Override
-		public void mouseReleased(MouseEvent event) {
-			System.out.println("released "
-					+ MouseEvent.getModifiersExText(event.getModifiersEx()));
-
-			if (selecting) {
-				selecting = false;
-				repaint();
-			}
-
-			if (event.isPopupTrigger())
-				showPopup(event);
-		}
-
-		@Override
-		public void mousePressed(MouseEvent event) {
-			System.out.println("pressed "
-					+ MouseEvent.getModifiersExText(event.getModifiersEx()));
-
-			mousePt = event.getPoint(); // drag starts here
-			if (event.isPopupTrigger())
-				showPopup(event);
-		}
-
-		private void showPopup(MouseEvent e) {
-			control.popup.show(e.getComponent(), e.getX(), e.getY());
-		}
-
 		@Override
 		public void mouseClicked(MouseEvent event) {
 			System.out.println("clicked "
@@ -135,13 +114,43 @@ public class Display extends JComponent {
 					graph.toggle(p);
 				else if (m == MouseEvent.BUTTON1_MASK) {
 					graph.select(p);
-					selecting = false;
 				}
 			}
 		}
-	}
 
-	private class MouseMotionHandler extends MouseMotionAdapter {
+		@Override
+		public void mousePressed(MouseEvent event) {
+			System.out.println("pressed "
+					+ MouseEvent.getModifiersExText(event.getModifiersEx()));
+
+			mousePt = event.getPoint(); // drag starts here
+			if (event.isPopupTrigger())
+				showPopup(event);
+		}
+
+		@Override
+		public void mouseReleased(MouseEvent event) {
+			System.out.println("released "
+					+ MouseEvent.getModifiersExText(event.getModifiersEx()));
+
+			if (event.getButton() == 1) {
+				if (dragState == DRAGSTATE_SELECT)
+					repaint(selectRect);
+				else if (dragState == DRAGSTATE_MOVE) {
+					repaint();
+				}
+
+				dragState = DRAGSTATE_NONE;
+			}
+
+			if (event.isPopupTrigger())
+				showPopup(event);
+		}
+
+		private void showPopup(MouseEvent e) {
+			control.popup.show(e.getComponent(), e.getX(), e.getY());
+		}
+
 		Point delta = new Point();
 
 		@Override
@@ -150,11 +159,11 @@ public class Display extends JComponent {
 					+ MouseEvent.getModifiersExText(event.getModifiersEx()));
 
 			if (selecting) {
-				mouseRect.setBounds(Math.min(mousePt.x, event.getX()),
+				selectRect.setBounds(Math.min(mousePt.x, event.getX()),
 						Math.min(mousePt.y, event.getY()),
 						Math.abs(mousePt.x - event.getX()),
 						Math.abs(mousePt.y - event.getY()));
-				graph.select(mouseRect);
+				graph.select(selectRect);
 			} else {
 				delta.setLocation(event.getX() - mousePt.x, event.getY()
 						- mousePt.y);
