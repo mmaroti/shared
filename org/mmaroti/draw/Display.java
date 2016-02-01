@@ -105,16 +105,18 @@ public class Display extends JComponent {
 		public void mouseClicked(MouseEvent event) {
 			System.out.println("clicked "
 					+ MouseEvent.getModifiersExText(event.getModifiersEx())
-					+ " " + event.getClickCount());
+					+ " " + event.getClickCount() + " " + event.getButton());
 
-			Point p = event.getPoint();
-			if (event.getClickCount() == 1) {
-				int m = event.getModifiers();
-				if (m == (MouseEvent.BUTTON1_MASK | MouseEvent.SHIFT_MASK))
-					graph.toggle(p);
-				else if (m == MouseEvent.BUTTON1_MASK) {
-					graph.select(p);
+			if (event.getClickCount() == 1 && event.getButton() == 1) {
+				System.out.println("hihihihi");
+				Node n = graph.find(event.getPoint());
+				if (event.isShiftDown())
+					n.setSelected(!n.isSelected());
+				else {
+					graph.unselectAll();
+					n.setSelected(true);
 				}
+				repaint();
 			}
 		}
 
@@ -158,7 +160,7 @@ public class Display extends JComponent {
 			System.out.println("dragged "
 					+ MouseEvent.getModifiersExText(event.getModifiersEx()));
 
-			if (selecting) {
+			if (dragState == DRAGSTATE_SELECT) {
 				selectRect.setBounds(Math.min(mousePt.x, event.getX()),
 						Math.min(mousePt.y, event.getY()),
 						Math.abs(mousePt.x - event.getX()),

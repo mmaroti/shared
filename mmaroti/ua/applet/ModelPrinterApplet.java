@@ -28,12 +28,14 @@ public class ModelPrinterApplet extends Applet
 		String filter = "";
 		
 		StringTokenizer tokenizer = 
-			new StringTokenizer(expString, "\n\r");
+			new StringTokenizer(expString, "\n\r.");
 			
 		StringBuffer exp = new StringBuffer();
 		while( tokenizer.hasMoreTokens() )
 		{
 			String token = tokenizer.nextToken().trim();
+			if (token.length() == 0)
+				continue;
 			
 			if( token.startsWith("only ") )
 			{
@@ -44,12 +46,9 @@ public class ModelPrinterApplet extends Applet
 			if( exp.length() > 0 )
 				exp.append("&");
 
-			if( token.length() > 0 )
-			{
-				exp.append("(");
-				exp.append(token);
-				exp.append(")");
-			}
+			exp.append("(");
+			exp.append(token);
+			exp.append(")");
 		}
 
 		Parser parser = new Parser(FirstOrder.Operators);
@@ -76,16 +75,18 @@ public class ModelPrinterApplet extends Applet
 
 	public static void main(String args[])
 	{
-		if( args.length == 0 )
+		if( args.length <= 1 )
 		{
 			System.out.println(
 				"Usage: java ModelPrinterApplet <size> <formula>");
 			return;
 		}
+		else if (args[1].equals("poset"))
+			args[1] = "r(x,x). (r(x,y)&r(y,x))->x=y. (r(x,y)&r(y,z))->r(x,z).";
 	
 		ModelPrinterApplet applet = new ModelPrinterApplet();
 		applet.createPrinter(args[0], args[1]);
-		applet.printer.printFirstModel();
+		applet.printer.printAllModels();
 		System.out.println(applet.writer.toString());
 	}
 

@@ -52,6 +52,13 @@ public class Graph {
 			n.setSelected(false);
 	}
 
+	public Node find(Point point) {
+		for (Node n : nodes)
+			if (n.contains(point))
+				return n;
+		return null;
+	}
+
 	public boolean select(Point point) {
 		Iterator<Node> i = nodes.iterator();
 		while (i.hasNext()) {
