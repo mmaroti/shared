@@ -59,22 +59,6 @@ public class Graph {
 		return null;
 	}
 
-	public boolean select(Point point) {
-		Iterator<Node> i = nodes.iterator();
-		while (i.hasNext()) {
-			Node n = i.next();
-			if (!n.contains(point))
-				n.setSelected(false);
-			else if (n.contains(point)) {
-				n.setSelected(true);
-				while (i.hasNext())
-					i.next().setSelected(false);
-				return true;
-			}
-		}
-		return false;
-	}
-
 	public void select(Rectangle rect) {
 		for (Node n : nodes)
 			n.setSelected(rect.contains(n.getCenter()));
@@ -82,8 +66,10 @@ public class Graph {
 
 	public void toggle(Point point) {
 		for (Node n : nodes) {
-			if (n.contains(point))
+			if (n.contains(point)) {
 				n.setSelected(!n.isSelected());
+				return;
+			}
 		}
 	}
 
@@ -106,15 +92,15 @@ public class Graph {
 		ListIterator<Edge> i1 = edges.listIterator();
 		while (i1.hasNext()) {
 			Edge e = i1.next();
-			if (e.hasSelectedNode())
+			if (e.isSelected())
 				i1.remove();
 		}
 
 		ListIterator<Node> i2 = nodes.listIterator();
-		while (i1.hasNext()) {
+		while (i2.hasNext()) {
 			Node n = i2.next();
 			if (n.isSelected())
-				i1.remove();
+				i2.remove();
 		}
 	}
 }

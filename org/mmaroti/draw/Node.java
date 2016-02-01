@@ -22,12 +22,11 @@ import java.awt.*;
 
 public class Node {
 	private Point center;
-	private int radius;
+	private int radius = 4;
 	private boolean selected = false;
 
 	public Node(Point center) {
 		this.center = center;
-		this.radius = 4;
 	}
 
 	public void draw(Graphics2D gaphics) {

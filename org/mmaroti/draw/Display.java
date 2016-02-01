@@ -20,6 +20,7 @@ package org.mmaroti.draw;
 
 import java.awt.*;
 import java.awt.event.*;
+
 import javax.swing.*;
 import java.util.List;
 
@@ -37,7 +38,7 @@ public class Display extends JComponent {
 	private static final int DRAGSTATE_MOVE = 2;
 	private int dragState = DRAGSTATE_NONE;
 
-	private Point mousePt = new Point(WIDE / 2, HIGH / 2);
+	private Point mousePt = new Point();
 	private Rectangle selectRect = new Rectangle();
 
 	public static void main(String[] args) throws Exception {
@@ -97,20 +98,17 @@ public class Display extends JComponent {
 
 	@Override
 	public String getToolTipText(MouseEvent event) {
-		return "hihi " + event.getX() + " " + event.getY();
+		return event.getX() + "," + event.getY();
 	}
 
 	private class MouseHandler extends MouseAdapter {
 		@Override
 		public void mouseClicked(MouseEvent event) {
-			System.out.println("clicked "
-					+ MouseEvent.getModifiersExText(event.getModifiersEx())
-					+ " " + event.getClickCount() + " " + event.getButton());
-
 			if (event.getClickCount() == 1 && event.getButton() == 1) {
-				System.out.println("hihihihi");
 				Node n = graph.find(event.getPoint());
-				if (event.isShiftDown())
+				if (n == null)
+					graph.unselectAll();
+				else if (event.isShiftDown())
 					n.setSelected(!n.isSelected());
 				else {
 					graph.unselectAll();
@@ -122,27 +120,18 @@ public class Display extends JComponent {
 
 		@Override
 		public void mousePressed(MouseEvent event) {
-			System.out.println("pressed "
-					+ MouseEvent.getModifiersExText(event.getModifiersEx()));
+			if (event.getButton() == 1)
+				mousePt = event.getPoint();
 
-			mousePt = event.getPoint(); // drag starts here
 			if (event.isPopupTrigger())
 				showPopup(event);
 		}
 
 		@Override
 		public void mouseReleased(MouseEvent event) {
-			System.out.println("released "
-					+ MouseEvent.getModifiersExText(event.getModifiersEx()));
-
-			if (event.getButton() == 1) {
-				if (dragState == DRAGSTATE_SELECT)
-					repaint(selectRect);
-				else if (dragState == DRAGSTATE_MOVE) {
-					repaint();
-				}
-
+			if (event.getButton() == 1 && dragState != DRAGSTATE_NONE) {
 				dragState = DRAGSTATE_NONE;
+				repaint();
 			}
 
 			if (event.isPopupTrigger())
@@ -157,22 +146,33 @@ public class Display extends JComponent {
 
 		@Override
 		public void mouseDragged(MouseEvent event) {
-			System.out.println("dragged "
-					+ MouseEvent.getModifiersExText(event.getModifiersEx()));
+			if ((event.getModifiers() & MouseEvent.BUTTON1_MASK) != 0) {
+				if (dragState == DRAGSTATE_NONE) {
+					Node n = graph.find(mousePt);
+					if (n != null) {
+						if (!n.isSelected()) {
+							graph.unselectAll();
+							n.setSelected(true);
+						}
+						dragState = DRAGSTATE_MOVE;
+					} else
+						dragState = DRAGSTATE_SELECT;
+				}
 
-			if (dragState == DRAGSTATE_SELECT) {
-				selectRect.setBounds(Math.min(mousePt.x, event.getX()),
-						Math.min(mousePt.y, event.getY()),
-						Math.abs(mousePt.x - event.getX()),
-						Math.abs(mousePt.y - event.getY()));
-				graph.select(selectRect);
-			} else {
-				delta.setLocation(event.getX() - mousePt.x, event.getY()
-						- mousePt.y);
-				graph.moveSlected(delta);
-				mousePt = event.getPoint();
+				if (dragState == DRAGSTATE_SELECT) {
+					selectRect.setBounds(Math.min(mousePt.x, event.getX()),
+							Math.min(mousePt.y, event.getY()),
+							Math.abs(mousePt.x - event.getX()),
+							Math.abs(mousePt.y - event.getY()));
+					graph.select(selectRect);
+				} else if (dragState == DRAGSTATE_MOVE) {
+					delta.setLocation(event.getX() - mousePt.x, event.getY()
+							- mousePt.y);
+					graph.moveSlected(delta);
+					mousePt = event.getPoint();
+				}
+				repaint();
 			}
-			repaint();
 		}
 	}
 

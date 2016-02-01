@@ -29,7 +29,7 @@ public class Edge {
 		this.node2 = node2;
 	}
 
-	public boolean hasSelectedNode() {
+	public boolean isSelected() {
 		return node1.isSelected() || node2.isSelected();
 	}
 
