@@ -26,7 +26,7 @@ public class XmlWriter
 	{
 		if( inElement )
 			out.println(">");
-		
+
 		printIndent();
 		out.print("<");
 		out.print(name);
@@ -39,7 +39,7 @@ public class XmlWriter
 	{
 		if( !inElement )
 			throw new IllegalStateException();
-		
+
 		out.print(' ');
 		out.print(name);
 		out.print("=\"");
@@ -70,7 +70,7 @@ public class XmlWriter
 		out.print(value);
 		endAttr();
 	}
-	
+
 	public void attr(String name, boolean value)
 	{
 		startAttr(name);
@@ -86,14 +86,14 @@ public class XmlWriter
 			inElement = false;
 			hasIndent = false;
 		}
-		
+
 		if( ! hasIndent )
 		{
 			printIndent();
 			hasIndent = true;
-		}		
+		}
 	}
-	
+
 	public void print(String data)
 	{
 		inBody();
@@ -122,31 +122,31 @@ public class XmlWriter
 	public void printPadded(int data, int max)
 	{
 		inBody();
-	
+
 		int space = max < 10 ? 1 : (max < 100 ? 2 : 3);
 		space -= data < 10 ? 1 : (data < 100 ? 2 : 3);
-	
+
 		while( --space >= 0 )
 			out.print(' ');
-		
+
 		out.print(data);
 	}
 
 	public void printComment(String data)
 	{
 		inBody();
-		
+
 		out.print("<!-- ");
 		out.print(data);
 		out.println("-->");
-		
+
 		hasIndent = false;
 	}
 
 	public void endElem()
 	{
 		String name = elems.pop();
-		
+
 		if( inElement )
 		{
 			out.println("/>");
@@ -156,24 +156,25 @@ public class XmlWriter
 		{
 			if( hasIndent )
 				out.println();
-				
+
 			printIndent();
 			out.print("</");
 			out.print(name);
 			out.println(">");
 		}
-		
+
 		hasIndent = false;
 	}
-	
+
 	public XmlWriter(PrintWriter out)
 	{
 		this.out = out;
 		elems = new Stack<String>();
-		
+
 		inElement = false;
 	}
-	
+
+	@Override
 	public void finalize()
 	{
 		out.flush();
