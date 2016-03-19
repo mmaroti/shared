@@ -27,22 +27,22 @@ public class Lexer implements Iterator<Token> {
 	private final HashMap<String, Token> operators;
 	int head = NONE;
 
-	private Lexer(Reader reader) {
+	private Lexer(Reader reader, Iterable<Token.Op> operators) {
 		this.reader = reader;
-		operators = new HashMap<String, Token>();
-		operators.put(PLUS.name, PLUS);
-		operators.put(MINUS.name, MINUS);
-		operators.put(MULT.name, MULT);
-		operators.put(DIV.name, DIV);
+		this.operators = new HashMap<String, Token>();
+		for (Token.Op op : operators)
+			this.operators.put(op.name, op);
 	}
 
-	public Lexer(String input) {
-		this(new StringReader(input));
+	public Lexer(String input, List<Token.Op> operators) {
+		this(new StringReader(input), operators);
 	}
 
-	public Lexer(File file) throws FileNotFoundException {
+	public Lexer(File file, List<Token.Op> operators)
+			throws FileNotFoundException {
 		this(new BufferedReader(new InputStreamReader(
-				new FileInputStream(file), Charset.forName("UTF-8"))));
+				new FileInputStream(file), Charset.forName("UTF-8"))),
+				operators);
 	}
 
 	private static int EOF = -1;
@@ -116,11 +116,6 @@ public class Lexer implements Iterator<Token> {
 		return peek() != EOF;
 	}
 
-	public final static Token.InfixOp PLUS = new Token.InfixOp("+", 1);
-	public final static Token.InfixOp MINUS = new Token.InfixOp("-", 1);
-	public final static Token.InfixOp MULT = new Token.InfixOp("*", 2);
-	public final static Token.InfixOp DIV = new Token.InfixOp("/", 2);
-
 	@Override
 	public Token next() {
 		int c = peek();
@@ -147,8 +142,29 @@ public class Lexer implements Iterator<Token> {
 		throw new UnsupportedOperationException();
 	}
 
+	public final static Token.Op AND = new Token.InfixOp("&&", 3);
+	public final static Token.Op OR = new Token.InfixOp("||", 3);
+
+	public final static Token.Op EQU = new Token.InfixOp("==", 4);
+	public final static Token.Op NEQ = new Token.InfixOp("!=", 4);
+	public final static Token.Op LT = new Token.InfixOp("<", 4);
+	public final static Token.Op LEQ = new Token.InfixOp("<=", 4);
+	public final static Token.Op GT = new Token.InfixOp(">", 4);
+	public final static Token.Op GEQ = new Token.InfixOp(">=", 4);
+
+	public final static Token.Op PLUS = new Token.PreInfOp("+", 5);
+	public final static Token.Op MINUS = new Token.PreInfOp("-", 5);
+
+	public final static Token.Op MULT = new Token.InfixOp("*", 6);
+	public final static Token.Op DIV = new Token.InfixOp("/", 6);
+
+	public final static Token.Op NOT = new Token.PrefixOp("!", 7);
+
+	public final static List<Token.Op> LANGUAGE = Arrays.asList(AND, OR, EQU,
+			NEQ, LT, LEQ, GT, GEQ, PLUS, MINUS, MULT, DIV, NOT);
+
 	public static void main(String[] args) {
-		Lexer lexer = new Lexer(" 12+3 * 2");
+		Lexer lexer = new Lexer(" 12+1 == -3 * 2", LANGUAGE);
 		while (lexer.hasNext())
 			System.out.println(lexer.next());
 	}

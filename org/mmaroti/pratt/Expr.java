@@ -19,6 +19,21 @@
 package org.mmaroti.pratt;
 
 public abstract class Expr {
+	public static class Unary extends Expr {
+		public final String name;
+		public final Expr expr;
+
+		public Unary(String name, Expr expr) {
+			this.name = name;
+			this.expr = expr;
+		}
+
+		@Override
+		public String toString() {
+			return "(" + name + " " + expr + ")";
+		}
+	}
+
 	public static class Binary extends Expr {
 		public final String name;
 		public final Expr left;

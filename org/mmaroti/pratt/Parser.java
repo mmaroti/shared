@@ -37,7 +37,7 @@ public class Parser {
 			throw new IllegalStateException("unexpected end of input");
 		head = null;
 
-		Expr expr = token.initial();
+		Expr expr = token.initial(this);
 		for (;;) {
 			token = peek();
 			if (token == null || prec >= token.precedence())
@@ -56,7 +56,7 @@ public class Parser {
 	}
 
 	public static void main(String[] args) {
-		Lexer lexer = new Lexer(" 12-3 * 2 - 2");
+		Lexer lexer = new Lexer(" -12-3 * 2 != 1- 2", Lexer.LANGUAGE);
 		Parser parser = new Parser(lexer);
 		Expr expr = parser.parse(0);
 		System.out.println(expr);

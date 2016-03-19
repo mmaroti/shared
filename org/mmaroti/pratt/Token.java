@@ -21,16 +21,23 @@ package org.mmaroti.pratt;
 public abstract class Token {
 	abstract int precedence();
 
-	abstract Expr initial();
+	abstract Expr initial(Parser parser);
 
 	abstract Expr combine(Parser parser, Expr left);
 
-	public static class InfixOp extends Token {
+	public static abstract class Op extends Token {
 		public final String name;
+
+		public Op(String name) {
+			this.name = name;
+		}
+	}
+
+	public static class InfixOp extends Op {
 		public final int prec;
 
 		public InfixOp(String name, int prec) {
-			this.name = name;
+			super(name);
 			this.prec = prec;
 		}
 
@@ -40,7 +47,7 @@ public abstract class Token {
 		}
 
 		@Override
-		Expr initial() {
+		Expr initial(Parser parser) {
 			throw new IllegalStateException(
 					"no left operand for infix operator " + name);
 		}
@@ -57,6 +64,68 @@ public abstract class Token {
 		}
 	}
 
+	public static class PrefixOp extends Op {
+		public final int prec;
+
+		public PrefixOp(String name, int prec) {
+			super(name);
+			this.prec = prec;
+		}
+
+		@Override
+		int precedence() {
+			return 0;
+		}
+
+		@Override
+		Expr initial(Parser parser) {
+			Expr expr = parser.parse(prec);
+			return new Expr.Unary(name, expr);
+		}
+
+		@Override
+		Expr combine(Parser parser, Expr left) {
+			throw new IllegalStateException(
+					"extra left operand for prefix operator " + name);
+		}
+
+		@Override
+		public String toString() {
+			return "PrefixOp(" + name + "," + prec + ")";
+		}
+	}
+
+	public static class PreInfOp extends Op {
+		public final int prec;
+
+		public PreInfOp(String name, int prec) {
+			super(name);
+			this.prec = prec;
+		}
+
+		@Override
+		int precedence() {
+			return prec;
+		}
+
+		@Override
+		Expr initial(Parser parser) {
+			Expr expr = parser.parse(prec);
+			return new Expr.Unary(name, expr);
+		}
+
+		@Override
+		Expr combine(Parser parser, Expr left) {
+			Expr right = parser.parse(prec);
+			return new Expr.Binary(name, left, right);
+		}
+
+		@Override
+		public String toString() {
+			return "PreInfOp(" + name + "," + prec + ")";
+		}
+	}
+
 	public static class IntLiteral extends Token {
 		public final int value;
 
@@ -70,7 +139,7 @@ public abstract class Token {
 		}
 
 		@Override
-		Expr initial() {
+		Expr initial(Parser parser) {
 			return new Expr.IntLiteral(value);
 		}
 
@@ -98,7 +167,7 @@ public abstract class Token {
 		}
 
 		@Override
-		Expr initial() {
+		Expr initial(Parser parser) {
 			return new Expr.Identifier(value);
 		}
 
