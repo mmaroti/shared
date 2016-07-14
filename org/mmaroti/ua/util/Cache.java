@@ -22,158 +22,140 @@ import java.lang.ref.*;
 import java.util.HashMap;
 
 /**
- * Cache maps can be used to cache results that are time consuming
- * to compute and is beneficial to remember if there is available
- * memory. The CacheMap automatically frees and removes
- * entries when memory is running short by employing soft references on
- * the key object. This to work, no references must be kept on the
- * key object.
+ * Cache maps can be used to cache results that are time consuming to compute
+ * and is beneficial to remember if there is available memory. The CacheMap
+ * automatically frees and removes entries when memory is running short by
+ * employing soft references on the key object. This to work, no references must
+ * be kept on the key object.
  */
-public final class Cache
-{
+public final class Cache<KEY, VALUE> {
 	/**
-	 * We wrap the cached entries in soft references, 
-	 * and store these soft references in a HashMap.
+	 * We wrap the cached entries in soft references, and store these soft
+	 * references in a HashMap.
 	 */
-	protected final class Entry extends SoftReference<Object>
-	{
+	protected static class Entry<KEY> extends SoftReference<KEY> {
 		/**
-		 * We need to store the hashCode in case 
-		 * the underlying object is already freed
-		 * and we want to remove this object from the hashmap.
+		 * We need to store the hashCode in case the underlying object is
+		 * already freed and we want to remove this object from the hashmap.
 		 */
 		protected int hashCode;
-		
-		public int hashCode()
-		{
+
+		public int hashCode() {
 			return hashCode;
 		}
-		
-		public boolean equals(Object o)
-		{
+
+		@SuppressWarnings("unchecked")
+		public boolean equals(Object o) {
 			// Entries are compared by identity
-			if(o instanceof Entry)
+			if (o instanceof Cache.Entry)
 				return this == o;
 
 			// Everything else must be a searching Sample
-			return ((Seeker)o).equals(this);
+			return ((Seeker<KEY>) o).equals(this);
 		}
 
-		public Entry(Object referent, Cache map)
-		{
+		public <VALUE> Entry(KEY referent, Cache<KEY, VALUE> map) {
 			super(referent, map.queue);
 			hashCode = map.comparator.hashCode(referent);
 		}
 	}
 
 	/**
-	 * Removes all entries from the map whose 
-	 * corresponding week references have been freed.
+	 * Removes all entries from the map whose corresponding week references have
+	 * been freed.
 	 */
-	protected void removeGarbage()
-	{
-		Reference<? extends Object> a;
-		while( (a = queue.poll()) != null )
+	protected void removeGarbage() {
+		Reference<? extends KEY> a;
+		while ((a = queue.poll()) != null)
 			map.remove(a);
 	}
 
 	/**
-	 * Removes all remembered canonical forms. 
+	 * Removes all remembered canonical forms.
 	 */
-	public void clear()
-	{
+	public void clear() {
 		map.clear();
-		while( queue.poll() != null )
+		while (queue.poll() != null)
 			;
 	}
-	
+
 	/**
-	 * The Seeker class is used to compare Entries to a new object
-	 * whose canonical form we want to find. 
+	 * The Seeker class is used to compare Entries to a new object whose
+	 * canonical form we want to find.
 	 */
-	protected static final class Seeker
-	{
-		public Object sample;
-		public Comparator comparator;
-		
-		public int hashCode()
-		{
+	protected static final class Seeker<KEY> {
+		public KEY sample;
+		public Comparator<KEY> comparator;
+
+		public int hashCode() {
 			return comparator.hashCode(sample);
 		}
-		
-		public boolean equals(Object o)
-		{
-			o = ((Entry)o).get();
-			
+
+		public boolean equals(Object o) {
+			@SuppressWarnings("unchecked")
+			KEY key = ((Entry<KEY>) o).get();
+
 			// has been garbage collected
-			if( o == null )
+			if (key == null)
 				return false;
-				
-			return comparator.equals(sample, o);
+
+			return comparator.equals(sample, key);
 		}
 	}
 
-	protected HashMap<Entry, Object> map = new HashMap<Entry, Object>();
-	protected ReferenceQueue<Object> queue = new ReferenceQueue<Object>();
-	protected Comparator comparator;
-	protected Seeker seeker = new Seeker();
+	protected HashMap<Entry<KEY>, VALUE> map = new HashMap<Entry<KEY>, VALUE>();
+	protected ReferenceQueue<KEY> queue = new ReferenceQueue<KEY>();
+	protected Comparator<KEY> comparator;
+	protected Seeker<KEY> seeker = new Seeker<KEY>();
 
 	/**
-	 * Returns true if the object is in the map,
-	 * that is, some information is associated with it.
+	 * Returns true if the key is in the map, that is, some information is
+	 * associated with it.
 	 */
-	public boolean contains(Object object)
-	{
+	public boolean contains(KEY key) {
 		removeGarbage();
-		
-		seeker.sample = object;
-		Entry entry = (Entry)map.get(seeker);
-		
-		return entry != null && (object = entry.get()) != null;
-	}
-	
-	/**
-	 * Returns the cached value associated with the specified
-	 * key. If there is no value associated or it was removed
-	 * because memory was tight, then <code>null</code> is returned.
-	 */
-	public Object get(Object key)
-	{
-		removeGarbage();
-		
+
 		seeker.sample = key;
-		Entry entry = (Entry)map.get(seeker);
-		
-		return entry == null ? null : entry.get();
+		return map.get(seeker) != null;
 	}
 
 	/**
-	 * Updates the cache with the new object. It is important
-	 * that no other references exist to the specified key
-	 * for this cache object to work, otherwise the key and
-	 * its associated value will not be freed.
+	 * Returns the cached value associated with the specified key. If there is
+	 * no value associated or it was removed because memory was tight, then
+	 * <code>null</code> is returned.
 	 */
-	public void put(Object key, Object value)
-	{
-		map.put(new Entry(key, this), value);
+	public VALUE get(KEY key) {
+		removeGarbage();
+
+		seeker.sample = key;
+		return map.get(seeker);
 	}
-	
+
+	/**
+	 * Updates the cache with the new object. It is important that no other
+	 * references exist to the specified key for this cache object to work,
+	 * otherwise the key and its associated value will not be freed.
+	 */
+	public void put(KEY key, VALUE value) {
+		map.put(new Entry<KEY>(key, this), value);
+	}
+
 	/**
 	 * Returns the current number of cached entries.
 	 */
-	public int size()
-	{
+	public int size() {
 		removeGarbage();
 		return map.size();
 	}
 
 	/**
 	 * Creates a new cache map based on the comparator equivalence relation.
-	 * @param comparator The comparator object that is consulted
-	 * 		when two objects need to be compared.
+	 * 
+	 * @param comparator
+	 *            The comparator object that is consulted when two objects need
+	 *            to be compared.
 	 */
-	public Cache(Comparator comparator)
-	{
+	public Cache(Comparator<KEY> comparator) {
 		this.comparator = comparator;
 		seeker.comparator = comparator;
 	}
